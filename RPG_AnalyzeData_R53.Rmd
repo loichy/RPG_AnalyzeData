@@ -61,24 +61,77 @@ L'objectif de cette analyse est de visualiser la diversité des cultures pratiqu
 
 Dans une première partie, nous présentons l'usage des sols de manière globale en Bretagne sur la période 2007-2023. Dans la deuxième section, nous étudions la dynamique des usages des sols, en étudiant en particulier l'expansion des cultures émergentes et le déclin des cultures en perte de vitesse. Enfin, nous étudions la diversité des cultures à l'échelle des communes et son évolution dans le temps.
 
-## Le mix cultural en Bretagne: une présentation générale
-
-### Evolution de la surface agricole en Bretagne
-
-Le graphique ci-dessous montre l'évolution sur la période 2007-2023 de la surface agricole totale en Bretagne ainsi que sa distribution entre communes.
-
-### La spécialisation des cultures en Bretagne
-
-#### Surface agricole par culture
-
-La tableau ci-dessous présente les surfaces agricoles utilisés par culture en Bretagne sur la période 2007-2023. Il s'agit du total des surfaces par culture sur toutes les parcelles, qui est calculé par année et dont nous présentons ici la moyenne sur la période 2007-2023.
-
 ```{r load-data, include=FALSE}
 # Load data
 RPG_R53 <- readRDS(here(dir$raw, "RPG_Aggregated_Brittany.rds"))
 RPG_R53_wide <- readRDS(here(dir$raw, "RPG_Aggregated_Brittany_wide.rds"))
 
 ```
+
+## Le mix cultural en Bretagne: une présentation générale
+
+### Evolution de la surface agricole en Bretagne
+
+Le graphique ci-dessous montre l'évolution sur la période 2007-2023 de la surface agricole totale en Bretagne ainsi que sa distribution entre communes.
+
+```{r agri-area, include=FALSE}
+total_agri_per_year <- RPG_R53_wide %>%
+  group_by(year) %>%
+  summarise(total_ha = sum(as.numeric(surf_agri_geo_unit_m2), na.rm = TRUE) / 10000)
+
+max_violin_y <- RPG_R53 %>% pull(surf_agri_geo_unit_m2) %>% as.numeric() %>% max(na.rm = TRUE) / 10000
+max_total_y  <- max(total_agri_per_year$total_ha)
+scale_factor <- max_violin_y / max_total_y
+total_agri_per_year <- total_agri_per_year %>%
+  mutate(scaled_total = total_ha * scale_factor)
+
+```
+
+
+```{r violin_plot, echo=FALSE}
+
+ggplot(RPG_R53_wide, aes(x = factor(year), y = as.numeric(surf_agri_geo_unit_m2) / 10000)) +
+  geom_violin(fill = "skyblue", color = "black", alpha = 0.7) +
+  geom_boxplot(width = 0.1, fill = "white", outlier.shape = NA, color = "black") +
+  stat_summary(fun = median, geom = "point", color = "blue", size = 2) +
+  stat_summary(
+    fun = median,
+    geom = "text",
+    aes(label = round(..y.., 1)),
+    vjust = -0.5, color = "blue", size = 2.5
+  ) + 
+  geom_line(data = total_agri_per_year,
+            aes(x = factor(year), y = scaled_total, group = 1),
+            color = "red", size = 1.2) +
+  geom_point(data = total_agri_per_year,
+             aes(x = factor(year), y = scaled_total),
+             color = "red", size = 2) +
+    geom_text(data = total_agri_per_year,
+            aes(x = factor(year), y = scaled_total,
+                label = round(total_ha, 0)),
+            vjust = -0.7, color = "red", size = 2) +
+  scale_y_continuous(
+    name = "Surface agricole par commune (ha)",  # Left axis
+    sec.axis = sec_axis(~ . / scale_factor, name = "Surface agricole totale (ha)")  # Right axis
+  ) +
+  labs(title = "Evolution de la surface agricole totale par commune et par année en Bretagne (2007–2023)",
+       x = "Année") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+Ce graphique montre que les surfaces agricoles utilisés en Bretagne reste relativement stable dans le temps (ligne rouge). De manière générale, on observe une légère décroissance des surfaces agricoles totales, qui a diminué de près de 4% entre 2013 et 2023. 
+
+La distribution de la surface agricole totale par commune montre également une stabilité importante. Près de 90% des communes en Bretagne ont une surface agricole utilisée inférieures à 3000 ha.
+
+A noter qu'en agriculture on parle davantage en hectares qu'en mètres carrés. 
+*1 hectare = 10 000 mètres carrés donc 30 000 000 mètres carrés = 3000 hectares.
+
+### La spécialisation des cultures en Bretagne
+
+#### Surface agricole par culture
+
+La tableau ci-dessous présente les surfaces agricoles utilisés par culture en Bretagne sur la période 2007-2023. Il s'agit du total des surfaces par culture sur toutes les parcelles, qui est calculé par année et dont nous présentons ici la moyenne sur la période 2007-2023.
 
 
 ```{r desc-stat, include=FALSE}
@@ -208,8 +261,10 @@ Cependant, des cultures moins visibles dans la surface agricole totale paraissen
 
 ## Evolution dynamique du mix cultural en Bretagne
 
-Cette section préésente des analyses statistiques visant à identifier des cultures en développement et en déclin en Bretagne. Etant donné le grand nombre de catégorie de cultures différentes, et la très grande domination de la surface agricole pour certaines de ces cultures la comparaison directe de l'évolution des surfaces n'ait pas rendue facile. Certaines cultures ont des surfaces très largement supérieur, par exemple la culture de maïs est environ 1 000 fois plus importante en surface que la culture des légumineuses. 
+Cette section présente des analyses statistiques visant à identifier des cultures en développement et en déclin en Bretagne. Etant donné le grand nombre de catégorie de cultures différentes, et la très grande domination de la surface agricole pour certaines de ces cultures la comparaison directe de l'évolution des surfaces n'ait pas rendue facile. Certaines cultures ont des surfaces très largement supérieur, par exemple la culture de maïs est environ 1 000 fois plus importante en surface que la culture des légumineuses. 
 
 Pour cette raison, nous avons choisi de présenter les évolutions relatives des surfaces agricoles par culture. Dans un premier temps, nous calculons alors le taux de croissance inter-annuel des surfaces agricoles utilisés par la culture, de la manière suivante $g_{kt} = \dfrac{y_{kt} - y_{kt-1}}{y_{kt-1}}$, où $g_{kt}$ est le taux de croissance de la culture $k$ à l'année $t$, et $y_{kt}$ est la surface agricole utilisée par la culture $k$ à l'année $t$. Cette analyse permet de comprendre la variabilité entre année des surfaces utilisés par la culture.
 
 Dans un second temps, nous calculons la croissance de la surface associé à la culture en base 100, où l'année de référence est celle associée à l'entrée de la culture dans les données RPG. Ainsi, pour chaque culture, nous calculons la surface agricole utilisée par la culture $k$ à l'année $t$ divisé par la surface agricole utilisée par la culture $k$ à l'année d'entrée dans les données RPG, que nous multiplions par 100. Cette analyse permet de comprendre l'évolution des surfaces agricoles utilisées par la culture depuis son entrée dans les données RPG, et de comparer alors les croissances des surfaces entre culture.
+
+### Analyse des taux de croissance inter-annuels des surfaces agricoles

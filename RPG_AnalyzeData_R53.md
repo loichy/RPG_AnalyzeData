@@ -41,6 +41,21 @@ Le graphique ci-dessous montre l’évolution sur la période 2007-2023 de
 la surface agricole totale en Bretagne ainsi que sa distribution entre
 communes.
 
+![](RPG_AnalyzeData_R53_files/figure-gfm/violin_plot-1.png)<!-- -->
+
+Ce graphique montre que les surfaces agricoles utilisés en Bretagne
+reste relativement stable dans le temps (ligne rouge). De manière
+générale, on observe une légère décroissance des surfaces agricoles
+totales, qui a diminué de près de 4% entre 2013 et 2023.
+
+La distribution de la surface agricole totale par commune montre
+également une stabilité importante. Près de 90% des communes en Bretagne
+ont une surface agricole utilisée inférieures à 3000 ha.
+
+A noter qu’en agriculture on parle davantage en hectares qu’en mètres
+carrés. \*1 hectare = 10 000 mètres carrés donc 30 000 000 mètres carrés
+= 3000 hectares.
+
 ### La spécialisation des cultures en Bretagne
 
 #### Surface agricole par culture
@@ -125,9 +140,9 @@ représentent 3.9% et 8.9% des parcelles cultivées en Bretagne en 2017.
 
 ## Evolution dynamique du mix cultural en Bretagne
 
-Cette section préésente des analyses statistiques visant à identifier
-des cultures en développement et en déclin en Bretagne. Etant donné le
-grand nombre de catégorie de cultures différentes, et la très grande
+Cette section présente des analyses statistiques visant à identifier des
+cultures en développement et en déclin en Bretagne. Etant donné le grand
+nombre de catégorie de cultures différentes, et la très grande
 domination de la surface agricole pour certaines de ces cultures la
 comparaison directe de l’évolution des surfaces n’ait pas rendue facile.
 Certaines cultures ont des surfaces très largement supérieur, par
@@ -153,3 +168,5 @@ d’entrée dans les données RPG, que nous multiplions par 100. Cette
 analyse permet de comprendre l’évolution des surfaces agricoles
 utilisées par la culture depuis son entrée dans les données RPG, et de
 comparer alors les croissances des surfaces entre culture.
+
+### Analyse des taux de croissance inter-annuels des surfaces agricoles
