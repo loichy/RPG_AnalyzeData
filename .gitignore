@@ -49,9 +49,9 @@ po/*~
 rsconnect/
 
 # Ignore all files in data
-data_folder/**/*
+data/**/*
 
 # But allow all directories
-!data_folder/
-!data_folder/**/
+!data/
+!data/**/
 
