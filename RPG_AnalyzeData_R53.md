@@ -43,14 +43,17 @@ communes.
 
 ![](RPG_AnalyzeData_R53_files/figure-gfm/violin_plot-1.png)<!-- -->
 
-Ce graphique montre que les surfaces agricoles utilisés en Bretagne
+Ce graphique montre que la surface agricole utilisée totale en Bretagne
 reste relativement stable dans le temps (ligne rouge). De manière
-générale, on observe une légère décroissance des surfaces agricoles
-totales, qui a diminué de près de 4% entre 2013 et 2023.
+générale, on observe une légère décroissance de la surface agricole
+totale, qui a diminué de près de 4% entre 2013 et 2023.
 
 La distribution de la surface agricole totale par commune montre
-également une stabilité importante. Près de 90% des communes en Bretagne
-ont une surface agricole utilisée inférieures à 3000 ha.
+également une stabilité importante (graphiques en violon, et boite à
+moustache associée). Près de 90% des communes en Bretagne ont une
+surface agricole utilisée inférieures à 3000 ha, et la médiane de la
+surface agricole utilisée des communes restent stable dans le temps
+(environ 1 080 ha).
 
 A noter qu’en agriculture on parle davantage en hectares qu’en mètres
 carrés. \*1 hectare = 10 000 mètres carrés donc 30 000 000 mètres carrés

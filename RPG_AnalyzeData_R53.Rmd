@@ -88,7 +88,7 @@ total_agri_per_year <- total_agri_per_year %>%
 ```
 
 
-```{r violin_plot, echo=FALSE}
+```{r violin_plot, echo=FALSE, fig.width=10, fig.height=6}
 
 ggplot(RPG_R53_wide, aes(x = factor(year), y = as.numeric(surf_agri_geo_unit_m2) / 10000)) +
   geom_violin(fill = "skyblue", color = "black", alpha = 0.7) +
@@ -120,9 +120,9 @@ ggplot(RPG_R53_wide, aes(x = factor(year), y = as.numeric(surf_agri_geo_unit_m2)
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 ```
 
-Ce graphique montre que les surfaces agricoles utilisés en Bretagne reste relativement stable dans le temps (ligne rouge). De manière générale, on observe une légère décroissance des surfaces agricoles totales, qui a diminué de près de 4% entre 2013 et 2023. 
+Ce graphique montre que la surface agricole utilisée totale en Bretagne reste relativement stable dans le temps (ligne rouge). De manière générale, on observe une légère décroissance de la surface agricole totale, qui a diminué de près de 4% entre 2013 et 2023. 
 
-La distribution de la surface agricole totale par commune montre également une stabilité importante. Près de 90% des communes en Bretagne ont une surface agricole utilisée inférieures à 3000 ha.
+La distribution de la surface agricole totale par commune montre également une stabilité importante (graphiques en violon, et boite à moustache associée). Près de 90% des communes en Bretagne ont une surface agricole utilisée inférieures à 3000 ha, et la médiane de la surface agricole utilisée des communes restent stable dans le temps (environ 1 080 ha).
 
 A noter qu'en agriculture on parle davantage en hectares qu'en mètres carrés. 
 *1 hectare = 10 000 mètres carrés donc 30 000 000 mètres carrés = 3000 hectares.
