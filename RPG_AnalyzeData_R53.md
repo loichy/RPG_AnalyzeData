@@ -224,7 +224,7 @@ annuel moyen des surfaces agricoles utilisées par culture sur la période
 Taux de croissance annuel moyen des surfaces agricoles par culture sur
 la période 2007–2023
 
-On remarque une très forte expansion de la vignee, qui chaque année
+On remarque une très forte expansion de la vigne, qui chaque année
 depuis qu’elle est cultivée en Bretagne (2014) voit sa surface se
 multiplier par 10,5 en moyenne. Le riz et les plantes à fibre sont
 également des cultures en forte expansion, avec un taux de croissance
@@ -232,11 +232,38 @@ annuel moyen de 113% et 111% respectivement, signifie que leur surface
 fait plus que doubler chaque année. A l’inverse, les cultures en déclin
 sont les prairies temporaires, qui ont vu leur surface diminuer de 4,3%
 par an en moyenne depuis 2007, ainsi que les légumes et fleurs (-1%) et
-les surfaces gelées (-11.7%).
+les surfaces gelées (-11.7%). Les résultats de ce tableau sont également
+représentés dans le figures suivantes, pour la croissance moyenne des
+surfaces et la croissance moyenne des parcelles:
+![](RPG_AnalyzeData_R53_files/figure-gfm/growth-base-year-1.png)<!-- -->![](RPG_AnalyzeData_R53_files/figure-gfm/growth-base-year-2.png)<!-- -->
+
+Si nous nous attachons à présent au taux de croissance moyen en termes
+de nombre de parcelles cultivées, nous constatons que le riz n’est plus
+une culture avec une tendance dominante à la croissance en termes de
+l’expansion en nombre de parcelles cultivées. Viennent alors à se
+détacher principalement les plantes à fibres et les vignes.
+
+La non prégnance du riz sur le second graphique (en termes de parcelles
+cultivées) vient confirmer l’idée que le riz reste une culture
+minoritaire, qui se concentrent sur un nombre limité de parcelles et qui
+ne vient pas exploser même si sur le premier graphique elle semble
+dominante de par sa tendance générale à une croissance en termes de
+surface cultivée au cours du temps. A l’inverse, il semble qu’il y ait
+un véritable intérêt pour les plantes à fibre dont la culture tend en
+moyenne à croître tant en termes de surface cultivée (considérablement)
+et que de nombre de parcelles.
+
+Les prairies temporaires et les gel (surface de non-production)
+semblent, a priori, être les seules groupes de culture avec un taux de
+crooissance moyen négatif, en considérant l’ensemble de la période
+2007-2023.
 
 Plus précisément, il serait intéressant de voir où le riz et les
 oliviers ont été implantés en Bretagne, et de quelle manière sont tirés
-ces taux de croissance.
+ces taux de croissance. Le tableau suivant présente les implantations
+des cultures du riz, des oliviers et de la vigne en Bretagne depuis
+2010, ainsi que le nombre de communes dans lesquelles elles sont
+cultivées et la surface totale cultivée par culture.
 
     ## `summarise()` has grouped output by 'LIBELLE_GROUPE_CULTURE'. You can override
     ## using the `.groups` argument.
@@ -310,4 +337,181 @@ Finalement, notons également l’explosion des autres cultures
 industrielles et des protéagineux en 2023, dont la surface agricole
 cultivée augmente de plus de 200%.
 
-### Analyse de croissance des surfaces agricoles utilisés par culture sur la période
+### Analyse de croissance des surfaces agricoles utilisés selon les groupes de cultures à partir de leur année d’implantation (année de référence)
+
+Nous optons ici pour une division du groupe en deux “échantillons”. En
+effet, les données dont nous disposons sont issues de deux types de
+recensement parcellaire : un recensement selon la catégorisation d’îlots
+anonymes (regroupement d’ensemble de cultures et de parcelles en de plus
+grands groupes), qui prend fin en 2015 pour laisser place à une
+catégorisation en parcelles graphiques (analyse plus fine).
+
+Il s’agit alors d’étudier d’un côté la période 2007-2014 et de l’autre
+celle 2015-2023, le but étant de se détacher du biais créé par la
+méthode de recensement des données. D’autre part, une analyse à partir
+d’une année de référence permet de visualiser la tendance des cultures
+sur le long terme (explosion, disparition …).
+
+### Analyse ciblée : les 10 groupes de culture qui la croissance moyenne la plus élevé (en termes de surfaces cultivées)
+
+![](RPG_AnalyzeData_R53_files/figure-gfm/top-growth-1.png)<!-- -->
+
+A partir de 2012, les fruits à coque sont un groupe de culture qui tend
+à croître jusqu’en 2015, avec un triplement de sa surface par rapport à
+2007 (année d’implantation). D’autre part, sur la première sous-période
+(2012-2015), on constate également une décroissance de certains groupes
+de cultures comme les légumineuses ou le tournesol.
+
+Cette tendance à la moindre culture du tournesol entre 2012 et 2015
+s’inverse pour atteindre une multiplication par 36 de sa surface en 2023
+par rapport à 2015. Deux autres culture se détachent grandement sur la
+deuxième sous-période étudiée (2016-2023) : la vigne, avec une surface
+214 fois plus grande en 2023 par rapport à 2016 (son année
+d’implantation) et les légumineuses à grain (surface 34 fois plus grande
+en 2023).
+
+Finalement, de manière plus marginale, si nous étudions le cas
+particulier du riz: implanté en 2015, sa surface agricole cultivé croît
+de manière importante en 2018 (+987%) mais ne continuera pas sur cette
+voie, accusant des taux de croissance négatifs dès 2019 et jusque 2023
+(entre -58% et -72% par rapport à 2015).
+
+### Analyse ciblée : les 10 groupes de culture qui ont la croissance moyenne la plus faible (en termes de surfaces cultivées)
+
+![](RPG_AnalyzeData_R53_files/figure-gfm/small-growth-1.png)<!-- -->
+
+Les autres olégaineux sont le groupe de culture principalement en baisse
+sur la première sous-période (2007-2014) alors qu’on constate une
+stabilisation des surfaces cultivées sur la seconde période (2015-2023).
+Les prairies temporaires sont également un groupe de culture qui subit
+une baisse continue et progressive de sa surface agricole cultivée en
+Bretagne. D’autres cultures restent relativement stables voire en légère
+croissance au cours de la période étudiée comme les autres céréales, les
+légumes ou fleurs ou encore le maïs grain et ensilage. Un constat qui
+peut-être fait grâce à cette visualisation ciblée sur les 10 cultures au
+taux de croissance moyen le plus faible et qui est plus difficile à
+percevoir sur une visualisation englobant l’ensemble des groupes de
+cultures cultivés en Bretagne.
+
+### Analyse de l’hétérogénéité de la croissance des surfaces de culture de 2019 à 2023
+
+``` r
+select_annees <- c(2008, 2013, 2018, 2023)
+select_cultures <- c("Maïs grain et ensilage", "Prairies permanentes", "Prairies temporaires", "Blé tendre")
+
+density_commune <- RPG_R53 |>
+  filter(year %in% select_annees,
+         LIBELLE_GROUPE_CULTURE %in% select_cultures)
+
+ggplot(density_commune, aes(x = as.numeric(surf_code_group_perc),  color = as.factor(year))) + 
+  geom_density(size = 0.5) + 
+  facet_wrap(~ LIBELLE_GROUPE_CULTURE, scales = "free_y") +
+  scale_x_continuous(labels = scales::percent_format(accuracy = 1)) +
+  labs(
+    title = "Distribution de la part de surface agricole utilisé par une culture à l'échelle de la commune par année",
+    x = "Part de la surface agricole totale (par commune)",
+    y = "Densité"
+  ) +
+  theme_minimal() +
+  theme(legend.position = "bottom")
+```
+
+![](RPG_AnalyzeData_R53_files/figure-gfm/unnamed-chunk-1-1.png)<!-- -->
+
+``` r
+ggsave(here(dir$output, "densite_culture.pdf"), width = 16, height = 10)
+```
+
+Le graphique ci-dessus représente, pour quatre cultures majeures, la
+distribution de la part qu’elles occupent dans la surface agricole
+totale des communes, entre 2015 et 2018. Chaque courbe de densité
+correspond à une année et montre la concentration des communes selon le
+poids relatif de la culture concernée.
+
+Pour le blé tendre et le maïs grain/ensilage, les distributions sont
+particulièrement stables sur les quatre années. La densité est
+concentrée autour de 10 à 30 %, avec peu de variations. Cela suggère que
+ces cultures, bien qu’importantes, occupent rarement une position
+dominante au sein des communes agricoles.
+
+En revanche, les prairies permanentes présentent une évolution nette en
+2018 : la courbe se déplace vers la droite, indiquant une augmentation
+du nombre de communes dont une part importante est consacrée à ce type
+de surface.
+
+Cette inflexion s’explique très probablement par la réforme de la PAC
+intervenue en fin d’année 2017, dite “Règlement Omnibus”, et appliquée à
+partir de la campagne 2018. Cette réforme a élargi la définition des
+prairies permanentes, en autorisant l’inclusion de prairies pastorales à
+dominante ligneuse, traditionnellement exploitées pour le pâturage, même
+si l’herbe n’y est pas majoritaire. En France, cette évolution a été
+adoptée dès 2018 et a concerné 38 départements, dont 15 nouvellement
+éligibles. Elle a eu pour effet direct d’augmenter les surfaces
+déclarables en prairies permanentes, entraînant une hausse visible dans
+les déclarations communales.
+
+De plus, dans certaines régions (notamment les Hauts-de-France et la
+Normandie), des régimes d’interdiction ou d’autorisation préalable de
+conversion de prairies ont été instaurés à la suite d’une dégradation
+excessive du ratio de maintien des prairies. Cela a sans doute incité
+les exploitants à maintenir voire réaffecter davantage de surfaces en
+prairie permanente dans leurs déclarations.
+
+Concernant les prairies temporaires, une autre évolution apparaît en
+2018, sous la forme d’une courbe de densité plus étroite, centrée autour
+de 12,5%. Cela suggère une plus faible variabilité dans les surfaces
+dédiées au prairie temporaires entre communes. Cela pourrait
+possiblement s’expliquer par une forme de standardisation ou
+d’harmonisation dans les pratiques déclaratives, possiblement en lien
+avec la clarification des règles de distinction entre prairies
+permanentes et temporaires induite par la réforme.
+
+## Analyse de la diversité culturale par commune
+
+### Evolution moyenne du nombre de culture différentes
+
+``` r
+RPG_R53 %>%
+  group_by(year, name) %>%
+  summarise(N_Cultures = n_distinct(LIBELLE_GROUPE_CULTURE), .groups = "drop") %>%
+  group_by(year) %>%
+  summarise(moyenne_cultures = mean(N_Cultures)) %>%
+  ggplot(aes(x = year, y = moyenne_cultures)) +
+  geom_col(colour = "lightgrey") +
+  labs(title = "Évolution moyenne du nombre de cultures différentes", y = "Nombre moyen de cultures distinctes par communes")
+```
+
+![](RPG_AnalyzeData_R53_files/figure-gfm/unnamed-chunk-2-1.png)<!-- -->
+
+Ce graphique montre une augmentation de la diversité culturale moyenne
+par commune entre 2007 et 2023. En 2007, la surface agricole des
+communes de Bretagne était en moyenne composée de 11,1 cultures
+distinctes alors qu’en 2023, le nombre de cultures distinctes s’élevait
+à 12,9, soit presque 13. La hausse entre 2014 et 2015 s’explique en
+partie par le changement de structures dans la collecte des données du
+Registre Parcellaire Graphique. En passant à des données à l’échelles
+des parcelles individuelles (plutôt que des ilôts définis comme ensemble
+de parcelles), on capture une plus grande variété de données par
+composition.
+
+### Indice de Shannon par commune et par année
+
+``` r
+#|echo: false
+#|message: false
+#|warning: false
+```
+
+L’indice de Shannon, indicateur issu de l’écologie et que l’on chercher
+à appliquer ici à l’agriculture, mesure la diversité culturale moyenne
+dans la région entre 2007 et 2023.
+
+Plus il est élevé, plus la diversité des cultures est importante.
+
+Ici, on constate : \* une baisse de la diversité culturale entre 2007 et
+2009 \* une forte variabilité entre 2010 et 2019 avec une grosse chute
+en 2019 \* une hausse continue depuis 2020 et donc jusque 2023
+
+*Nb : définition de l’indice de Shanon :* *H = -Σp(i)xln(p(i))* *avec :*
+*- p(i) la proportion d’une catégorie de culture* *- ln, le logarithme
+naturel*
