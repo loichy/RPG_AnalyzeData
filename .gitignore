@@ -34,9 +34,4 @@ po/*~
 # RStudio Connect folder
 rsconnect/
 # Ignore all files in data
-data_folder/**/*
-# But allow all directories
-!data_folder/
-!data_folder/**/
-RPG_AnalyzeData.html
-RPG_AnalyzeData_files
+
