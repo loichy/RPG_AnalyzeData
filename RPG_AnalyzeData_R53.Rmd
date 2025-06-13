@@ -17,7 +17,7 @@ gc()
 
 # Load package
 if (!require("pacman")) install.packages("pacman")
-pacman::p_load(tidyverse, data.table, here, sf, tmap, units, knitr, kableExtra)
+pacman::p_load(tidyverse, data.table, here, sf, tmap, units, knitr, kableExtra, plotly)
 
 # List directories 
 dir <- list()
@@ -241,9 +241,10 @@ df_parcelles <- RPG_R53_simplified %>%
 ```{r nb-parcels-plot, echo=FALSE, fig.width=10, fig.height=6}
 ggplot(df_parcelles, aes(x = LIBELLE_GROUPE_CULTURE, y = Share_parcels)) +
   geom_col(fill = "darkgrey") +
+  geom_text(aes(label = round(Share_parcels, digits = 3)), hjust = 1.1, color = "black", size = 2) +
   facet_wrap(~ year, ncol = 2) +
   labs(
-    title = "Pöurcentage de parcelles par type de culture",
+    title = "Pourcentage de parcelles par type de culture",
     x = "Type de culture",
     y = "Nombre de parcelles"
   ) +
@@ -261,10 +262,194 @@ Cependant, des cultures moins visibles dans la surface agricole totale paraissen
 
 ## Evolution dynamique du mix cultural en Bretagne
 
-Cette section présente des analyses statistiques visant à identifier des cultures en développement et en déclin en Bretagne. Etant donné le grand nombre de catégorie de cultures différentes, et la très grande domination de la surface agricole pour certaines de ces cultures la comparaison directe de l'évolution des surfaces n'ait pas rendue facile. Certaines cultures ont des surfaces très largement supérieur, par exemple la culture de maïs est environ 1 000 fois plus importante en surface que la culture des légumineuses. 
+Cette section présente des analyses statistiques visant à identifier des cultures en développement et en déclin en Bretagne. Etant donné le grand nombre de catégorie de cultures différentes, et la très grande domination de la surface agricole pour certaines de ces cultures la comparaison directe de l'évolution des surfaces n'ait pas rendue facile. Certaines cultures ont des surfaces très largement supérieur, par exemple la culture de maïs est environ 1 000 fois plus importante en surface que la culture des légumineuses. Le graphique ci-dessous présente l'évolution des parts de surfaces agricoles utilisées par culture en Bretagne sur la période 2007-2023. Nous voyons qu'il est délicat d'identifier les dynamiques de toutes les cultures à partir de ce graphique, étant donné les différences d'importance/d'échelle entre elles.
+
+```{r surf-group-year, include=FALSE}
+
+cultures_groupes_year <- RPG_R53 %>%
+  group_by(CODE_GROUP, LIBELLE_GROUPE_CULTURE, year) %>%
+  summarise(surface_groupe = sum(surf_code_group_m2)) %>% 
+  filter(!is.na(LIBELLE_GROUPE_CULTURE)) %>% 
+  ungroup()
+
+surf_tot_year <- RPG_R53 %>% 
+  group_by(year, insee) %>%
+  slice(1) %>% 
+  ungroup() %>% 
+  group_by(year) %>%
+  summarise(surface_tot = sum(surf_agri_geo_unit_m2)) %>% 
+  ungroup()
+
+share_cultures_groupes_year <- cultures_groupes_year %>% 
+  left_join(surf_tot_year, by = "year") %>%
+  mutate(share_surface_group = surface_groupe / surface_tot * 100, 
+         LIBELLE_GROUPE_CULTURE = fct_reorder(LIBELLE_GROUPE_CULTURE, share_surface_group, .fun = sum, .desc = TRUE)) %>% 
+  arrange(LIBELLE_GROUPE_CULTURE, year) %>%
+  group_by(LIBELLE_GROUPE_CULTURE) %>%
+  mutate(growth_share_group = (share_surface_group - lag(share_surface_group)) / lag(share_surface_group) * 100) %>% 
+  ungroup()
+
+```
+```{r plot-surf-group-year, echo=FALSE, fig.width=10, fig.height=6}
+
+p <- ggplot(share_cultures_groupes_year, aes(
+  x = year,
+  y = share_surface_group,
+  color = LIBELLE_GROUPE_CULTURE,
+  group = LIBELLE_GROUPE_CULTURE,
+  text = LIBELLE_GROUPE_CULTURE
+)) +
+  geom_line(size = 1) +
+  geom_point(size = 2) +
+  labs(
+    title = "Evolution des parts de surfaces agricoles utilisées par culture en Bretagne (2007–2023)",
+    x = "Année",
+    y = "Part de surface agricole utilisée"
+  ) +
+  scale_color_manual(values = c25) +
+  theme_minimal() +
+  theme(
+    legend.position = "bottom",                # Move legend below the plot
+    legend.box = "horizontal",                 # Arrange legend items horizontally
+    legend.text = element_text(size = 10),     # Optional: adjust label size
+    legend.title = element_blank()             # Optional: remove legend title
+  ) +
+  guides(color = guide_legend(ncol = 3))       # 🔥 Divide legend into 3 columns
+
+ggplotly(p, tooltip = "text")
+
+```
+
+Nous remarquons ici que la part des surfaces en prairie permanente a plus que triplé entre 2014 et 2018, passant de 5,9% à 20%, tandis que celle de la prairie temporaire a été divisé part deux, passant de 30,3% à 14,7%. La diminution des surfaces en prairies temporaires peut s’expliquer en partie par une requalification de ces surfaces
+en prairies permanentes. En dehors d'une variation importante de la part des surfaces associées aux prairies, il est délicat d'identifier d'autres dynamiques pour les autres cultures sur ce graphique. 
 
 Pour cette raison, nous avons choisi de présenter les évolutions relatives des surfaces agricoles par culture. Dans un premier temps, nous calculons alors le taux de croissance inter-annuel des surfaces agricoles utilisés par la culture, de la manière suivante $g_{kt} = \dfrac{y_{kt} - y_{kt-1}}{y_{kt-1}}$, où $g_{kt}$ est le taux de croissance de la culture $k$ à l'année $t$, et $y_{kt}$ est la surface agricole utilisée par la culture $k$ à l'année $t$. Cette analyse permet de comprendre la variabilité entre année des surfaces utilisés par la culture.
 
 Dans un second temps, nous calculons la croissance de la surface associé à la culture en base 100, où l'année de référence est celle associée à l'entrée de la culture dans les données RPG. Ainsi, pour chaque culture, nous calculons la surface agricole utilisée par la culture $k$ à l'année $t$ divisé par la surface agricole utilisée par la culture $k$ à l'année d'entrée dans les données RPG, que nous multiplions par 100. Cette analyse permet de comprendre l'évolution des surfaces agricoles utilisées par la culture depuis son entrée dans les données RPG, et de comparer alors les croissances des surfaces entre culture.
 
 ### Analyse des taux de croissance inter-annuels des surfaces agricoles
+
+Le tableau ci-dessous présente le nombre d'années de données ou chaque culture apparaît dans notre échantillon, ainsi que le taux de croissance annuel moyen des surfaces agricoles utilisées par culture sur la période 2007-2023.
+
+```{r mean-growth-rate,  echo=FALSE, results='asis'}
+
+mean_growthrates <- share_cultures_groupes_year %>% 
+  group_by(LIBELLE_GROUPE_CULTURE) %>%
+  summarize(n_years = n(),
+            mean_growthrate = mean(growth_share_group, na.rm = TRUE))  %>% 
+  arrange(desc(mean_growthrate)) %>%
+  rename("Groupe de culture" = LIBELLE_GROUPE_CULTURE,
+    "Nombre d'années" = n_years,
+    "Taux de croissance annuel moyen" = mean_growthrate)
+
+knitr::kable(mean_growthrates, 
+             digits = 1, 
+             format = "markdown", 
+             align = "lrrr",
+             caption = "Taux de croissance annuel moyen des surfaces agricoles par culture sur la période 2007–2023")
+
+```
+
+
+On remarque une très forte expansion de la vignee, qui chaque année depuis qu'elle est cultivée en Bretagne (2014) voit sa surface se multiplier par 10,5 en moyenne. Le riz et les plantes à fibre sont également des cultures en forte expansion, avec un taux de croissance annuel moyen de 113% et 111% respectivement, signifie que leur surface fait plus que doubler chaque année. A l'inverse, les cultures en déclin sont les prairies temporaires, qui ont vu leur surface diminuer de 4,3% par an en moyenne depuis 2007, ainsi que les légumes et fleurs (-1%) et les surfaces gelées (-11.7%).
+
+Plus précisément, il serait intéressant de voir où le riz et les oliviers ont été implantés en Bretagne, et de quelle manière sont tirés ces taux de croissance.
+
+
+```{r implantations, echo=FALSE, results='asis'}
+
+implantations <- RPG_R53 %>%
+  filter(LIBELLE_GROUPE_CULTURE %in% c("Oliviers", "Riz", "Vignes"), year >= 2010) %>%
+  group_by(insee, LIBELLE_GROUPE_CULTURE, year) %>%
+  slice(1) %>% 
+  ungroup() %>% 
+  group_by(LIBELLE_GROUPE_CULTURE, year) %>% 
+  summarize(
+    Nb_communes = n(),
+    surf_code_group_m2 = sum(surf_code_group_m2, na.rm = TRUE) / 10000,  # Convert to hectares
+  ) %>% 
+  ungroup() %>% 
+  arrange(LIBELLE_GROUPE_CULTURE, year) %>% 
+  rename(
+    "Groupe de culture" = LIBELLE_GROUPE_CULTURE,
+    "Année" = year,
+    "Nombre de communes d'implantation" = Nb_communes,
+    "Surface (ha)" = surf_code_group_m2
+  )
+
+knitr::kable(implantations, 
+             digits = 1, 
+             format = "markdown", 
+             align = "lrrr",
+             caption = "Implantations des cultures du riz, des oliviers et de la vigne en Bretagne (2010–2023)")
+
+```
+
+
+Il faut noter, que la culture du riz et des oliviers sont relativement anecdotiques, en n'étant cultivées que dans deux communes pour le riz, et que sur une seule année pour les oliviers. Dans le cas du riz, le taux de croissance est fortement tiré par la tentative de culture du riz à Bain-de-Bretagne sur une année, arrêtée les année suivantes. Le cas de la vigne est relativement plus répandue et s'est fortement étendue après 2021, avec plus de 40 communes cultivant de la vigne en 2023 sur environ 60 hectares.
+
+La représentation graphique ci-dessous montre l'évolution des taux de croissances annuels à partir d'une échelle en couleur.
+
+```{r heatmap, echo=FALSE, results='asis'}
+heatmap_data <- share_cultures_groupes_year 
+
+ggplot(heatmap_data, aes(x = year, y = LIBELLE_GROUPE_CULTURE, fill = log(1 + as.numeric( growth_share_group)/100))) +
+  geom_tile() +
+  labs(
+    title = "Taux de croissance annuelle des surfaces cultivées par culture",
+    fill = "Taux de croissance (échelle en log)"
+  ) +
+  theme_minimal() +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1)
+  ) +
+  scale_fill_gradientn(
+    colours = c("darkblue", "blue", "turquoise",  "yellow", "orange", "red", "purple"),
+    na.value = "white"
+  )
+```
+
+On remarque que les taux de croissance interannuels sont relativement proches pour un grand nombre de culture, et varie peu entre les année. Cette représentation a l'avantage d'identifier rapidement les cultures qui représentent une forte instabilité sur la période comme le riz, les vignes, les légumineuses, les plantes à fibre, les fruits à coques, les tournesols et les autres oléagineux.
+
+Enfin, le graphique ci-dessous montre l'évolution du taux de croissance inter-annuel par culture sur la période 2007-2023.
+
+```{r plot-growth-rate, echo=FALSE, fig.width=10, fig.height=6}
+
+p <- ggplot(filter(share_cultures_groupes_year,
+                   !( LIBELLE_GROUPE_CULTURE %in% c("Vignes", "Riz", "Olivier"))),
+            aes(
+  x = year,
+  y = growth_share_group,
+  color = LIBELLE_GROUPE_CULTURE,
+  group = LIBELLE_GROUPE_CULTURE,
+  text = LIBELLE_GROUPE_CULTURE
+)) +
+  geom_line(size = 1) +
+  geom_point(size = 2) +
+  labs(
+    title = "Evolution des taux de croissance des surfaces agricoles utilisées \n par culture en Bretagne (2007–2023), hors olivier, riz et vignes",
+    x = "Année",
+    y = "Taux de croissance inter-annuel"
+  ) +
+  scale_color_manual(values = c25) +
+  theme_minimal() +
+  theme(
+    legend.position = "bottom",                # Move legend below the plot
+    legend.box = "horizontal",                 # Arrange legend items horizontally
+    legend.text = element_text(size = 10),     # Optional: adjust label size
+    legend.title = element_blank()             # Optional: remove legend title
+  ) +
+  guides(color = guide_legend(ncol = 3))       # Divide legend into 3 columns
+
+ggplotly(p, tooltip = "text")
+
+```
+
+Ce graphique illustre la relative variabilité dans l'utilisation des sols agricoles, avec des variations assez importantes d'une année à l'autre pour certaines cultures. Les courbes se chevauchant autour de 0 pour les cultures les plus stables, il est plus aisé de s'attacher aux cultures qui ont tendance à fluctuer au fil des années.
+
+Trois cultures ont majoritairement les variations les plus importantes, entre croissance et décroissance, c'est-à-dire entre augmentation de la surface cultivée et diminution, marquées donc par une forme d'instabilité: les légumineuses à grains (courbe bleue claire), le tournesol (courbe fuschia) et les plantes à fibres (courbe bleu). On remarque également une forte variation du taux de croissance du fourage sur une année seulement.  
+
+Finalement, notons également l'explosion des autres cultures industrielles et des protéagineux en 2023, dont la surface agricole cultivée augmente de plus de 200%.
+
+
+### Analyse de croissance des surfaces agricoles utilisés par culture sur la période

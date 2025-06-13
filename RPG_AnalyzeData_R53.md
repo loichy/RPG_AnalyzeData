@@ -150,7 +150,23 @@ domination de la surface agricole pour certaines de ces cultures la
 comparaison directe de l’évolution des surfaces n’ait pas rendue facile.
 Certaines cultures ont des surfaces très largement supérieur, par
 exemple la culture de maïs est environ 1 000 fois plus importante en
-surface que la culture des légumineuses.
+surface que la culture des légumineuses. Le graphique ci-dessous
+présente l’évolution des parts de surfaces agricoles utilisées par
+culture en Bretagne sur la période 2007-2023. Nous voyons qu’il est
+délicat d’identifier les dynamiques de toutes les cultures à partir de
+ce graphique, étant donné les différences d’importance/d’échelle entre
+elles.
+
+![](RPG_AnalyzeData_R53_files/figure-gfm/plot-surf-group-year-1.png)<!-- -->
+
+Nous remarquons ici que la part des surfaces en prairie permanente a
+plus que triplé entre 2014 et 2018, passant de 5,9% à 20%, tandis que
+celle de la prairie temporaire a été divisé part deux, passant de 30,3%
+à 14,7%. La diminution des surfaces en prairies temporaires peut
+s’expliquer en partie par une requalification de ces surfaces en
+prairies permanentes. En dehors d’une variation importante de la part
+des surfaces associées aux prairies, il est délicat d’identifier
+d’autres dynamiques pour les autres cultures sur ce graphique.
 
 Pour cette raison, nous avons choisi de présenter les évolutions
 relatives des surfaces agricoles par culture. Dans un premier temps,
@@ -173,3 +189,125 @@ utilisées par la culture depuis son entrée dans les données RPG, et de
 comparer alors les croissances des surfaces entre culture.
 
 ### Analyse des taux de croissance inter-annuels des surfaces agricoles
+
+Le tableau ci-dessous présente le nombre d’années de données ou chaque
+culture apparaît dans notre échantillon, ainsi que le taux de croissance
+annuel moyen des surfaces agricoles utilisées par culture sur la période
+2007-2023.
+
+| Groupe de culture | Nombre d’années | Taux de croissance annuel moyen |
+|:---|---:|---:|
+| Vignes | 9 | 955.4878819 \[1\] |
+| Riz | 9 | 113.3323345 \[1\] |
+| Plantes à fibres | 16 | 111.9261494 \[1\] |
+| Légumineuses à grains | 14 | 58.1304307 \[1\] |
+| Tournesol | 17 | 53.1630635 \[1\] |
+| Fruits à coque | 17 | 38.2078853 \[1\] |
+| Autres cultures industrielles | 17 | 37.7294665 \[1\] |
+| Protéagineux | 17 | 35.7526624 \[1\] |
+| Fourrage | 17 | 34.0840932 \[1\] |
+| Prairies permanentes | 17 | 9.3235933 \[1\] |
+| Vergers | 17 | 6.5556444 \[1\] |
+| Colza | 17 | 6.3355395 \[1\] |
+| Estives et landes | 17 | 6.1753243 \[1\] |
+| Autres oléagineux | 17 | 5.2600565 \[1\] |
+| Orge | 17 | 2.3328859 \[1\] |
+| Blé tendre | 17 | 0.6290358 \[1\] |
+| Maïs grain et ensilage | 17 | 0.3338785 \[1\] |
+| Divers | 17 | -0.4492808 \[1\] |
+| Autres céréales | 17 | -0.5962302 \[1\] |
+| Légumes ou fleurs | 17 | -0.9786653 \[1\] |
+| Prairies temporaires | 17 | -4.3299469 \[1\] |
+| Gel (surfaces gelées sans production) | 12 | -11.7830703 \[1\] |
+| Oliviers | 1 | NaN \[1\] |
+
+Taux de croissance annuel moyen des surfaces agricoles par culture sur
+la période 2007–2023
+
+On remarque une très forte expansion de la vignee, qui chaque année
+depuis qu’elle est cultivée en Bretagne (2014) voit sa surface se
+multiplier par 10,5 en moyenne. Le riz et les plantes à fibre sont
+également des cultures en forte expansion, avec un taux de croissance
+annuel moyen de 113% et 111% respectivement, signifie que leur surface
+fait plus que doubler chaque année. A l’inverse, les cultures en déclin
+sont les prairies temporaires, qui ont vu leur surface diminuer de 4,3%
+par an en moyenne depuis 2007, ainsi que les légumes et fleurs (-1%) et
+les surfaces gelées (-11.7%).
+
+Plus précisément, il serait intéressant de voir où le riz et les
+oliviers ont été implantés en Bretagne, et de quelle manière sont tirés
+ces taux de croissance.
+
+    ## `summarise()` has grouped output by 'LIBELLE_GROUPE_CULTURE'. You can override
+    ## using the `.groups` argument.
+
+| Groupe de culture | Année | Nombre de communes d’implantation | Surface (ha) |
+|:---|---:|---:|---:|
+| Oliviers | 2010 | 2 | 2.81490232 \[m^2\] |
+| Riz | 2015 | 1 | 0.16641442 \[m^2\] |
+| Riz | 2016 | 1 | 0.16641442 \[m^2\] |
+| Riz | 2017 | 1 | 0.16641442 \[m^2\] |
+| Riz | 2018 | 1 | 1.80835200 \[m^2\] |
+| Riz | 2019 | 1 | 0.04765220 \[m^2\] |
+| Riz | 2020 | 1 | 0.07026375 \[m^2\] |
+| Riz | 2021 | 1 | 0.07026375 \[m^2\] |
+| Riz | 2022 | 1 | 0.07026375 \[m^2\] |
+| Riz | 2023 | 1 | 0.04654961 \[m^2\] |
+| Vignes | 2014 | 1 | 4.30380091 \[m^2\] |
+| Vignes | 2016 | 2 | 0.28497761 \[m^2\] |
+| Vignes | 2017 | 1 | 0.01362971 \[m^2\] |
+| Vignes | 2018 | 4 | 0.63433072 \[m^2\] |
+| Vignes | 2019 | 6 | 1.93506051 \[m^2\] |
+| Vignes | 2020 | 4 | 0.52260697 \[m^2\] |
+| Vignes | 2021 | 11 | 15.87638665 \[m^2\] |
+| Vignes | 2022 | 19 | 31.67012166 \[m^2\] |
+| Vignes | 2023 | 44 | 59.69315978 \[m^2\] |
+
+Implantations des cultures du riz, des oliviers et de la vigne en
+Bretagne (2010–2023)
+
+Il faut noter, que la culture du riz et des oliviers sont relativement
+anecdotiques, en n’étant cultivées que dans deux communes pour le riz,
+et que sur une seule année pour les oliviers. Dans le cas du riz, le
+taux de croissance est fortement tiré par la tentative de culture du riz
+à Bain-de-Bretagne sur une année, arrêtée les année suivantes. Le cas de
+la vigne est relativement plus répandue et s’est fortement étendue après
+2021, avec plus de 40 communes cultivant de la vigne en 2023 sur environ
+60 hectares.
+
+La représentation graphique ci-dessous montre l’évolution des taux de
+croissances annuels à partir d’une échelle en couleur.
+
+![](RPG_AnalyzeData_R53_files/figure-gfm/heatmap-1.png)<!-- -->
+
+On remarque que les taux de croissance interannuels sont relativement
+proches pour un grand nombre de culture, et varie peu entre les année.
+Cette représentation a l’avantage d’identifier rapidement les cultures
+qui représentent une forte instabilité sur la période comme le riz, les
+vignes, les légumineuses, les plantes à fibre, les fruits à coques, les
+tournesols et les autres oléagineux.
+
+Enfin, le graphique ci-dessous montre l’évolution du taux de croissance
+inter-annuel par culture sur la période 2007-2023.
+
+![](RPG_AnalyzeData_R53_files/figure-gfm/plot-growth-rate-1.png)<!-- -->
+
+Ce graphique illustre la relative variabilité dans l’utilisation des
+sols agricoles, avec des variations assez importantes d’une année à
+l’autre pour certaines cultures. Les courbes se chevauchant autour de 0
+pour les cultures les plus stables, il est plus aisé de s’attacher aux
+cultures qui ont tendance à fluctuer au fil des années.
+
+Trois cultures ont majoritairement les variations les plus importantes,
+entre croissance et décroissance, c’est-à-dire entre augmentation de la
+surface cultivée et diminution, marquées donc par une forme
+d’instabilité: les légumineuses à grains (courbe bleue claire), le
+tournesol (courbe fuschia) et les plantes à fibres (courbe bleu). On
+remarque également une forte variation du taux de croissance du fourage
+sur une année seulement.
+
+Finalement, notons également l’explosion des autres cultures
+industrielles et des protéagineux en 2023, dont la surface agricole
+cultivée augmente de plus de 200%.
+
+### Analyse de croissance des surfaces agricoles utilisés par culture sur la période
