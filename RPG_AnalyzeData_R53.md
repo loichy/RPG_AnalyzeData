@@ -515,3 +515,5 @@ en 2019 \* une hausse continue depuis 2020 et donc jusque 2023
 *Nb : définition de l’indice de Shanon :* *H = -Σp(i)xln(p(i))* *avec :*
 *- p(i) la proportion d’une catégorie de culture* *- ln, le logarithme
 naturel*
+
+\[Ajouter la figure de l’indice de Shannon\]

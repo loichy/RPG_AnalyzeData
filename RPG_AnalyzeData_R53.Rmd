@@ -2,7 +2,7 @@
 title: "Analyse descriptive du mix cultural de la Bretagne (2007-2023)"
 author: "Aziliz Joseph dit Pagny, Inès Bezie et Loïc Henry"
 date: "2025-06-12"
-output: html_document
+output: github_document
 ---
 
 ```{r setup, include=FALSE}
