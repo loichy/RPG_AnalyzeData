@@ -633,7 +633,7 @@ D'autres cultures restent relativement stables voire en légère croissance au c
 
 
 select_annees <- c(2008, 2013, 2018, 2023)
-select_cultures <- c("Maïs grain et ensilage", "Prairies permanentes", "Prairies temporaires", "Blé tendre")
+select_cultures <- c("Maïs grain et ensilage", "Prairies permanentes", "Prairies temporaires", "Vignes")
 
 density_commune <- RPG_R53 |>
   filter(year %in% select_annees,
@@ -695,6 +695,24 @@ Ce graphique montre une augmentation de la diversité culturale moyenne par comm
 #|message: false
 #|warning: false
 
+# Calcul de l'indice de Shannon
+shannon_index <- RPG_R53 %>%
+  group_by(year, name, LIBELLE_GROUPE_CULTURE) %>%
+  summarise(surface_culture = sum(surf_code_group_m2), .groups = "drop") %>%
+  group_by(year, name) %>%
+  mutate(total_surface = sum(surface_culture),
+         proportion = surface_culture / total_surface) %>%
+  summarise(shannon = -sum(proportion * log(proportion), na.rm = TRUE), .groups = "drop") %>%
+  group_by(year) %>%
+  summarise(moyenne_shannon = mean(shannon, na.rm = TRUE), .groups = "drop")
+# Graphique de la diversité culturale à partir de l'indice de Shannon moyen
+ggplot(shannon_index, aes(x = year, y = moyenne_shannon, group = 1)) +
+  geom_line(color = "#E31A1C", size = 0.5) +
+  geom_point(color = "red", size = 2) +
+  labs(title = "Évolution de la diversité culturale (Indice de Shannon)",
+       x = "Année",
+       y = "Indice de Shannon moyen") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 10))
 
 
 ```

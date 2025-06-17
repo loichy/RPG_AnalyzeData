@@ -35,10 +35,10 @@ po/*~
 rsconnect/
 # Ignore all files in data
 data/**/*
-
 # But allow all directories
 !data/
 !data/**/
-
 # Ignore all files in output
 output/*
+RPG_AnalyzeData_files
+RPG_AnalyzeData.html

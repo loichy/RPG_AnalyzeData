@@ -1,0 +1,615 @@
+---
+title: "Analyse descriptive du mix cultural de la France (2007-2023)"
+format: html
+editor: visual
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(warning = FALSE)
+```
+
+```{r environment-preparation, include=FALSE}
+# Clean memory 
+rm(list=ls())
+gc()
+
+# Load package
+if (!require("pacman")) install.packages("pacman")
+pacman::p_load(tidyverse, data.table, here, sf, tmap, units, knitr, kableExtra, plotly)
+
+# List directories 
+dir <- list()
+dir$root <- here()
+dir$data <- here(dir$root, "data")
+dir$raw <- here(dir$data, "raw")
+dir$derived <- here(dir$data, "derived")
+dir$final <- here(dir$data, "final")
+dir$script <- here(dir$root, "script")
+dir$output <- here(dir$root, "output")
+
+# Create non existing directories
+lapply(dir, function(i) dir.create(i, recursive = T, showWarnings = F))
+
+```
+
+```{r color-palette, include=FALSE}
+c25 <- c(
+  "dodgerblue2", "#E31A1C", # red
+  "green4",
+  "#6A3D9A", # purple
+  "#FF7F00", # orange
+  "black", "gold1",
+  "skyblue2", "#FB9A99", # lt pink
+  "palegreen2",
+  "#CAB2D6", # lt purple
+  "#FDBF6F", # lt orange
+  "gray70", "khaki2",
+  "maroon", "orchid1", "deeppink1", "blue1", "steelblue4",
+  "darkturquoise", "green1", "yellow4", "yellow3",
+  "darkorange4", "brown"
+)
+
+```
+
+
+## Introduction
+
+Ce document présente la répartition des cultures en France à partir des données du **Registre Parcellaire Graphique** (RPG). Le RPG est une base de données géographique qui recense les parcelles agricoles et les cultures qui y sont pratiquées. Ces données sont déclarées par les agriculteurs dans le cadre de leur déclaration de la Politique Agricole Commune. Elles sont en [libre accès](https://geoservices.ign.fr/rpg) et sont mises à jour chaque année. 
+
+L'objectif de cette analyse est de visualiser la diversité des cultures pratiquées en Bretagne et d'identifier les principales cultures présentes dans la région. En particulier, nous souhaitons identifier les dynamiques des cultures (cultures émergentes ou en déclin) ainsi que leur répartition spatiale. Cette analyse utilise les données du RPG sur 17 années (2007-2023), aggrégées à l'échelle de la commune. Les scripts permettant de collecter, et préparer les données du RPG sont disponibles sur GitHub dans le dépôts [`RPG_PrepareData`](https://github.com/loichy/RPG_PrepareData) Nous disposons ainsi de l'usage des sols entre 24 et 28 grands groupes de culture. Nous mesurons la surface dédié à chaque groupe de culture par commune et année, ainsi que le nombre de parcelles.
+
+Dans une première partie, nous présentons l'usage des sols de manière globale en France sur la période 2007-2023. Dans la deuxième section, nous étudions la dynamique des usages des sols, en étudiant en particulier l'expansion des cultures émergentes et le déclin des cultures en perte de vitesse. Enfin, nous étudions la diversité des cultures à l'échelle des communes et son évolution dans le temps.
+
+```{r load-data, include=FALSE}
+# Load data
+RPG_R53 <- readRDS(here(dir$raw, "RPG_Aggregated_All.rds"))
+RPG_R53_wide <- readRDS(here(dir$raw, "RPG_Aggregated_All_wide.rds"))
+
+```
+
+
+## Le mix cultural en France: une présentation générale
+
+### Evolution de la surface agricole en France
+
+Le graphique ci-dessous montre l'évolution sur la période 2007-2023 de la surface agricole totale en France ainsi que sa distribution entre communes.
+
+```{r agri-area, include=FALSE}
+total_agri_per_year <- RPG_R53_wide %>%
+  group_by(year) %>%
+  summarise(total_ha = sum(as.numeric(surf_agri_geo_unit_m2), na.rm = TRUE) / 10000)
+
+max_violin_y <- RPG_R53 %>% pull(surf_agri_geo_unit_m2) %>% as.numeric() %>% max(na.rm = TRUE) / 10000
+max_total_y  <- max(total_agri_per_year$total_ha)
+scale_factor <- max_violin_y / max_total_y 
+total_agri_per_year <- total_agri_per_year %>%
+  mutate(scaled_total = total_ha * scale_factor)
+
+```
+
+```{r violin_plot, echo=FALSE, fig.width=10, fig.height=6}
+
+ggplot(RPG_R53_wide, aes(x = factor(year), y = as.numeric(surf_agri_geo_unit_m2) / 10000)) +
+   geom_violin(trim = TRUE, fill = "skyblue", color = "black", alpha = 0.7) +
+  geom_boxplot(width = 0.1, fill = "white", outlier.shape = NA, color = "black") +
+  stat_summary(fun = median, geom = "point", color = "blue", size = 3.5) +
+  stat_summary(fun = median, geom = "text",
+               aes(label = round(..y.., 1)),
+               vjust = -1.2, color = "blue", size = 3) +
+  geom_line(data = total_agri_per_year,
+            aes(x = factor(year), y = scaled_total, group = 1),
+            color = "red", size = 1.2) +
+  geom_point(data = total_agri_per_year,
+             aes(x = factor(year), y = scaled_total),
+             color = "red", size = 2.5) +
+  geom_text(data = total_agri_per_year,
+            aes(x = factor(year), y = scaled_total, label = round(total_ha, 0)),
+            vjust = -0.7, color = "red", size = 2.7) +
+  scale_y_continuous(
+    name = "Surface agricole par commune (ha)",
+    sec.axis = sec_axis(~ . / scale_factor,
+                        name = "Surface agricole totale (ha)",
+                        labels = scales::label_number(big.mark = " "))
+  ) +
+  labs(title = "Évolution de la surface agricole par commune et totale en France (2007–2023)",
+       x = "Année") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+Ce graphique montre que la surface agricole utilisée totale en France reste  stable dans le temps (ligne rouge). De manière générale, on observe une légère augmentation de la surface agricole totale, à hauteur de 2% entre 2007 et 2023. La surface agricole française totale a atteint un premier maximum en 2012, puis suite à une diminution jusqu'en 2019, un nouveau maximum en 2021.
+
+La distribution de la surface agricole totale par commune montre également une stabilité importante (graphiques en violon, et boite à moustache associée). Près de 90% des communes en Bretagne ont une surface agricole utilisée inférieures à 3000 ha, et la médiane de la surface agricole utilisée des communes restent stable dans le temps (environ 1 080 ha).
+
+### La spécialisation des cultures en France
+
+#### Surface agricole par culture
+
+La tableau ci-dessous présente les surfaces agricoles utilisés par culture en France sur la période 2007-2023. Il s'agit du total des surfaces par culture sur toutes les parcelles, qui est calculé par année et dont nous présentons ici la moyenne sur la période 2007-2023.
+
+```{r desc-stat, include=FALSE}
+# Descriptive statistics
+RPG_R53_total <- RPG_R53_wide %>% 
+  group_by(insee) %>% 
+  summarise(
+    mean_surf_agri = mean(surf_agri_geo_unit_m2, na.rm = TRUE)
+  ) %>% 
+  ungroup() %>% 
+  summarise(
+    total_surf_agri = sum(mean_surf_agri, na.rm = TRUE)
+  )
+
+RPG_R53_desc <- RPG_R53 %>% 
+  group_by(LIBELLE_GROUPE_CULTURE, insee) %>% 
+  summarise(
+    mean_surf_ha = mean(surf_code_group_m2, na.rm = TRUE),
+    mean_surf_perc = mean(surf_code_group_perc, na.rm = TRUE)
+  ) %>% 
+  ungroup() %>% 
+  group_by(LIBELLE_GROUPE_CULTURE) %>%
+  summarise(
+    surf_ha = sum(mean_surf_ha, na.rm = TRUE),
+    surf_perc = sum(mean_surf_ha, na.rm = TRUE) / RPG_R53_total$total_surf_agri
+  ) %>% 
+  arrange(desc(surf_ha)) %>% 
+  filter(! is.na(LIBELLE_GROUPE_CULTURE))
+  
+
+# Calcul de la surface agricole totale (en ha)
+total_surf_agri <- sum(RPG_R53_desc$surf_ha)
+
+# Créer une ligne de résumé
+ligne_total <- tibble::tibble(
+  LIBELLE_GROUPE_CULTURE = "Surface agricole totale",
+  surf_ha = total_surf_agri,
+  surf_perc  = NA
+)
+
+# Ajouter à la fin du tableau
+df_total <- bind_rows(RPG_R53_desc, ligne_total) %>% 
+  arrange(desc(surf_ha)) 
+
+```
+
+```{r desc-stat-table, echo=FALSE, results='asis'}
+RPG_R53_desc_clean <- df_total %>%
+  mutate(
+    surf_ha = as.numeric(surf_ha) / 10000,
+    surf_perc = as.numeric(surf_perc) * 100
+  ) %>%
+  select(LIBELLE_GROUPE_CULTURE, surf_ha, surf_perc) %>%
+  rename(
+    "Groupe de culture" = LIBELLE_GROUPE_CULTURE,
+    "Surface de la culture (ha)" = surf_ha,
+    "Part (%)" = surf_perc
+  )
+
+knitr::kable(RPG_R53_desc_clean, 
+             digits = 1, 
+             format = "markdown", 
+             align = "lrrr",
+             caption = "Utilisation des sols agricoles par culture (moyenne sur la période 2007–2023)")
+
+```
+
+La surface agricole totale est de `r round(as.numeric(total_surf_agri) / 10000, 1)` ha. 
+
+La culture la plus répandue en France sont **les prairies permanentes**, qui représente `r round(RPG_R53_desc$surf_perc[1] * 100, 1)` % de la surface agricole totale. Les prairies permanentes sont suivies par **le blé tendre et le maïs**, qui représentent respectivement `r round(RPG_R53_desc$surf_perc[2] * 100, 1)` % et `r round(RPG_R53_desc$surf_perc[4] * 100, 1)` % de la surface agricole totale. **Les prairies temporaires, les estives et landes et l'orge** complètent le tableau des principales cultures, représentant respectivement `r round(RPG_R53_desc$surf_perc[3] * 100, 1)` %, `r round(RPG_R53_desc$surf_perc[5] * 100, 1)` % et `r round(RPG_R53_desc$surf_perc[6] * 100, 1)` % de la surface agricole totale.
+
+#### Part de parcelles agricoles par culture
+
+La figure ci-dessous représente le pourcentage de parcelles agricoles par type de culture en France pour quatre années (2007, 2012, 2017 et 2023). Il s'agit du nombre de parcelles par culture divisé par le nombre total de parcelles recensés par le RPG en Bretagne sur l'année.
+
+```{r nb-parcels, include=FALSE}
+
+year_simplified <- c(2007, 2012, 2017, 2023)
+
+RPG_R53_simplified <- RPG_R53 %>%
+  filter(year %in% year_simplified)
+
+# Nombre total de parcelles par année
+N_Parcels_byyear <- RPG_R53_simplified %>% 
+  group_by(year) %>%
+  summarise(N_Parcels_byyear = sum(parcel_cult_code_group_n))
+
+# Agréger par année et culture
+df_parcelles <- RPG_R53_simplified %>%
+  ungroup() %>% 
+  left_join(N_Parcels_byyear, by = "year") %>%
+  group_by(year, LIBELLE_GROUPE_CULTURE) %>%
+  summarise(Share_parcels = sum(parcel_cult_code_group_n, na.rm = TRUE) / N_Parcels_byyear * 100 ) %>% 
+  group_by(LIBELLE_GROUPE_CULTURE, year) %>%
+  slice(1) %>% 
+  ungroup() %>% 
+  arrange(year, desc(Share_parcels)) %>% 
+  filter(! is.na(LIBELLE_GROUPE_CULTURE)) %>% 
+  mutate(LIBELLE_GROUPE_CULTURE = fct_reorder(LIBELLE_GROUPE_CULTURE, Share_parcels, .fun = sum, .desc = TRUE))
+```
+
+```{r nb-parcels-plot, echo=FALSE, fig.width=10, fig.height=6}
+ggplot(df_parcelles, aes(x = LIBELLE_GROUPE_CULTURE, y = Share_parcels)) +
+  geom_col(fill = "darkgrey") +
+  geom_text(aes(label = round(Share_parcels, digits = 3)), hjust = 1.1, color = "black", size = 2) +
+  facet_wrap(~ year, ncol = 2) +
+  labs(
+    title = "Pourcentage de parcelles par type de culture",
+    x = "Type de culture",
+    y = "Nombre de parcelles"
+  ) +
+  coord_flip() +
+  theme_minimal()
+
+ggsave(here(dir$output, "Pourcentage_parcelles_culture.pdf"), width = 10, height = 6)
+
+```
+
+Initialement, on retrouve les plus grandes cultures en terme de surface agricole comme occupant la majorité des parcelles. En effet, **les prairies permanentes** occupent à elles seules en moyenne un tiers des parcelles en France, avec une forte augmentation depuis 2017. Elles sont suivies par les cultures de **blé tendre, prairies temporaires et maïs**, consituant au total plus de 50% des parcelles agricoles. On peut noter néanmoins une décroissance continue des cultures de **blé tendre et prairies temporaires**, avec une baisse respective de 6% et 4% des parcelles agricoles occupées. 
+
+Par ailleurs, on observe que **les estives et landes et l'orge**, qui suivent les cultures ci-dessus en terme de surface, sont devancés notamment par les cultures **Divers, les vignes ou encore les surfaces gelées sans production**. En particulier, **les vignes** représentent en moyenne 1,9% de la surface agricole totale, alors qu'elles occupent en moyenne 4,6% des parcelles. 
+
+## Evolution dynamique du mix cultural en Bretagne
+
+Cette section présente des analyses statistiques visant à identifier des cultures en développement et en déclin en France. 
+
+```{r surf-group-year, include=FALSE}
+
+cultures_groupes_year <- RPG_R53 %>%
+  group_by(CODE_GROUP, LIBELLE_GROUPE_CULTURE, year) %>%
+  summarise(surface_groupe = sum(surf_code_group_m2, na.rm=T),
+            parcel_groupe = sum(parcel_cult_code_group_n)) %>% 
+  filter(!is.na(LIBELLE_GROUPE_CULTURE)) %>% 
+  ungroup()
+
+surf_tot_year <- RPG_R53 %>% 
+  group_by(year, insee) %>%
+  slice(1) %>% 
+  ungroup() %>% 
+  group_by(year) %>%
+  summarise(surface_tot = sum(surf_agri_geo_unit_m2),
+            parcel_tot = sum(N_Parcels)) %>% 
+  ungroup()
+
+share_cultures_groupes_year <- cultures_groupes_year %>% 
+  left_join(surf_tot_year, by = "year") %>%
+  mutate(share_surface_group = surface_groupe / surface_tot * 100, 
+         share_parcels_group = parcel_groupe / parcel_tot * 100,
+         LIBELLE_GROUPE_CULTURE = fct_reorder(LIBELLE_GROUPE_CULTURE, share_surface_group, .fun = sum, .desc = TRUE)) %>% 
+  arrange(LIBELLE_GROUPE_CULTURE, year) %>%
+  group_by(LIBELLE_GROUPE_CULTURE) %>%
+  mutate(growth_share_group = (share_surface_group - lag(share_surface_group)) / lag(share_surface_group) * 100,
+         growth_share_parcel_group = (share_parcels_group - lag(share_parcels_group)) / lag(share_parcels_group) * 100) %>% 
+  ungroup() %>% 
+  mutate(
+    binary_period = ifelse(year > 2014, 1, 0) # 0 = 2007-2014, 1 = 2015-2023
+  ) %>% 
+  arrange(LIBELLE_GROUPE_CULTURE, year) %>%
+  group_by(CODE_GROUP, LIBELLE_GROUPE_CULTURE, binary_period) %>%
+  mutate(
+    # Calcul de l'année de base pour chaque période
+    min_year = min(year), 
+    share_surface_base = sum(share_surface_group[year == min_year], na.rm = TRUE),
+    share_parcels_base = sum(share_parcels_group[year == min_year], na.rm = TRUE),
+    growth_surf_100 = share_surface_group / share_surface_base * 100,
+    growth_parcels_100 = share_parcels_group  / share_parcels_base * 100
+  )
+```
+
+```{r plot-surf-group-year, echo=FALSE, fig.width=10, fig.height=6}
+
+p <- ggplot(share_cultures_groupes_year, aes(
+  x = year,
+  y = share_surface_group,
+  color = LIBELLE_GROUPE_CULTURE,
+  group = LIBELLE_GROUPE_CULTURE,
+  text = LIBELLE_GROUPE_CULTURE
+)) +
+  geom_line(size = 1) +
+  geom_point(size = 2) +
+  labs(
+    title = "Evolution des parts de surfaces agricoles utilisées par culture en France (2007–2023)",
+    x = "Année",
+    y = "Part de surface agricole utilisée (en %)"
+  ) +
+  scale_color_manual(values = c25) +
+  theme_minimal() +
+  theme(
+    legend.position = "bottom",                
+    legend.box = "horizontal",                 
+    legend.text = element_text(size = 10),     
+    legend.title = element_blank()             
+  ) +
+  guides(color = guide_legend(ncol = 3))       
+
+ggplotly(p, tooltip = "text")
+
+```
+On observe une croissance de la part des surfaces agricoles allouée aux **prairies permanentes**, passant de 25% à 28% entre 2007 et 2023, avec une très forte hausse entre 2017 et 2018. De la même manière, on observe une forte décroissance de la part des **prairies temporaires**. Cela s'explique par une redéfinition réglementaires des prairies temporaires et permanentes, qui a conduit à des modifications dans la déclaration de ces surfaces. Le **blé tendre** est en diminution lente, mais continue en terme de part de surface occupée, passant de 18,5% à 17% environ. On observe une dynamique similaire pour **le maïs**, passant de 11% à 9% de la part des surfaces agricoles. 
+
+Par la suite, nous présentons les évolutions relatives des surfaces agricoles par culture. Dans un premier temps, nous calculons alors le taux de croissance inter-annuel des surfaces agricoles utilisés par la culture, de la manière suivante $g_{kt} = \dfrac{y_{kt} - y_{kt-1}}{y_{kt-1}}$, où $g_{kt}$ est le taux de croissance de la culture $k$ à l'année $t$, et $y_{kt}$ est la surface agricole utilisée par la culture $k$ à l'année $t$. Cette analyse permet de comprendre la variabilité entre année des surfaces utilisés par la culture.
+
+Dans un second temps, nous calculons la croissance de la surface associé à la culture en base 100, où l'année de référence est celle associée à l'entrée de la culture dans les données RPG. Ainsi, pour chaque culture, nous calculons la surface agricole utilisée par la culture $k$ à l'année $t$ divisé par la surface agricole utilisée par la culture $k$ à l'année d'entrée dans les données RPG, que nous multiplions par 100. Cette analyse permet de comprendre l'évolution des surfaces agricoles utilisées par la culture depuis son entrée dans les données RPG, et de comparer alors les croissances des surfaces entre culture.
+
+### Analyse des taux de croissance inter-annuels des surfaces agricoles
+
+Le tableau ci-dessous présente le nombre d'années de données ou chaque culture apparaît dans notre échantillon, ainsi que le taux de croissance annuel moyen des surfaces agricoles utilisées par culture sur la période 2007-2023.
+
+```{r mean-growth-rate,  echo=FALSE, results='asis'}
+
+mean_growthrates <- share_cultures_groupes_year %>% 
+  group_by(LIBELLE_GROUPE_CULTURE) %>%
+  summarize(n_years = n(),
+            mean_growthrate = mean(growth_share_group, na.rm = TRUE))  %>% 
+  arrange(desc(mean_growthrate)) %>%
+  rename("Groupe de culture" = LIBELLE_GROUPE_CULTURE,
+    "Nombre d'années" = n_years,
+    "Taux de croissance annuel moyen" = mean_growthrate)
+
+knitr::kable(mean_growthrates, 
+             digits = 1, 
+             format = "markdown", 
+             align = "lrrr",
+             caption = "Taux de croissance annuel moyen des surfaces agricoles par culture sur la période 2007–2023")
+
+```
+
+```{r growth-base-year, echo=FALSE, message=FALSE, warning=FALSE}
+
+#Graphique selon la moyenne des taux de croissance des surfaces cultivées des groupes de cultures sur la période 2007-2023
+share_cultures_groupes_year %>%
+  filter(!is.na(LIBELLE_GROUPE_CULTURE)) %>%
+  group_by(LIBELLE_GROUPE_CULTURE) %>%
+  summarise(taux_croissance_moyen = mean(growth_share_group, na.rm = TRUE)) %>%
+  ggplot(aes(x = reorder(LIBELLE_GROUPE_CULTURE, as.numeric(taux_croissance_moyen)), y = taux_croissance_moyen, fill = LIBELLE_GROUPE_CULTURE)) +
+  geom_col() +
+  coord_flip() +
+  scale_fill_manual(values = c25) +
+  labs(title = "Taux de croissance moyen de la surface des groupes de culture (2007-2023)",
+       x = "Groupe de culture", y = "Taux de croissance moyen") +
+  theme(legend.position = "none")
+
+# Graphique selon la moyenne des taux de croissance du nombre de parcelles cultivées des groupes de cultures sur la période 2007-2023
+share_cultures_groupes_year %>%
+  filter(!is.na(LIBELLE_GROUPE_CULTURE)) %>%
+  group_by(LIBELLE_GROUPE_CULTURE) %>%
+  summarise(taux_croissance_moyen = mean(growth_share_parcel_group, na.rm = TRUE)) %>%
+  ggplot(aes(x = reorder(LIBELLE_GROUPE_CULTURE, taux_croissance_moyen), y = taux_croissance_moyen, fill = LIBELLE_GROUPE_CULTURE)) +
+ geom_col() +
+  coord_flip() +
+  scale_fill_manual(values = c25) +
+  labs(title = "Taux de croissance moyen du nombre de parcelles par groupes de culture (2007-2023)",
+       x= "Groupe de culture",
+       y = "Taux de croissance moyen") +
+  theme(legend.position = "none")
+```
+
+On observe une forte expansion des cultures de **fourrage, autres oléagineux et légumineuses à grain**, respectivement de `r round(mean_growthrates$mean_growthrate[1], 1)`%, `r round(mean_growthrates$mean_growthrate[2], 1)`% et `r round(mean_growthrates$mean_growthrate[3], 1)`%. Il est intéressant de le noter, car nous n'avons pas observé d'hausse particulière pour ces cultures en terme de part de surface agricole occupée dans l'analyse précédente. Les cultures en déclin rejoignent au contraire les analyses précédentes avec **le blé tendre et le maïs**, avec une baisse respective moyenne de -0,39% et -0,75%. Le plus grand déclin reste **les prairies temporaires**, pour les raisons citées ci-dessus, ainsi que **le riz** (-2,55% en moyenne).
+
+En comparant entre les taux de croissance moyen en terme de surface agricole et de nombre de parcelles alloué à une culture, on observe une similarité relativement forte. Seules **les cultures diverses** modifient significativement le classement, en prenant la deuxième place en terme d'expansion en nombre de parcelles, avec une moyenne de 30% de taux de croissance.
+
+Le **canne à sucre** est un cas particulier, car il n'a été cultivé que sur une seule année (2011), ce qui explique un fort taux de décroissance.  
+
+La représentation graphique ci-dessous montre l'évolution des taux de croissances annuels à partir d'une échelle en couleur.
+
+```{r heatmap, echo=FALSE, results='asis'}
+heatmap_data <- share_cultures_groupes_year 
+
+ggplot(heatmap_data, aes(x = year, y = LIBELLE_GROUPE_CULTURE, fill = log(1 + as.numeric( growth_share_group)/100))) +
+  geom_tile() +
+  labs(
+    title = "Taux de croissance annuelle des surfaces cultivées par culture",
+    fill = "Taux de croissance (échelle en log)"
+  ) +
+  theme_minimal() +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1)
+  ) +
+  scale_fill_gradientn(
+    colours = c("darkblue", "blue", "turquoise",  "yellow", "orange", "red", "purple"),
+    na.value = "white"
+  )
+```
+Cette représentation permet d'identifier les cultures les plus instables sur la période d'intérêt : **les protéagineux, les légumineuses à grain et autres oléagineux**, ainsi que **le fourrage** présentent une relativement forte variabilité sur la période.
+
+### Analyse de croissance des surfaces agricoles utilisés selon les groupes de cultures à partir de leur année d'implantation (année de référence)
+
+Nous optons ici pour une division du groupe en deux "échantillons". En effet, les données dont nous disposons sont issues de deux types de recensement parcellaire : un recensement selon la catégorisation d'îlots anonymes (regroupement d'ensemble de cultures et de parcelles en de plus grands groupes), qui prend fin en 2015 pour laisser place à une catégorisation en parcelles graphiques (analyse plus fine). 
+
+Il s'agit alors d'étudier d'un côté la période 2007-2014 et de l'autre celle 2015-2023, le but étant de se détacher du biais créé par la méthode de recensement des données.
+D'autre part, une analyse à partir d'une année de référence permet de visualiser la tendance des cultures sur le long terme (explosion, disparition ...). 
+
+
+### Analyse ciblée : les 10 groupes de culture qui la croissance moyenne la plus élevé (en termes de surfaces cultivées)
+
+
+```{r top-growth, echo=FALSE, message=FALSE, warning=FALSE}
+
+# Visualisation top 10 des groupes de culture qui ont le plus cru sur la période 2007-2023, en moyenne 
+#Calcul du taux de croissance moyen sur la variable binaire 
+top_10_cultures <- share_cultures_groupes_year %>%
+  filter(!is.na(LIBELLE_GROUPE_CULTURE)) %>%
+  group_by(LIBELLE_GROUPE_CULTURE) %>%
+  summarise(
+    mean_taux_croissance = mean(growth_surf_100, na.rm = TRUE),
+    .groups = "drop"
+  ) %>%
+  arrange(desc(mean_taux_croissance)) %>%
+  slice(1 : 10) # Sélection des 10 premiers
+
+# Filtrer pour ne garder que les cultures sélectionnées
+filtered_data <- share_cultures_groupes_year %>%
+  filter(LIBELLE_GROUPE_CULTURE %in% top_10_cultures$LIBELLE_GROUPE_CULTURE)
+
+base_plot3 <- filtered_data %>%
+  ggplot(aes(
+    x = year,
+    y = as.numeric(growth_surf_100),
+    color = LIBELLE_GROUPE_CULTURE,
+    group = LIBELLE_GROUPE_CULTURE,
+    text = paste(
+      "Culture:", LIBELLE_GROUPE_CULTURE,
+      "<br>Année:", year, 
+      "<br>Surface (base 100):", round(as.numeric(growth_surf_100))
+    )
+  )) +
+  geom_point() +
+  geom_line() +
+  scale_color_manual(values = c25) + 
+  facet_wrap(~ binary_period, scales = "free_x") +
+  labs(
+    title = "Évolution des 10 cultures aux taux de croissance moyen le plus élevé",
+    y = "Surface des cultures (en base 100, \n année de référence étant l'année d'introduction de la culture)",
+    x = "Année"
+  ) +
+  theme_minimal()
+
+interactive_plot3 <- ggplotly(base_plot3, tooltip = "text")
+
+interactive_plot3
+
+```
+
+On observe une dynamique particulièrement marquée pour **les légumineuses à grains**, dont la surface a presque triplé entre 2015 et 2018, passant de 100 à 280, avant de légèrement reculer tout en restant bien au-dessus de son niveau initial autour de 230. Cette trajectoire reflète directement les effets incitatifs de la réforme de la PAC de 2015, notamment à travers le verdissement et la valorisation des cultures fixant l’azote ( [`PAC 2015`](https://www.touteleurope.eu/agriculture-et-peche/la-pac-2014-2020/). 
+
+Le **fourrage** connaissent également une progression continue, avec un indice passant de 100 en 2015 à près de 170 en 2023, tout comme **les autres oléagineux**, qui atteignent 150 à 160 sur la période. **Les protéagineux**, bien que moins spectaculaires, atteignent un indice de 140 en 2023, contre 100 au point de départ. 
+À l’inverse, **les vignes** restent quasiment stables, oscillant autour de l’indice 100–110 sur l’ensemble de la période, tandis que **les fruits à coque et les légumes ou fleurs** progressent lentement, atteignant des indices compris entre 120 et 140. 
+
+### Analyse ciblée : les 10 groupes de culture qui ont la croissance moyenne la plus faible (en termes de surfaces cultivées)
+
+```{r small-growth, echo=FALSE, message=FALSE, warning=FALSE}
+
+
+# Visualisation du top 10 des groupes de cultures qui ont le moins cru sur la période 2007-2023, en moyenne
+#Calcul du taux de croissance moyen sur la variable binaire 
+top_10_cultures_last <- share_cultures_groupes_year %>%
+  filter(!is.na(LIBELLE_GROUPE_CULTURE)) %>%
+  filter(LIBELLE_GROUPE_CULTURE != "Oliviers") %>% 
+  group_by(LIBELLE_GROUPE_CULTURE) %>%
+  summarise(
+    mean_taux_croissance = mean(growth_surf_100, na.rm = TRUE),
+    .groups = "drop"
+  ) %>%
+  arrange(mean_taux_croissance) %>%
+  slice(1 : 10) # Sélection des 10 premiers
+
+# Filtrer pour ne garder que les cultures sélectionnées
+filtered_data <- share_cultures_groupes_year %>%
+  filter(LIBELLE_GROUPE_CULTURE %in% top_10_cultures_last$LIBELLE_GROUPE_CULTURE)
+
+base_plot4 <- filtered_data %>%
+  ggplot(aes(
+    x = year,
+    y = as.numeric(growth_surf_100),
+    color = LIBELLE_GROUPE_CULTURE,
+    group = LIBELLE_GROUPE_CULTURE,
+    text = paste(
+      "Culture:", LIBELLE_GROUPE_CULTURE,
+      "<br>Année:", year, 
+      "<br>Surface (base 100)", round(as.numeric(growth_surf_100))
+    )
+  )) +
+  geom_point() +
+  geom_line() +
+  scale_color_manual(values = c25) + 
+  facet_wrap(~ binary_period, ncol = 1, scales = "free") +
+  labs(
+    title = "Évolution des 10 cultures aux taux de croissance moyen le plus faible",
+    y = "Surface des cultures (en base 100, \n année de référence étant l'année d'introduction de la culture)",
+    x = "Année"
+  ) +
+  theme_minimal() 
+
+interactive_plot4 <- ggplotly(base_plot4, tooltip = "text")
+
+interactive_plot4
+```
+Plusieurs cultures montrent une tendance à la stagnation : c’est notamment le cas du **blé tendre** et du **maïs**, dont les indices oscillent autour de 100 à 110 sur toute la période, traduisant une stabilité des surfaces cultivées. 
+**Le colza** connaît une évolution plus irrégulière : après un recul net en 2018 (indice à 85), il remonte progressivement pour se stabiliser autour de 100 à 110 en 2023. 
+**Le riz** reste également stable, avec des variations limitées entre 90 et 110. 
+En revanche, certaines cultures présentent une baisse marquée : **les prairies temporaires** voient leur indice chuter de 100 à environ 60 en 2023, traduisant un fort recul relatif. Cette baisse peut s’expliquer par les requalifications en prairies permanentes dans le contexte réglementaire post-2018.
+
+**Les surfaces gelées sans production** affichent également une baisse tendancielle, passant de 100 à environ 70–80, en lien probable avec une raréfaction des surfaces laissées en jachère ou non cultivées. 
+Le cas des **autres céréales** est plus hétérogène, mais tend à rester sous l’indice 110. 
+
+### Analyse de l'hétérogénéité de la croissance des surfaces de culture de 2019 à 2023
+
+```{r}
+
+
+select_annees <- c(2008, 2013, 2018, 2023)
+select_cultures <- c("Légumineuses à grains", "Fourrage", "Colza", "Riz")
+
+density_commune <- RPG_R53 |>
+  filter(year %in% select_annees,
+         LIBELLE_GROUPE_CULTURE %in% select_cultures)
+
+ggplot(density_commune, aes(x = as.numeric(surf_code_group_perc),  color = as.factor(year))) + 
+  geom_density(size = 0.5) + 
+  facet_wrap(~ LIBELLE_GROUPE_CULTURE, scales = "free_y") +
+  scale_x_continuous(labels = scales::percent_format(accuracy = 1)) +
+  labs(
+    title = "Distribution de la part de surface agricole utilisé par une culture à l'échelle de la commune par année",
+    x = "Part de la surface agricole totale (par commune)",
+    y = "Densité"
+  ) +
+  theme_minimal() +
+  theme(legend.position = "bottom")
+
+ggsave(here(dir$output, "densite_culture.pdf"), width = 16, height = 10)
+
+```
+Ce graphique illustre la distribution de la part de la surface agricole totale consacrée à quatre cultures, dont deux émergentes - fourrages et légumineuses à grains - et deux en déclin - riz et colza - dans les communes françaises, pour les années 2008, 2018 et 2023.
+
+Pour le colza, la distribution reste globalement stable sur les trois années, concentrée entre 5 % et 15 % de la surface agricole communale. La faible dispersion et l’absence de déplacement significatif de la courbe indiquent que la culture du colza est restée relativement constante dans son implantation territoriale et dans son importance relative au sein des systèmes agricoles communaux.
+
+En revanche, le cas des fourrages montre une dynamique très marquée. En 2008, un pic de densité très élevé apparaît proche de 0 %, reflétant une multitude de communes où les fourrages occupaient une place négligeable ou marginale. En 2018 et plus encore en 2023, cette courbe s’aplatit et s’étale, suggérant une diffusion plus large des fourrages dans les SAU communales, et une augmentation de leur part relative dans de nombreuses zones. 
+
+Les légumineuses à grains présentent une évolution similaire mais plus spectaculaire. En 2008, leur part dans la superficie agricole est quasi nulle dans l’écrasante majorité des communes. En 2018 puis 2023, on observe une montée de la densité autour de 2 à 5 %, montrant une adoption progressive de ces cultures à l’échelle locale. Cette tendance est en cohérence avec l'essor déjà identifié précédemment : les légumineuses ont bénéficié d’incitations fortes à partir de 2015, en tant que cultures fixant l’azote, valorisées dans le cadre du verdissement de la PAC.
+
+Enfin, le riz présente une dynamique plus complexe. En 2008, la courbe est plus aplatie, traduisant une répartition assez hétérogène des parts, parfois significatives (>25 %) dans certaines communes. En 2018, la densité se concentre autour de 5–10 %, signe d’une certaine homogénéisation. En 2023, la densité baisse légèrement mais reste comparable. Cette stabilité relative traduit probablement la nature très géographiquement contrainte de cette culture, principalement concentrée dans quelques zones comme la Camargue.
+
+
+## Analyse de la diversité culturale par commune
+
+### Evolution moyenne du nombre de culture différentes
+
+```{r}
+
+RPG_R53 %>%
+  group_by(year, name) %>%
+  summarise(N_Cultures = n_distinct(LIBELLE_GROUPE_CULTURE), .groups = "drop") %>%
+  group_by(year) %>%
+  summarise(moyenne_cultures = mean(N_Cultures)) %>%
+  ggplot(aes(x = year, y = moyenne_cultures)) +
+  geom_col(colour = "lightgrey") +
+  labs(title = "Évolution moyenne du nombre de cultures différentes", y = "Nombre moyen de cultures distinctes par communes")
+```
+On observe au niveau de la France, une hausse de la diversité culturale, passant de 9,3 à 11,7 cultures distinctes par commune en moyenne, entre 2007 et 2023. On observe une forte hausse en 2015, probablement suite à l'incitation à la diversification mise en place par la réglementation PAC en 2015 en France.
+
+### Indice de Shannon par commune et par année
+
+```{r}
+
+#|echo: false
+#|message: false
+#|warning: false
+
+# Calcul de l'indice de Shannon
+shannon_index <- RPG_R53 %>%
+  group_by(year, name, LIBELLE_GROUPE_CULTURE) %>%
+  summarise(surface_culture = sum(surf_code_group_m2), .groups = "drop") %>%
+  group_by(year, name) %>%
+  mutate(total_surface = sum(surface_culture),
+         proportion = surface_culture / total_surface) %>%
+  summarise(shannon = -sum(proportion * log(proportion), na.rm = TRUE), .groups = "drop") %>%
+  group_by(year) %>%
+  summarise(moyenne_shannon = mean(shannon, na.rm = TRUE), .groups = "drop")
+# Graphique de la diversité culturale à partir de l'indice de Shannon moyen
+ggplot(shannon_index, aes(x = year, y = moyenne_shannon, group = 1)) +
+  geom_line(color = "#E31A1C", size = 0.5) +
+  geom_point(color = "red", size = 2) +
+  labs(title = "Évolution de la diversité culturale (Indice de Shannon)",
+       x = "Année",
+       y = "Indice de Shannon moyen") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 10))
+```
