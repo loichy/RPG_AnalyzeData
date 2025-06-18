@@ -1,0 +1,1048 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.6.42">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Analyse descriptive du mix cultural de la France (2007-2023)</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="RPG_AnalyzeData_France_files/libs/clipboard/clipboard.min.js"></script>
+<script src="RPG_AnalyzeData_France_files/libs/quarto-html/quarto.js"></script>
+<script src="RPG_AnalyzeData_France_files/libs/quarto-html/popper.min.js"></script>
+<script src="RPG_AnalyzeData_France_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="RPG_AnalyzeData_France_files/libs/quarto-html/anchor.min.js"></script>
+<link href="RPG_AnalyzeData_France_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="RPG_AnalyzeData_France_files/libs/quarto-html/quarto-syntax-highlighting-2f5df379a58b258e96c21c0638c20c03.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="RPG_AnalyzeData_France_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="RPG_AnalyzeData_France_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="RPG_AnalyzeData_France_files/libs/bootstrap/bootstrap-1bc8a17f135ab3d594c857e9f48e611b.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="RPG_AnalyzeData_France_files/libs/htmltools-fill-0.5.8.1/fill.css" rel="stylesheet">
+
+<script src="RPG_AnalyzeData_France_files/libs/htmlwidgets-1.6.4/htmlwidgets.js"></script>
+
+<script src="RPG_AnalyzeData_France_files/libs/plotly-binding-4.10.4/plotly.js"></script>
+
+<script src="RPG_AnalyzeData_France_files/libs/typedarray-0.1/typedarray.min.js"></script>
+
+<script src="RPG_AnalyzeData_France_files/libs/jquery-3.5.1/jquery.min.js"></script>
+
+<link href="RPG_AnalyzeData_France_files/libs/crosstalk-1.2.1/css/crosstalk.min.css" rel="stylesheet">
+
+<script src="RPG_AnalyzeData_France_files/libs/crosstalk-1.2.1/js/crosstalk.min.js"></script>
+
+<link href="RPG_AnalyzeData_France_files/libs/plotly-htmlwidgets-css-2.11.1/plotly-htmlwidgets.css" rel="stylesheet">
+
+<script src="RPG_AnalyzeData_France_files/libs/plotly-main-2.11.1/plotly-latest.min.js"></script>
+
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="fullcontent">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Analyse descriptive du mix cultural de la France (2007-2023)</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="introduction" class="level2">
+<h2 class="anchored" data-anchor-id="introduction">Introduction</h2>
+<p>Ce document présente la répartition des cultures en France à partir des données du <strong>Registre Parcellaire Graphique</strong> (RPG). Le RPG est une base de données géographique qui recense les parcelles agricoles et les cultures qui y sont pratiquées. Ces données sont déclarées par les agriculteurs dans le cadre de leur déclaration de la Politique Agricole Commune. Elles sont en <a href="https://geoservices.ign.fr/rpg">libre accès</a> et sont mises à jour chaque année.</p>
+<p>L’objectif de cette analyse est de visualiser la diversité des cultures pratiquées en Bretagne et d’identifier les principales cultures présentes dans la région. En particulier, nous souhaitons identifier les dynamiques des cultures (cultures émergentes ou en déclin) ainsi que leur répartition spatiale. Cette analyse utilise les données du RPG sur 17 années (2007-2023), aggrégées à l’échelle de la commune. Les scripts permettant de collecter, et préparer les données du RPG sont disponibles sur GitHub dans le dépôts <a href="https://github.com/loichy/RPG_PrepareData"><code>RPG_PrepareData</code></a> Nous disposons ainsi de l’usage des sols entre 24 et 28 grands groupes de culture. Nous mesurons la surface dédié à chaque groupe de culture par commune et année, ainsi que le nombre de parcelles.</p>
+<p>Dans une première partie, nous présentons l’usage des sols de manière globale en France sur la période 2007-2023. Dans la deuxième section, nous étudions la dynamique des usages des sols, en étudiant en particulier l’expansion des cultures émergentes et le déclin des cultures en perte de vitesse. Enfin, nous étudions la diversité des cultures à l’échelle des communes et son évolution dans le temps.</p>
+</section>
+<section id="le-mix-cultural-en-france-une-présentation-générale" class="level2">
+<h2 class="anchored" data-anchor-id="le-mix-cultural-en-france-une-présentation-générale">Le mix cultural en France: une présentation générale</h2>
+<section id="evolution-de-la-surface-agricole-en-france" class="level3">
+<h3 class="anchored" data-anchor-id="evolution-de-la-surface-agricole-en-france">Evolution de la surface agricole en France</h3>
+<p>Le graphique ci-dessous montre l’évolution sur la période 2007-2023 de la surface agricole totale en France ainsi que sa distribution entre communes.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="RPG_AnalyzeData_France_files/figure-html/violin_plot-1.png" class="img-fluid figure-img" width="960"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Ce graphique montre que la surface agricole utilisée totale en France reste stable dans le temps (ligne rouge). De manière générale, on observe une légère augmentation de la surface agricole totale, à hauteur de 2% entre 2007 et 2023. La surface agricole française totale a atteint un premier maximum en 2012, puis suite à une diminution jusqu’en 2019, un nouveau maximum en 2021.</p>
+<p>La distribution de la surface agricole totale par commune montre également une stabilité importante (graphiques en violon, et boite à moustache associée). Près de 90% des communes en Bretagne ont une surface agricole utilisée inférieures à 3000 ha, et la médiane de la surface agricole utilisée des communes restent stable dans le temps (environ 1 080 ha).</p>
+</section>
+<section id="la-spécialisation-des-cultures-en-france" class="level3">
+<h3 class="anchored" data-anchor-id="la-spécialisation-des-cultures-en-france">La spécialisation des cultures en France</h3>
+<section id="surface-agricole-par-culture" class="level4">
+<h4 class="anchored" data-anchor-id="surface-agricole-par-culture">Surface agricole par culture</h4>
+<p>La tableau ci-dessous présente les surfaces agricoles utilisés par culture en France sur la période 2007-2023. Il s’agit du total des surfaces par culture sur toutes les parcelles, qui est calculé par année et dont nous présentons ici la moyenne sur la période 2007-2023.</p>
+<table class="caption-top table">
+<caption>Utilisation des sols agricoles par culture (moyenne sur la période 2007–2023)</caption>
+<colgroup>
+<col style="width: 51%">
+<col style="width: 36%">
+<col style="width: 12%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Groupe de culture</th>
+<th style="text-align: right;">Surface de la culture (ha)</th>
+<th style="text-align: right;">Part (%)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Surface agricole totale</td>
+<td style="text-align: right;">28815847.8</td>
+<td style="text-align: right;">NA</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Prairies permanentes</td>
+<td style="text-align: right;">6976719.2</td>
+<td style="text-align: right;">25.1</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Blé tendre</td>
+<td style="text-align: right;">5038322.0</td>
+<td style="text-align: right;">18.2</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Maïs grain et ensilage</td>
+<td style="text-align: right;">3014955.3</td>
+<td style="text-align: right;">10.9</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Prairies temporaires</td>
+<td style="text-align: right;">2645918.8</td>
+<td style="text-align: right;">9.5</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Estives et landes</td>
+<td style="text-align: right;">2055614.6</td>
+<td style="text-align: right;">7.4</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Orge</td>
+<td style="text-align: right;">1797203.0</td>
+<td style="text-align: right;">6.5</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Colza</td>
+<td style="text-align: right;">1449134.7</td>
+<td style="text-align: right;">5.2</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Autres céréales</td>
+<td style="text-align: right;">1044425.2</td>
+<td style="text-align: right;">3.8</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Tournesol</td>
+<td style="text-align: right;">777740.7</td>
+<td style="text-align: right;">2.8</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Fourrage</td>
+<td style="text-align: right;">737652.2</td>
+<td style="text-align: right;">2.7</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Vignes</td>
+<td style="text-align: right;">525859.1</td>
+<td style="text-align: right;">1.9</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Autres cultures industrielles</td>
+<td style="text-align: right;">515325.4</td>
+<td style="text-align: right;">1.9</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Gel (surfaces gelées sans production)</td>
+<td style="text-align: right;">486780.6</td>
+<td style="text-align: right;">1.8</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Légumes ou fleurs</td>
+<td style="text-align: right;">402370.6</td>
+<td style="text-align: right;">1.4</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Protéagineux</td>
+<td style="text-align: right;">361613.5</td>
+<td style="text-align: right;">1.3</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Divers</td>
+<td style="text-align: right;">348512.9</td>
+<td style="text-align: right;">1.3</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Autres oléagineux</td>
+<td style="text-align: right;">223620.2</td>
+<td style="text-align: right;">0.8</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Plantes à fibres</td>
+<td style="text-align: right;">144762.9</td>
+<td style="text-align: right;">0.5</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Vergers</td>
+<td style="text-align: right;">109987.1</td>
+<td style="text-align: right;">0.4</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Légumineuses à grains</td>
+<td style="text-align: right;">84948.0</td>
+<td style="text-align: right;">0.3</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Fruits à coque</td>
+<td style="text-align: right;">42955.2</td>
+<td style="text-align: right;">0.2</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Riz</td>
+<td style="text-align: right;">18521.4</td>
+<td style="text-align: right;">0.1</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Oliviers</td>
+<td style="text-align: right;">12901.0</td>
+<td style="text-align: right;">0.0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Canne à sucre</td>
+<td style="text-align: right;">4.1</td>
+<td style="text-align: right;">0.0</td>
+</tr>
+</tbody>
+</table>
+<p>La surface agricole totale est de 2.8815848^{7} ha.</p>
+<p>La culture la plus répandue en France sont <strong>les prairies permanentes</strong>, qui représente 25.1 % de la surface agricole totale. Les prairies permanentes sont suivies par <strong>le blé tendre et le maïs</strong>, qui représentent respectivement 18.2 % et 10.9 % de la surface agricole totale. <strong>Les prairies temporaires, les estives et landes et l’orge</strong> complètent le tableau des principales cultures, représentant respectivement 9.5 %, 7.4 % et 6.5 % de la surface agricole totale.</p>
+</section>
+<section id="part-de-parcelles-agricoles-par-culture" class="level4">
+<h4 class="anchored" data-anchor-id="part-de-parcelles-agricoles-par-culture">Part de parcelles agricoles par culture</h4>
+<p>La figure ci-dessous représente le pourcentage de parcelles agricoles par type de culture en France pour quatre années (2007, 2012, 2017 et 2023). Il s’agit du nombre de parcelles par culture divisé par le nombre total de parcelles recensés par le RPG en France sur l’année.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="RPG_AnalyzeData_France_files/figure-html/nb-parcels-plot-1.png" class="img-fluid figure-img" width="960"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Initialement, on retrouve les plus grandes cultures en terme de surface agricole comme occupant la majorité des parcelles. En effet, <strong>les prairies permanentes</strong> occupent à elles seules en moyenne un tiers des parcelles en France, avec une forte augmentation depuis 2017. Elles sont suivies par les cultures de <strong>blé tendre, prairies temporaires et maïs</strong>, consituant au total plus de 50% des parcelles agricoles. On peut noter néanmoins une décroissance continue des cultures de <strong>blé tendre et prairies temporaires</strong>, avec une baisse respective de 6% et 4% des parcelles agricoles occupées.</p>
+<p>Par ailleurs, on observe que <strong>les estives et landes et l’orge</strong>, qui suivent les cultures ci-dessus en terme de surface, sont devancés notamment par les cultures <strong>Divers, les vignes ou encore les surfaces gelées sans production</strong>. En particulier, <strong>les vignes</strong> représentent en moyenne 1,9% de la surface agricole totale, alors qu’elles occupent en moyenne 4,6% des parcelles.</p>
+</section>
+</section>
+</section>
+<section id="evolution-dynamique-du-mix-cultural-en-bretagne" class="level2">
+<h2 class="anchored" data-anchor-id="evolution-dynamique-du-mix-cultural-en-bretagne">Evolution dynamique du mix cultural en Bretagne</h2>
+<p>Cette section présente des analyses statistiques visant à identifier des cultures en développement et en déclin en France.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div class="plotly html-widget html-fill-item" id="htmlwidget-4c27120513e2fd3cf49b" style="width:100%;height:390px;"></div>
+<script type="application/json" data-for="htmlwidget-4c27120513e2fd3cf49b">{"x":{"data":[{"x":[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17],"y":[25.123595210687405,24.203945712963453,24.026442741157407,23.025158237727382,23.074471034822512,23.039500118510187,23.019404443092824,22.487245971448292,24.120036487339515,24.313815781347156,24.217393201968662,27.621009433404055,27.716275312877407,27.813360496152139,27.686555797466156,27.520850104672945,27.307613242330426],"text":"Prairies permanentes","type":"scatter","mode":"lines+markers","line":{"width":3.7795275590551185,"color":"rgba(28,134,238,1)","dash":"solid"},"hoveron":"points","name":"Prairies permanentes","legendgroup":"Prairies permanentes","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","marker":{"autocolorscale":false,"color":"rgba(28,134,238,1)","opacity":1,"size":7.559055118110237,"symbol":"circle","line":{"width":1.8897637795275593,"color":"rgba(28,134,238,1)"}},"frame":null},{"x":[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17],"y":[18.581493633190966,19.634128698802474,18.191843607650675,18.904710525603445,19.239808903915755,18.599900563832701,18.920318592030696,19.148449424080901,18.479010439100527,18.365848032059922,17.705746135278726,17.395770572036099,17.950799021162229,15.151631265320123,17.660936012354782,16.625697894254557,17.020552509013015],"text":"Blé tendre","type":"scatter","mode":"lines+markers","line":{"width":3.7795275590551185,"color":"rgba(227,26,28,1)","dash":"solid"},"hoveron":"points","name":"Blé tendre","legendgroup":"Blé tendre","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","marker":{"autocolorscale":false,"color":"rgba(227,26,28,1)","opacity":1,"size":7.559055118110237,"symbol":"circle","line":{"width":1.8897637795275593,"color":"rgba(227,26,28,1)"}},"frame":null},{"x":[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17],"y":[10.51931914845858,11.645047616678001,11.716191598486809,10.906414392747319,10.871706352968047,11.206095788740516,11.898977141452793,11.685545837341991,11.229301012656325,10.253811633904807,10.147499822619022,10.154442888933495,10.615181378837162,11.067085085028792,9.9937153333274971,9.7546567058089995,9.2715329528220067],"text":"Maïs grain et ensilage","type":"scatter","mode":"lines+markers","line":{"width":3.7795275590551185,"color":"rgba(0,139,0,1)","dash":"solid"},"hoveron":"points","name":"Maïs grain et ensilage","legendgroup":"Maïs grain et ensilage","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","marker":{"autocolorscale":false,"color":"rgba(0,139,0,1)","opacity":1,"size":7.559055118110237,"symbol":"circle","line":{"width":1.8897637795275593,"color":"rgba(0,139,0,1)"}},"frame":null},{"x":[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17],"y":[12.715970607795708,12.718969573040628,12.545012887154321,13.111736655932027,13.238752919923705,13.234105438155385,13.176073315581204,12.679309970672298,8.9098571111498241,8.5630087910862098,8.4484096206778023,5.1862882552258416,5.4977371908314199,5.2280892139203079,5.2580002781639168,5.0613281116207647,5.011598190790334],"text":"Prairies temporaires","type":"scatter","mode":"lines+markers","line":{"width":3.7795275590551185,"color":"rgba(106,61,154,1)","dash":"solid"},"hoveron":"points","name":"Prairies temporaires","legendgroup":"Prairies temporaires","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","marker":{"autocolorscale":false,"color":"rgba(106,61,154,1)","opacity":1,"size":7.559055118110237,"symbol":"circle","line":{"width":1.8897637795275593,"color":"rgba(106,61,154,1)"}},"frame":null},{"x":[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17],"y":[5.6544776104991241,6.2772827516178564,6.3343490061567032,6.6784914592457678,6.7137021555377245,6.7705970624532137,6.8710112559818679,7.1025160831843683,7.4565592738775388,7.4760967586104634,7.6280116088633152,7.7478315673230034,7.9585086801087401,7.9512239773150526,8.0857340639750337,8.1589435370512078,8.2818016329450668],"text":"Estives et landes","type":"scatter","mode":"lines+markers","line":{"width":3.7795275590551185,"color":"rgba(255,127,0,1)","dash":"solid"},"hoveron":"points","name":"Estives et landes","legendgroup":"Estives et landes","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","marker":{"autocolorscale":false,"color":"rgba(255,127,0,1)","opacity":1,"size":7.559055118110237,"symbol":"circle","line":{"width":1.8897637795275593,"color":"rgba(255,127,0,1)"}},"frame":null},{"x":[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17],"y":[6.1302508444799546,6.4986030063586666,6.7453986170664155,5.5709750770337054,5.4345693629349574,6.0264242014778047,5.7040240152711394,6.2701007742361012,6.5744953481496395,6.8422096212783874,6.7966260543172075,6.3204373432218217,6.9787163206998457,7.0394835333728425,6.1626781074623178,6.63378379232475,6.5374595367573729],"text":"Orge","type":"scatter","mode":"lines+markers","line":{"width":3.7795275590551185,"color":"rgba(0,0,0,1)","dash":"solid"},"hoveron":"points","name":"Orge","legendgroup":"Orge","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","marker":{"autocolorscale":false,"color":"rgba(0,0,0,1)","opacity":1,"size":7.559055118110237,"symbol":"circle","line":{"width":1.8897637795275593,"color":"rgba(0,0,0,1)"}},"frame":null},{"x":[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17],"y":[4.6211345681691407,4.5783911033639946,5.3603011316145217,5.3708637889011657,5.7044820197812962,5.8313795023073043,5.1778014453578161,5.4212890689816238,5.3719689106013799,5.5342324384650787,5.0084182245752071,5.7752979321181304,3.974865517965847,3.9706727082318558,3.4922060732374001,4.3826755171854535,4.8513094404871442],"text":"Colza","type":"scatter","mode":"lines+markers","line":{"width":3.7795275590551185,"color":"rgba(255,215,0,1)","dash":"solid"},"hoveron":"points","name":"Colza","legendgroup":"Colza","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","marker":{"autocolorscale":false,"color":"rgba(255,215,0,1)","opacity":1,"size":7.559055118110237,"symbol":"circle","line":{"width":1.8897637795275593,"color":"rgba(255,215,0,1)"}},"frame":null},{"x":[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17],"y":[3.6726543642966556,3.4965912366443592,3.6719370688414452,4.00341105879704,3.5659706104703677,3.7872080991214641,3.3571125563768978,3.2143796603880892,3.3695649921299053,3.6612375098038346,3.679931507268396,3.4937444931278163,3.408884739580035,3.5215214843072009,3.8951693147797077,3.6023826202213916,3.4007091705451242],"text":"Autres céréales","type":"scatter","mode":"lines+markers","line":{"width":3.7795275590551185,"color":"rgba(126,192,238,1)","dash":"solid"},"hoveron":"points","name":"Autres céréales","legendgroup":"Autres céréales","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","marker":{"autocolorscale":false,"color":"rgba(126,192,238,1)","opacity":1,"size":7.559055118110237,"symbol":"circle","line":{"width":1.8897637795275593,"color":"rgba(126,192,238,1)"}},"frame":null},{"x":[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17],"y":[1.7890525670542163,2.2698428908900645,2.6780280962348706,2.5419437122980373,2.7251488663087153,2.4990523782697687,2.7851744341584292,2.3955490888317001,2.1865058495912648,1.9103635919186728,2.087294485618274,1.9643995219688328,2.1718877148797744,2.7750999145464994,2.4828405676019365,3.0641567770035523,2.9348969045006625],"text":"Tournesol","type":"scatter","mode":"lines+markers","line":{"width":3.7795275590551185,"color":"rgba(251,154,153,1)","dash":"solid"},"hoveron":"points","name":"Tournesol","legendgroup":"Tournesol","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","marker":{"autocolorscale":false,"color":"rgba(251,154,153,1)","opacity":1,"size":7.559055118110237,"symbol":"circle","line":{"width":1.8897637795275593,"color":"rgba(251,154,153,1)"}},"frame":null},{"x":[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17],"y":[0.37393648454183986,0.34045961394138313,0.34302167783388232,0.60788230742803451,0.57931758654378185,0.47592247725280834,0.40291824063800719,0.39907913350111424,2.2209994158040076,2.590636330245196,3.1238701211766502,3.1966129138884796,3.3687300485441751,3.605103803170842,3.7060709996033561,3.6613066290608098,3.947557948148027],"text":"Fourrage","type":"scatter","mode":"lines+markers","line":{"width":3.7795275590551185,"color":"rgba(144,238,144,1)","dash":"solid"},"hoveron":"points","name":"Fourrage","legendgroup":"Fourrage","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","marker":{"autocolorscale":false,"color":"rgba(144,238,144,1)","opacity":1,"size":7.559055118110237,"symbol":"circle","line":{"width":1.8897637795275593,"color":"rgba(144,238,144,1)"}},"frame":null},{"x":[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17],"y":[1.0902620968855872,1.0423386943068804,1.2381823704368033,1.6128002496702887,1.7822466671310253,1.8913762029565919,1.9536727342769054,2.037492802103094,2.0301860652682793,2.0521339286503437,2.0693708008201983,2.1100537784528703,2.1624895763482943,2.1955391552958741,2.2189492753571889,2.2238942340959316,2.1971490930993589],"text":"Vignes","type":"scatter","mode":"lines+markers","line":{"width":3.7795275590551185,"color":"rgba(202,178,214,1)","dash":"solid"},"hoveron":"points","name":"Vignes","legendgroup":"Vignes","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","marker":{"autocolorscale":false,"color":"rgba(202,178,214,1)","opacity":1,"size":7.559055118110237,"symbol":"circle","line":{"width":1.8897637795275593,"color":"rgba(202,178,214,1)"}},"frame":null},{"x":[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17],"y":[1.4316817213802546,1.2932522850378696,1.3437713503376918,1.5007064341527077,1.5029773164056135,1.4864609818356975,1.5093682617863167,1.561007695454798,1.6111719076047255,1.7141129216799249,2.0111176503961756,2.0027400653979361,1.8919966076755126,1.7901047861069281,1.756187376225498,1.7315101497692003,1.7000535294223957],"text":"Autres cultures industrielles","type":"scatter","mode":"lines+markers","line":{"width":3.7795275590551185,"color":"rgba(253,191,111,1)","dash":"solid"},"hoveron":"points","name":"Autres cultures industrielles","legendgroup":"Autres cultures industrielles","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","marker":{"autocolorscale":false,"color":"rgba(253,191,111,1)","opacity":1,"size":7.559055118110237,"symbol":"circle","line":{"width":1.8897637795275593,"color":"rgba(253,191,111,1)"}},"frame":null},{"x":[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17],"y":[1.0743807673085539,1.0860048907565436,1.1371433930207151,1.1744217947809228,1.1895981343415347,1.1641742086011262,1.1810484971957182,1.2366778880249145,1.2802051382389852,1.3460573733453223,1.4374532029133638,1.4594398023596022,1.5164960599828934,1.5383120764278251,1.5455188189441014,1.4958286557806555,1.2380159258734849],"text":"Légumes ou fleurs","type":"scatter","mode":"lines+markers","line":{"width":3.7795275590551185,"color":"rgba(179,179,179,1)","dash":"solid"},"hoveron":"points","name":"Légumes ou fleurs","legendgroup":"Légumes ou fleurs","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","marker":{"autocolorscale":false,"color":"rgba(179,179,179,1)","opacity":1,"size":7.559055118110237,"symbol":"circle","line":{"width":1.8897637795275593,"color":"rgba(179,179,179,1)"}},"frame":null},{"x":[1,2,3,9,10,11,12,13,14,15,16,17],"y":[2.8755800921130454,1.6456896232633293,1.4843626728031138,1.6195740236490317,1.5286734882841804,1.5806965397193118,1.6129627661878805,1.5678312420499378,1.6746521848416602,1.5608345891569988,1.705520875149974,1.5788438795675646],"text":"Gel (surfaces gelées sans production)","type":"scatter","mode":"lines+markers","line":{"width":3.7795275590551185,"color":"rgba(238,230,133,1)","dash":"solid"},"hoveron":"points","name":"Gel (surfaces gelées sans production)","legendgroup":"Gel (surfaces gelées sans production)","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","marker":{"autocolorscale":false,"color":"rgba(238,230,133,1)","opacity":1,"size":7.559055118110237,"symbol":"circle","line":{"width":1.8897637795275593,"color":"rgba(238,230,133,1)"}},"frame":null},{"x":[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17],"y":[1.114966056931846,1.0429185224266704,1.0482474390611822,1.0565889346606117,1.0102386148796019,0.96985578022408314,0.97834073012454148,0.95731658774857875,0.99617858219880162,1.0556741419281284,1.084080826389807,1.1419466543651862,1.2041602915468943,1.3102705269237225,1.3185334916041882,1.3335968929954982,1.2837823018978547],"text":"Divers","type":"scatter","mode":"lines+markers","line":{"width":3.7795275590551185,"color":"rgba(176,48,96,1)","dash":"solid"},"hoveron":"points","name":"Divers","legendgroup":"Divers","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","marker":{"autocolorscale":false,"color":"rgba(176,48,96,1)","opacity":1,"size":7.559055118110237,"symbol":"circle","line":{"width":1.8897637795275593,"color":"rgba(176,48,96,1)"}},"frame":null},{"x":[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17],"y":[0.7124417755891429,0.50236762587097639,0.64370093731777378,1.3062523560725945,0.90125671668415086,0.64079381239509492,0.61818659413029198,0.72381519402340855,0.97320647269392802,1.1124592971553695,1.1206760019071955,0.85139632272860577,0.92362864315626814,1.1713437854122566,1.2004297270852273,0.93377857572603318,1.3406710534420314],"text":"Protéagineux","type":"scatter","mode":"lines+markers","line":{"width":3.7795275590551185,"color":"rgba(255,131,250,1)","dash":"solid"},"hoveron":"points","name":"Protéagineux","legendgroup":"Protéagineux","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","marker":{"autocolorscale":false,"color":"rgba(255,131,250,1)","opacity":1,"size":7.559055118110237,"symbol":"circle","line":{"width":1.8897637795275593,"color":"rgba(255,131,250,1)"}},"frame":null},{"x":[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17],"y":[0.17199014837182394,0.10006718394583226,0.1952391001370353,0.27188908358744707,0.23208925116310258,0.20405965710168789,0.21818363713145852,0.35497881609334747,0.54014960630316111,0.59006711912558552,0.62363735795441622,0.65862414568910488,0.69401967947207455,0.80480255622915231,0.70179117955260295,0.76629451921757696,0.68642118820451148],"text":"Autres oléagineux","type":"scatter","mode":"lines+markers","line":{"width":3.7795275590551185,"color":"rgba(255,20,147,1)","dash":"solid"},"hoveron":"points","name":"Autres oléagineux","legendgroup":"Autres oléagineux","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","marker":{"autocolorscale":false,"color":"rgba(255,20,147,1)","opacity":1,"size":7.559055118110237,"symbol":"circle","line":{"width":1.8897637795275593,"color":"rgba(255,20,147,1)"}},"frame":null},{"x":[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17],"y":[0.27161825907177189,0.29064687520298293,0.2921066057862457,0.31484308719197857,0.31896777370525609,0.31857460455866199,0.32046503847594987,0.3264245554855309,0.39623959469825432,0.39281174115448358,0.39416318599258121,0.39612966007555361,0.4042687178652542,0.39981677362803714,0.40529423942257609,0.41059813121543537,0.41227804981493904],"text":"Vergers","type":"scatter","mode":"lines+markers","line":{"width":3.7795275590551185,"color":"rgba(0,0,255,1)","dash":"solid"},"hoveron":"points","name":"Vergers","legendgroup":"Vergers","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","marker":{"autocolorscale":false,"color":"rgba(0,0,255,1)","opacity":1,"size":7.559055118110237,"symbol":"circle","line":{"width":1.8897637795275593,"color":"rgba(0,0,255,1)"}},"frame":null},{"x":[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17],"y":[0.24503142705248615,0.20224403987081471,0.18486376103509497,0.16818648706783418,0.17530527273132468,0.22467726989276299,0.19136451112362216,0.2100853811153133,0.32871756328048091,0.37285882877713422,0.41903824784546528,0.44164194192521328,0.49671940545940058,0.56840571658291383,0.42721956093909913,0.52803776633549981,0.54918751186441062],"text":"Plantes à fibres","type":"scatter","mode":"lines+markers","line":{"width":3.7795275590551185,"color":"rgba(54,100,139,1)","dash":"solid"},"hoveron":"points","name":"Plantes à fibres","legendgroup":"Plantes à fibres","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","marker":{"autocolorscale":false,"color":"rgba(54,100,139,1)","opacity":1,"size":7.559055118110237,"symbol":"circle","line":{"width":1.8897637795275593,"color":"rgba(54,100,139,1)"}},"frame":null},{"x":[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17],"y":[0.079254302839695381,0.082262180603751275,0.087022955874195174,0.093729261397485303,0.096793698089108191,0.10249557406641557,0.10999876988611366,0.11323209825031784,0.12906698403913097,0.13504098210315613,0.14316559782072855,0.14947079337999386,0.16017584085372794,0.16530552826008593,0.17216815458150689,0.17772761919434599,0.17955225188707644],"text":"Fruits à coque","type":"scatter","mode":"lines+markers","line":{"width":3.7795275590551185,"color":"rgba(0,206,209,1)","dash":"solid"},"hoveron":"points","name":"Fruits à coque","legendgroup":"Fruits à coque","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","marker":{"autocolorscale":false,"color":"rgba(0,206,209,1)","opacity":1,"size":7.559055118110237,"symbol":"circle","line":{"width":1.8897637795275593,"color":"rgba(0,206,209,1)"}},"frame":null},{"x":[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17],"y":[0.033469906522652429,0.03111676669519934,0.042856840898368526,0.051922438795840985,0.060852839844183479,0.07753238563694527,0.080648831656436604,0.088209472804056985,0.093572202730180298,0.10921087242190537,0.19124195954994064,0.24771104791965659,0.26994416081274714,0.21077020910985678,0.19137921319558424,0.16116580429059707,0.18978986335069725],"text":"Légumineuses à grains","type":"scatter","mode":"lines+markers","line":{"width":3.7795275590551185,"color":"rgba(0,255,0,1)","dash":"solid"},"hoveron":"points","name":"Légumineuses à grains","legendgroup":"Légumineuses à grains","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","marker":{"autocolorscale":false,"color":"rgba(0,255,0,1)","opacity":1,"size":7.559055118110237,"symbol":"circle","line":{"width":1.8897637795275593,"color":"rgba(0,255,0,1)"}},"frame":null},{"x":[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17],"y":[0.078293982319771305,0.075421551113502697,0.096600740389390066,0.092486059408232235,0.095083580365208184,0.093403349358691462,0.084238638973486712,0.068169116956974016,0.0537760261789536,0.054179092087849316,0.055428869167110519,0.045642308397609008,0.052393079182597016,0.05190265136587157,0.043966115957422808,0.04124720018122615,0.044518132474802137],"text":"Riz","type":"scatter","mode":"lines+markers","line":{"width":3.7795275590551185,"color":"rgba(139,139,0,1)","dash":"solid"},"hoveron":"points","name":"Riz","legendgroup":"Riz","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","marker":{"autocolorscale":false,"color":"rgba(139,139,0,1)","opacity":1,"size":7.559055118110237,"symbol":"circle","line":{"width":1.8897637795275593,"color":"rgba(139,139,0,1)"}},"frame":null},{"x":[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17],"y":[0.038578715954357717,0.038397550218754781,0.038766151435588293,0.039413968174928329,0.039484778945753259,0.040558842241424968,0.040678195610685267,0.041357357871927874,0.047031037683406537,0.04643201706625092,0.045740570931618367,0.044562206996737165,0.046233969875565953,0.046439517607187286,0.047494896315715289,0.048533555104248977,0.047715521625229247],"text":"Oliviers","type":"scatter","mode":"lines+markers","line":{"width":3.7795275590551185,"color":"rgba(205,205,0,1)","dash":"solid"},"hoveron":"points","name":"Oliviers","legendgroup":"Oliviers","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","marker":{"autocolorscale":false,"color":"rgba(205,205,0,1)","opacity":1,"size":7.559055118110237,"symbol":"circle","line":{"width":1.8897637795275593,"color":"rgba(205,205,0,1)"}},"frame":null},{"x":[5,6,8],"y":[1.2126251819295011e-05,2.8478750061202041e-07,2.4526579284605179e-06],"text":"Canne à sucre","type":"scatter","mode":"lines+markers","line":{"width":3.7795275590551185,"color":"rgba(139,69,0,1)","dash":"solid"},"hoveron":"points","name":"Canne à sucre","legendgroup":"Canne à sucre","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","marker":{"autocolorscale":false,"color":"rgba(139,69,0,1)","opacity":1,"size":7.559055118110237,"symbol":"circle","line":{"width":1.8897637795275593,"color":"rgba(139,69,0,1)"}},"frame":null}],"layout":{"margin":{"t":45.710806697108069,"r":7.3059360730593621,"b":42.130898021308994,"l":37.260273972602747},"font":{"color":"rgba(0,0,0,1)","family":"","size":14.611872146118724},"title":{"text":"Evolution des parts de surfaces agricoles utilisées par culture en France (2007–2023)","font":{"color":"rgba(0,0,0,1)","family":"","size":17.534246575342465},"x":0,"xref":"paper"},"xaxis":{"domain":[0,1],"automargin":true,"type":"linear","autorange":false,"range":[0.40000000000000002,17.600000000000001],"tickmode":"array","ticktext":["2007","2008","2009","2010","2011","2012","2013","2014","2015","2016","2017","2018","2019","2020","2021","2022","2023"],"tickvals":[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17],"categoryorder":"array","categoryarray":["2007","2008","2009","2010","2011","2012","2013","2014","2015","2016","2017","2018","2019","2020","2021","2022","2023"],"nticks":null,"ticks":"","tickcolor":null,"ticklen":3.6529680365296811,"tickwidth":0,"showticklabels":true,"tickfont":{"color":"rgba(77,77,77,1)","family":"","size":11.68949771689498},"tickangle":-0,"showline":false,"linecolor":null,"linewidth":0,"showgrid":true,"gridcolor":"rgba(235,235,235,1)","gridwidth":0.66417600664176002,"zeroline":false,"anchor":"y","title":{"text":"Année","font":{"color":"rgba(0,0,0,1)","family":"","size":14.611872146118724}},"hoverformat":".2f"},"yaxis":{"domain":[0,1],"automargin":true,"type":"linear","autorange":false,"range":[-1.3906677257807314,29.20402850672037],"tickmode":"array","ticktext":["0","10","20"],"tickvals":[0,10,20],"categoryorder":"array","categoryarray":["0","10","20"],"nticks":null,"ticks":"","tickcolor":null,"ticklen":3.6529680365296811,"tickwidth":0,"showticklabels":true,"tickfont":{"color":"rgba(77,77,77,1)","family":"","size":11.68949771689498},"tickangle":-0,"showline":false,"linecolor":null,"linewidth":0,"showgrid":true,"gridcolor":"rgba(235,235,235,1)","gridwidth":0.66417600664176002,"zeroline":false,"anchor":"x","title":{"text":"Part de surface agricole utilisée (en %)","font":{"color":"rgba(0,0,0,1)","family":"","size":14.611872146118724}},"hoverformat":".2f"},"shapes":[{"type":"rect","fillcolor":null,"line":{"color":null,"width":0,"linetype":[]},"yref":"paper","xref":"paper","x0":0,"x1":1,"y0":0,"y1":1}],"showlegend":true,"legend":{"bgcolor":null,"bordercolor":null,"borderwidth":0,"font":{"color":"rgba(0,0,0,1)","family":"","size":13.283520132835205},"title":{"text":"LIBELLE_GROUPE_CULTURE","font":{"color":null,"family":null,"size":0}}},"hovermode":"closest","barmode":"relative"},"config":{"doubleClick":"reset","modeBarButtonsToAdd":["hoverclosest","hovercompare"],"showSendToCloud":false},"source":"A","attrs":{"b3c4f4077b7":{"x":{},"y":{},"colour":{},"text":{},"type":"scatter"},"b3c450d3cc8":{"x":{},"y":{},"colour":{},"text":{}}},"cur_data":"b3c4f4077b7","visdat":{"b3c4f4077b7":["function (y) ","x"],"b3c450d3cc8":["function (y) ","x"]},"highlight":{"on":"plotly_click","persistent":false,"dynamic":false,"selectize":false,"opacityDim":0.20000000000000001,"selected":{"opacity":1},"debounce":0},"shinyEvents":["plotly_hover","plotly_click","plotly_selected","plotly_relayout","plotly_brushed","plotly_brushing","plotly_clickannotation","plotly_doubleclick","plotly_deselect","plotly_afterplot","plotly_sunburstclick"],"base_url":"https://plot.ly"},"evals":[],"jsHooks":[]}</script>
+</div>
+</div>
+<p>On observe une croissance de la part des surfaces agricoles allouée aux <strong>prairies permanentes</strong>, passant de 25% à 28% entre 2007 et 2023, avec une très forte hausse entre 2017 et 2018. De la même manière, on observe une forte décroissance de la part des <strong>prairies temporaires</strong>. Cela s’explique par une redéfinition réglementaires des prairies temporaires et permanentes, qui a conduit à des modifications dans la déclaration de ces surfaces. Le <strong>blé tendre</strong> est en diminution lente, mais continue en terme de part de surface occupée, passant de 18,5% à 17% environ. On observe une dynamique similaire pour <strong>le maïs</strong>, passant de 11% à 9% de la part des surfaces agricoles.</p>
+<p>Par la suite, nous présentons les évolutions relatives des surfaces agricoles par culture. Dans un premier temps, nous calculons alors le taux de croissance inter-annuel des surfaces agricoles utilisés par la culture, de la manière suivante <span class="math inline">\(g_{kt} = \dfrac{y_{kt} - y_{kt-1}}{y_{kt-1}}\)</span>, où <span class="math inline">\(g_{kt}\)</span> est le taux de croissance de la culture <span class="math inline">\(k\)</span> à l’année <span class="math inline">\(t\)</span>, et <span class="math inline">\(y_{kt}\)</span> est la surface agricole utilisée par la culture <span class="math inline">\(k\)</span> à l’année <span class="math inline">\(t\)</span>. Cette analyse permet de comprendre la variabilité entre année des surfaces utilisés par la culture.</p>
+<p>Dans un second temps, nous calculons la croissance de la surface associé à la culture en base 100, où l’année de référence est celle associée à l’entrée de la culture dans les données RPG. Ainsi, pour chaque culture, nous calculons la surface agricole utilisée par la culture <span class="math inline">\(k\)</span> à l’année <span class="math inline">\(t\)</span> divisé par la surface agricole utilisée par la culture <span class="math inline">\(k\)</span> à l’année d’entrée dans les données RPG, que nous multiplions par 100. Cette analyse permet de comprendre l’évolution des surfaces agricoles utilisées par la culture depuis son entrée dans les données RPG, et de comparer alors les croissances des surfaces entre culture.</p>
+<section id="analyse-des-taux-de-croissance-inter-annuels-des-surfaces-agricoles" class="level3">
+<h3 class="anchored" data-anchor-id="analyse-des-taux-de-croissance-inter-annuels-des-surfaces-agricoles">Analyse des taux de croissance inter-annuels des surfaces agricoles</h3>
+<p>Le tableau ci-dessous présente le nombre d’années de données ou chaque culture apparaît dans notre échantillon, ainsi que le taux de croissance annuel moyen des surfaces agricoles utilisées par culture sur la période 2007-2023.</p>
+<table class="caption-top table">
+<caption>Taux de croissance annuel moyen des surfaces agricoles par culture sur la période 2007–2023</caption>
+<colgroup>
+<col style="width: 44%">
+<col style="width: 18%">
+<col style="width: 37%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Groupe de culture</th>
+<th style="text-align: right;">Nombre d’années</th>
+<th style="text-align: right;">Taux de croissance annuel moyen</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Canne à sucre</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">331.7861942 [1]</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Fourrage</td>
+<td style="text-align: right;">17</td>
+<td style="text-align: right;">34.2545361 [1]</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Légumineuses à grains</td>
+<td style="text-align: right;">17</td>
+<td style="text-align: right;">13.5697334 [1]</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Autres oléagineux</td>
+<td style="text-align: right;">17</td>
+<td style="text-align: right;">13.4664115 [1]</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Protéagineux</td>
+<td style="text-align: right;">17</td>
+<td style="text-align: right;">8.7407920 [1]</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Plantes à fibres</td>
+<td style="text-align: right;">17</td>
+<td style="text-align: right;">6.8512051 [1]</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Fruits à coque</td>
+<td style="text-align: right;">17</td>
+<td style="text-align: right;">5.2821467 [1]</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Vignes</td>
+<td style="text-align: right;">17</td>
+<td style="text-align: right;">4.7806598 [1]</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Tournesol</td>
+<td style="text-align: right;">17</td>
+<td style="text-align: right;">4.0727311 [1]</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Vergers</td>
+<td style="text-align: right;">17</td>
+<td style="text-align: right;">2.7711385 [1]</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Estives et landes</td>
+<td style="text-align: right;">17</td>
+<td style="text-align: right;">2.4477254 [1]</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Oliviers</td>
+<td style="text-align: right;">17</td>
+<td style="text-align: right;">1.3984316 [1]</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Autres cultures industrielles</td>
+<td style="text-align: right;">17</td>
+<td style="text-align: right;">1.2757767 [1]</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Colza</td>
+<td style="text-align: right;">17</td>
+<td style="text-align: right;">1.1915021 [1]</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Légumes ou fleurs</td>
+<td style="text-align: right;">17</td>
+<td style="text-align: right;">1.0457953 [1]</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Divers</td>
+<td style="text-align: right;">17</td>
+<td style="text-align: right;">0.9715514 [1]</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Orge</td>
+<td style="text-align: right;">17</td>
+<td style="text-align: right;">0.7305723 [1]</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Prairies permanentes</td>
+<td style="text-align: right;">17</td>
+<td style="text-align: right;">0.6056547 [1]</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Autres céréales</td>
+<td style="text-align: right;">17</td>
+<td style="text-align: right;">-0.2360584 [1]</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Blé tendre</td>
+<td style="text-align: right;">17</td>
+<td style="text-align: right;">-0.3230604 [1]</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Maïs grain et ensilage</td>
+<td style="text-align: right;">17</td>
+<td style="text-align: right;">-0.6413181 [1]</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Riz</td>
+<td style="text-align: right;">17</td>
+<td style="text-align: right;">-2.6936355 [1]</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Gel (surfaces gelées sans production)</td>
+<td style="text-align: right;">12</td>
+<td style="text-align: right;">-4.0519305 [1]</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Prairies temporaires</td>
+<td style="text-align: right;">17</td>
+<td style="text-align: right;">-4.7952865 [1]</td>
+</tr>
+</tbody>
+</table>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="RPG_AnalyzeData_France_files/figure-html/growth-base-year-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="RPG_AnalyzeData_France_files/figure-html/growth-base-year-2.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>On observe une forte expansion des cultures de <strong>fourrage, autres oléagineux et légumineuses à grain</strong>, respectivement de 34,3%, 13.6% et 13.5%. Le grqphique de l’évolution des parts des surfaces par groupe de culture ne rendait pas évident la visualisation de ces hausses pour ces cultures étant donné qu’elles representent une part relativement faible des surfaces (3,6% des surfaces totale sont du fourrage en 2023 par exemple). Les cultures en déclin rejoignent au contraire les analyses précédentes avec <strong>le blé tendre et le maïs</strong>, avec une baisse respective moyenne de -0,39% et -0,75%. Le plus grand déclin reste <strong>les prairies temporaires</strong>, pour les raisons citées ci-dessus, ainsi que <strong>le riz</strong> (-2,55% en moyenne).</p>
+<p>En comparant entre les taux de croissance moyen en terme de surface agricole et de nombre de parcelles alloué à une culture, on observe une similarité relativement forte. Seules <strong>les cultures diverses</strong> modifient significativement le classement, en prenant la deuxième place en terme d’expansion en nombre de parcelles, avec une moyenne de 30% de taux de croissance.</p>
+<p>Le <strong>canne à sucre</strong> est un cas particulier d’une culture qui n’a été déclaré comme cultivé que sur 1 à 3 parcelles entre 2011 et 2014.</p>
+<p>La représentation graphique ci-dessous montre l’évolution des taux de croissances annuels à partir d’une échelle en couleur.</p>
+<p><img src="RPG_AnalyzeData_France_files/figure-html/heatmap-1.png" class="img-fluid" width="672"></p>
+<p>Cette représentation permet d’identifier les cultures les plus instables sur la période d’intérêt : <strong>les protéagineux, les légumineuses à grain et autres oléagineux</strong>, ainsi que <strong>le fourrage</strong> présentent une relativement forte variabilité sur la période. Le cas du fourrage présente une singularité: la part de sa surface est multiplié par 4 entre 2014 et 2015, ce qui coincide avec le changement de recensement des données RPG, passant d’une catégorisation par îlots anonymes à une catégorisation par parcelles graphiques. L’importante variation obvservées sur cette année est donc possiblement lié à un biais de recensement, et non à dynamique d’expansion de la culture.</p>
+</section>
+<section id="analyse-de-croissance-des-surfaces-agricoles-utilisés-selon-les-groupes-de-cultures-à-partir-de-leur-année-dimplantation-année-de-référence" class="level3">
+<h3 class="anchored" data-anchor-id="analyse-de-croissance-des-surfaces-agricoles-utilisés-selon-les-groupes-de-cultures-à-partir-de-leur-année-dimplantation-année-de-référence">Analyse de croissance des surfaces agricoles utilisés selon les groupes de cultures à partir de leur année d’implantation (année de référence)</h3>
+<p>Nous optons ici pour une division du groupe en deux “échantillons”. En effet, les données dont nous disposons sont issues de deux types de recensement parcellaire : un recensement selon la catégorisation d’îlots anonymes (regroupement d’ensemble de cultures et de parcelles en de plus grands groupes), qui prend fin en 2015 pour laisser place à une catégorisation en parcelles graphiques (analyse plus fine).</p>
+<p>Il s’agit alors d’étudier d’un côté la période 2007-2014 et de l’autre celle 2015-2023, le but étant de se détacher du biais créé par la méthode de recensement des données. D’autre part, une analyse à partir d’une année de référence permet de visualiser la tendance des cultures sur le long terme (explosion, disparition …).</p>
+</section>
+<section id="analyse-ciblée-les-10-groupes-de-culture-qui-la-croissance-moyenne-la-plus-élevé-en-termes-de-surfaces-cultivées" class="level3">
+<h3 class="anchored" data-anchor-id="analyse-ciblée-les-10-groupes-de-culture-qui-la-croissance-moyenne-la-plus-élevé-en-termes-de-surfaces-cultivées">Analyse ciblée : les 10 groupes de culture qui la croissance moyenne la plus élevé (en termes de surfaces cultivées)</h3>
+<div class="cell">
+<div class="cell-output-display">
+<div class="plotly html-widget html-fill-item" id="htmlwidget-555fb7dd095946808200" style="width:100%;height:464px;"></div>
+<script type="application/json" data-for="htmlwidget-555fb7dd095946808200">{"x":{"data":[{"x":[1,2,3,4,5,6,7,8],"y":[100,111.01437098207481,112.02359338014192,118.10978695618628,118.73249162879083,119.73868372706437,121.51451874570884,125.60870468381648],"text":["Culture: Estives et landes <br>Année: 2007 <br>Surface (base 100): 100","Culture: Estives et landes <br>Année: 2008 <br>Surface (base 100): 111","Culture: Estives et landes <br>Année: 2009 <br>Surface (base 100): 112","Culture: Estives et landes <br>Année: 2010 <br>Surface (base 100): 118","Culture: Estives et landes <br>Année: 2011 <br>Surface (base 100): 119","Culture: Estives et landes <br>Année: 2012 <br>Surface (base 100): 120","Culture: Estives et landes <br>Année: 2013 <br>Surface (base 100): 122","Culture: Estives et landes <br>Année: 2014 <br>Surface (base 100): 126"],"type":"scatter","mode":"markers+lines","marker":{"autocolorscale":false,"color":"rgba(28,134,238,1)","opacity":1,"size":5.6692913385826778,"symbol":"circle","line":{"width":1.8897637795275593,"color":"rgba(28,134,238,1)"}},"hoveron":"points","name":"Estives et landes","legendgroup":"Estives et landes","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","line":{"width":1.8897637795275593,"color":"rgba(28,134,238,1)","dash":"solid"},"frame":null},{"x":[1,2,3,4,5,6,7,8,9],"y":[100,100.26201742674226,102.29934918624497,103.90625599216887,106.73164911314626,106.63395388232834,108.43787016220301,109.41968322620758,111.06733452731461],"text":["Culture: Estives et landes <br>Année: 2015 <br>Surface (base 100): 100","Culture: Estives et landes <br>Année: 2016 <br>Surface (base 100): 100","Culture: Estives et landes <br>Année: 2017 <br>Surface (base 100): 102","Culture: Estives et landes <br>Année: 2018 <br>Surface (base 100): 104","Culture: Estives et landes <br>Année: 2019 <br>Surface (base 100): 107","Culture: Estives et landes <br>Année: 2020 <br>Surface (base 100): 107","Culture: Estives et landes <br>Année: 2021 <br>Surface (base 100): 108","Culture: Estives et landes <br>Année: 2022 <br>Surface (base 100): 109","Culture: Estives et landes <br>Année: 2023 <br>Surface (base 100): 111"],"type":"scatter","mode":"markers+lines","marker":{"autocolorscale":false,"color":"rgba(28,134,238,1)","opacity":1,"size":5.6692913385826778,"symbol":"circle","line":{"width":1.8897637795275593,"color":"rgba(28,134,238,1)"}},"hoveron":"points","name":"Estives et landes","legendgroup":"Estives et landes","showlegend":false,"xaxis":"x2","yaxis":"y","hoverinfo":"text","line":{"width":1.8897637795275593,"color":"rgba(28,134,238,1)","dash":"solid"},"frame":null},{"x":[1,2,3,4,5,6,7,8],"y":[100,126.87401883486848,149.68973777245719,142.08323215921496,152.32357709845488,139.68579930463477,155.67873663681041,133.90043048182295],"text":["Culture: Tournesol <br>Année: 2007 <br>Surface (base 100): 100","Culture: Tournesol <br>Année: 2008 <br>Surface (base 100): 127","Culture: Tournesol <br>Année: 2009 <br>Surface (base 100): 150","Culture: Tournesol <br>Année: 2010 <br>Surface (base 100): 142","Culture: Tournesol <br>Année: 2011 <br>Surface (base 100): 152","Culture: Tournesol <br>Année: 2012 <br>Surface (base 100): 140","Culture: Tournesol <br>Année: 2013 <br>Surface (base 100): 156","Culture: Tournesol <br>Année: 2014 <br>Surface (base 100): 134"],"type":"scatter","mode":"markers+lines","marker":{"autocolorscale":false,"color":"rgba(227,26,28,1)","opacity":1,"size":5.6692913385826778,"symbol":"circle","line":{"width":1.8897637795275593,"color":"rgba(227,26,28,1)"}},"hoveron":"points","name":"Tournesol","legendgroup":"Tournesol","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","line":{"width":1.8897637795275593,"color":"rgba(227,26,28,1)","dash":"solid"},"frame":null},{"x":[1,2,3,4,5,6,7,8,9],"y":[100,87.370614273718374,95.462561237074354,89.841951364367418,99.331438572907402,126.91939127742391,113.55288933098748,140.13942736884749,134.22771793861418],"text":["Culture: Tournesol <br>Année: 2015 <br>Surface (base 100): 100","Culture: Tournesol <br>Année: 2016 <br>Surface (base 100): 87","Culture: Tournesol <br>Année: 2017 <br>Surface (base 100): 95","Culture: Tournesol <br>Année: 2018 <br>Surface (base 100): 90","Culture: Tournesol <br>Année: 2019 <br>Surface (base 100): 99","Culture: Tournesol <br>Année: 2020 <br>Surface (base 100): 127","Culture: Tournesol <br>Année: 2021 <br>Surface (base 100): 114","Culture: Tournesol <br>Année: 2022 <br>Surface (base 100): 140","Culture: Tournesol <br>Année: 2023 <br>Surface (base 100): 134"],"type":"scatter","mode":"markers+lines","marker":{"autocolorscale":false,"color":"rgba(227,26,28,1)","opacity":1,"size":5.6692913385826778,"symbol":"circle","line":{"width":1.8897637795275593,"color":"rgba(227,26,28,1)"}},"hoveron":"points","name":"Tournesol","legendgroup":"Tournesol","showlegend":false,"xaxis":"x2","yaxis":"y","hoverinfo":"text","line":{"width":1.8897637795275593,"color":"rgba(227,26,28,1)","dash":"solid"},"frame":null},{"x":[1,2,3,4,5,6,7,8],"y":[100,91.047444690647467,91.732604871162692,162.5629839711504,154.92406076758789,127.27361381597339,107.75044888483582,106.72377529303674],"text":["Culture: Fourrage <br>Année: 2007 <br>Surface (base 100): 100","Culture: Fourrage <br>Année: 2008 <br>Surface (base 100): 91","Culture: Fourrage <br>Année: 2009 <br>Surface (base 100): 92","Culture: Fourrage <br>Année: 2010 <br>Surface (base 100): 163","Culture: Fourrage <br>Année: 2011 <br>Surface (base 100): 155","Culture: Fourrage <br>Année: 2012 <br>Surface (base 100): 127","Culture: Fourrage <br>Année: 2013 <br>Surface (base 100): 108","Culture: Fourrage <br>Année: 2014 <br>Surface (base 100): 107"],"type":"scatter","mode":"markers+lines","marker":{"autocolorscale":false,"color":"rgba(0,139,0,1)","opacity":1,"size":5.6692913385826778,"symbol":"circle","line":{"width":1.8897637795275593,"color":"rgba(0,139,0,1)"}},"hoveron":"points","name":"Fourrage","legendgroup":"Fourrage","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","line":{"width":1.8897637795275593,"color":"rgba(0,139,0,1)","dash":"solid"},"frame":null},{"x":[1,2,3,4,5,6,7,8,9],"y":[100,116.64281907554572,140.65155078151162,143.92677868991234,151.67631403111764,162.31898925852644,166.86501460702766,164.84950887460755,177.73791024249329],"text":["Culture: Fourrage <br>Année: 2015 <br>Surface (base 100): 100","Culture: Fourrage <br>Année: 2016 <br>Surface (base 100): 117","Culture: Fourrage <br>Année: 2017 <br>Surface (base 100): 141","Culture: Fourrage <br>Année: 2018 <br>Surface (base 100): 144","Culture: Fourrage <br>Année: 2019 <br>Surface (base 100): 152","Culture: Fourrage <br>Année: 2020 <br>Surface (base 100): 162","Culture: Fourrage <br>Année: 2021 <br>Surface (base 100): 167","Culture: Fourrage <br>Année: 2022 <br>Surface (base 100): 165","Culture: Fourrage <br>Année: 2023 <br>Surface (base 100): 178"],"type":"scatter","mode":"markers+lines","marker":{"autocolorscale":false,"color":"rgba(0,139,0,1)","opacity":1,"size":5.6692913385826778,"symbol":"circle","line":{"width":1.8897637795275593,"color":"rgba(0,139,0,1)"}},"hoveron":"points","name":"Fourrage","legendgroup":"Fourrage","showlegend":false,"xaxis":"x2","yaxis":"y","hoverinfo":"text","line":{"width":1.8897637795275593,"color":"rgba(0,139,0,1)","dash":"solid"},"frame":null},{"x":[1,2,3,4,5,6,7,8],"y":[100,95.604414505869414,113.56740493627736,147.92775556238905,163.4695613304491,173.47903851371569,179.19294267476721,186.88100851376382],"text":["Culture: Vignes <br>Année: 2007 <br>Surface (base 100): 100","Culture: Vignes <br>Année: 2008 <br>Surface (base 100): 96","Culture: Vignes <br>Année: 2009 <br>Surface (base 100): 114","Culture: Vignes <br>Année: 2010 <br>Surface (base 100): 148","Culture: Vignes <br>Année: 2011 <br>Surface (base 100): 163","Culture: Vignes <br>Année: 2012 <br>Surface (base 100): 173","Culture: Vignes <br>Année: 2013 <br>Surface (base 100): 179","Culture: Vignes <br>Année: 2014 <br>Surface (base 100): 187"],"type":"scatter","mode":"markers+lines","marker":{"autocolorscale":false,"color":"rgba(106,61,154,1)","opacity":1,"size":5.6692913385826778,"symbol":"circle","line":{"width":1.8897637795275593,"color":"rgba(106,61,154,1)"}},"hoveron":"points","name":"Vignes","legendgroup":"Vignes","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","line":{"width":1.8897637795275593,"color":"rgba(106,61,154,1)","dash":"solid"},"frame":null},{"x":[1,2,3,4,5,6,7,8,9],"y":[100,101.08107644700853,101.93010563033005,103.93400952508445,106.51681702201674,108.14472588775965,109.29782808178055,109.54139978308119,108.22402590025739],"text":["Culture: Vignes <br>Année: 2015 <br>Surface (base 100): 100","Culture: Vignes <br>Année: 2016 <br>Surface (base 100): 101","Culture: Vignes <br>Année: 2017 <br>Surface (base 100): 102","Culture: Vignes <br>Année: 2018 <br>Surface (base 100): 104","Culture: Vignes <br>Année: 2019 <br>Surface (base 100): 107","Culture: Vignes <br>Année: 2020 <br>Surface (base 100): 108","Culture: Vignes <br>Année: 2021 <br>Surface (base 100): 109","Culture: Vignes <br>Année: 2022 <br>Surface (base 100): 110","Culture: Vignes <br>Année: 2023 <br>Surface (base 100): 108"],"type":"scatter","mode":"markers+lines","marker":{"autocolorscale":false,"color":"rgba(106,61,154,1)","opacity":1,"size":5.6692913385826778,"symbol":"circle","line":{"width":1.8897637795275593,"color":"rgba(106,61,154,1)"}},"hoveron":"points","name":"Vignes","legendgroup":"Vignes","showlegend":false,"xaxis":"x2","yaxis":"y","hoverinfo":"text","line":{"width":1.8897637795275593,"color":"rgba(106,61,154,1)","dash":"solid"},"frame":null},{"x":[1,2,3,4,5,6,7,8],"y":[100,101.08193703775147,105.84174881214494,109.3115058009632,110.72407199931673,108.35769254484285,109.92829852626448,115.10610815595047],"text":["Culture: Légumes ou fleurs <br>Année: 2007 <br>Surface (base 100): 100","Culture: Légumes ou fleurs <br>Année: 2008 <br>Surface (base 100): 101","Culture: Légumes ou fleurs <br>Année: 2009 <br>Surface (base 100): 106","Culture: Légumes ou fleurs <br>Année: 2010 <br>Surface (base 100): 109","Culture: Légumes ou fleurs <br>Année: 2011 <br>Surface (base 100): 111","Culture: Légumes ou fleurs <br>Année: 2012 <br>Surface (base 100): 108","Culture: Légumes ou fleurs <br>Année: 2013 <br>Surface (base 100): 110","Culture: Légumes ou fleurs <br>Année: 2014 <br>Surface (base 100): 115"],"type":"scatter","mode":"markers+lines","marker":{"autocolorscale":false,"color":"rgba(255,127,0,1)","opacity":1,"size":5.6692913385826778,"symbol":"circle","line":{"width":1.8897637795275593,"color":"rgba(255,127,0,1)"}},"hoveron":"points","name":"Légumes ou fleurs","legendgroup":"Légumes ou fleurs","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","line":{"width":1.8897637795275593,"color":"rgba(255,127,0,1)","dash":"solid"},"frame":null},{"x":[1,2,3,4,5,6,7,8,9],"y":[100,105.14388148737801,112.2830365210598,114.00046436051392,118.4572702206885,120.16137339863239,120.72430993911448,116.84288799514397,96.704495935429961],"text":["Culture: Légumes ou fleurs <br>Année: 2015 <br>Surface (base 100): 100","Culture: Légumes ou fleurs <br>Année: 2016 <br>Surface (base 100): 105","Culture: Légumes ou fleurs <br>Année: 2017 <br>Surface (base 100): 112","Culture: Légumes ou fleurs <br>Année: 2018 <br>Surface (base 100): 114","Culture: Légumes ou fleurs <br>Année: 2019 <br>Surface (base 100): 118","Culture: Légumes ou fleurs <br>Année: 2020 <br>Surface (base 100): 120","Culture: Légumes ou fleurs <br>Année: 2021 <br>Surface (base 100): 121","Culture: Légumes ou fleurs <br>Année: 2022 <br>Surface (base 100): 117","Culture: Légumes ou fleurs <br>Année: 2023 <br>Surface (base 100): 97"],"type":"scatter","mode":"markers+lines","marker":{"autocolorscale":false,"color":"rgba(255,127,0,1)","opacity":1,"size":5.6692913385826778,"symbol":"circle","line":{"width":1.8897637795275593,"color":"rgba(255,127,0,1)"}},"hoveron":"points","name":"Légumes ou fleurs","legendgroup":"Légumes ou fleurs","showlegend":false,"xaxis":"x2","yaxis":"y","hoverinfo":"text","line":{"width":1.8897637795275593,"color":"rgba(255,127,0,1)","dash":"solid"},"frame":null},{"x":[1,2,3,4,5,6,7,8],"y":[100,70.513499219715342,90.351374578712068,183.3486469813493,126.50250835429608,89.943323700410488,86.770121476817096,101.59639970927597],"text":["Culture: Protéagineux <br>Année: 2007 <br>Surface (base 100): 100","Culture: Protéagineux <br>Année: 2008 <br>Surface (base 100): 71","Culture: Protéagineux <br>Année: 2009 <br>Surface (base 100): 90","Culture: Protéagineux <br>Année: 2010 <br>Surface (base 100): 183","Culture: Protéagineux <br>Année: 2011 <br>Surface (base 100): 127","Culture: Protéagineux <br>Année: 2012 <br>Surface (base 100): 90","Culture: Protéagineux <br>Année: 2013 <br>Surface (base 100): 87","Culture: Protéagineux <br>Année: 2014 <br>Surface (base 100): 102"],"type":"scatter","mode":"markers+lines","marker":{"autocolorscale":false,"color":"rgba(0,0,0,1)","opacity":1,"size":5.6692913385826778,"symbol":"circle","line":{"width":1.8897637795275593,"color":"rgba(0,0,0,1)"}},"hoveron":"points","name":"Protéagineux","legendgroup":"Protéagineux","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","line":{"width":1.8897637795275593,"color":"rgba(0,0,0,1)","dash":"solid"},"frame":null},{"x":[1,2,3,4,5,6,7,8,9],"y":[100,114.30866197138789,115.15295400831621,87.48362722782349,94.905723407241254,120.35922677023156,123.34789798122938,95.948660631206579,137.75813160499504],"text":["Culture: Protéagineux <br>Année: 2015 <br>Surface (base 100): 100","Culture: Protéagineux <br>Année: 2016 <br>Surface (base 100): 114","Culture: Protéagineux <br>Année: 2017 <br>Surface (base 100): 115","Culture: Protéagineux <br>Année: 2018 <br>Surface (base 100): 87","Culture: Protéagineux <br>Année: 2019 <br>Surface (base 100): 95","Culture: Protéagineux <br>Année: 2020 <br>Surface (base 100): 120","Culture: Protéagineux <br>Année: 2021 <br>Surface (base 100): 123","Culture: Protéagineux <br>Année: 2022 <br>Surface (base 100): 96","Culture: Protéagineux <br>Année: 2023 <br>Surface (base 100): 138"],"type":"scatter","mode":"markers+lines","marker":{"autocolorscale":false,"color":"rgba(0,0,0,1)","opacity":1,"size":5.6692913385826778,"symbol":"circle","line":{"width":1.8897637795275593,"color":"rgba(0,0,0,1)"}},"hoveron":"points","name":"Protéagineux","legendgroup":"Protéagineux","showlegend":false,"xaxis":"x2","yaxis":"y","hoverinfo":"text","line":{"width":1.8897637795275593,"color":"rgba(0,0,0,1)","dash":"solid"},"frame":null},{"x":[1,2,3,4,5,6,7,8],"y":[100,58.181927798270131,113.51760666834805,158.08410316598628,134.9433402786251,118.64613120777894,126.85821786708928,206.39485427149117],"text":["Culture: Autres oléagineux <br>Année: 2007 <br>Surface (base 100): 100","Culture: Autres oléagineux <br>Année: 2008 <br>Surface (base 100): 58","Culture: Autres oléagineux <br>Année: 2009 <br>Surface (base 100): 114","Culture: Autres oléagineux <br>Année: 2010 <br>Surface (base 100): 158","Culture: Autres oléagineux <br>Année: 2011 <br>Surface (base 100): 135","Culture: Autres oléagineux <br>Année: 2012 <br>Surface (base 100): 119","Culture: Autres oléagineux <br>Année: 2013 <br>Surface (base 100): 127","Culture: Autres oléagineux <br>Année: 2014 <br>Surface (base 100): 206"],"type":"scatter","mode":"markers+lines","marker":{"autocolorscale":false,"color":"rgba(255,215,0,1)","opacity":1,"size":5.6692913385826778,"symbol":"circle","line":{"width":1.8897637795275593,"color":"rgba(255,215,0,1)"}},"hoveron":"points","name":"Autres oléagineux","legendgroup":"Autres oléagineux","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","line":{"width":1.8897637795275593,"color":"rgba(255,215,0,1)","dash":"solid"},"frame":null},{"x":[1,2,3,4,5,6,7,8,9],"y":[100,109.24142353154063,115.45641257107522,121.93365282570427,128.48656582794086,148.9962311992233,129.92533390068232,141.86708835394228,127.07982755045366],"text":["Culture: Autres oléagineux <br>Année: 2015 <br>Surface (base 100): 100","Culture: Autres oléagineux <br>Année: 2016 <br>Surface (base 100): 109","Culture: Autres oléagineux <br>Année: 2017 <br>Surface (base 100): 115","Culture: Autres oléagineux <br>Année: 2018 <br>Surface (base 100): 122","Culture: Autres oléagineux <br>Année: 2019 <br>Surface (base 100): 128","Culture: Autres oléagineux <br>Année: 2020 <br>Surface (base 100): 149","Culture: Autres oléagineux <br>Année: 2021 <br>Surface (base 100): 130","Culture: Autres oléagineux <br>Année: 2022 <br>Surface (base 100): 142","Culture: Autres oléagineux <br>Année: 2023 <br>Surface (base 100): 127"],"type":"scatter","mode":"markers+lines","marker":{"autocolorscale":false,"color":"rgba(255,215,0,1)","opacity":1,"size":5.6692913385826778,"symbol":"circle","line":{"width":1.8897637795275593,"color":"rgba(255,215,0,1)"}},"hoveron":"points","name":"Autres oléagineux","legendgroup":"Autres oléagineux","showlegend":false,"xaxis":"x2","yaxis":"y","hoverinfo":"text","line":{"width":1.8897637795275593,"color":"rgba(255,215,0,1)","dash":"solid"},"frame":null},{"x":[1,2,3,4,5,6,7,8],"y":[100,82.538000249043037,75.444918743217713,68.638741197800869,71.543995331575971,91.69324628903081,78.097945812735091,85.738137202422067],"text":["Culture: Plantes à fibres <br>Année: 2007 <br>Surface (base 100): 100","Culture: Plantes à fibres <br>Année: 2008 <br>Surface (base 100): 83","Culture: Plantes à fibres <br>Année: 2009 <br>Surface (base 100): 75","Culture: Plantes à fibres <br>Année: 2010 <br>Surface (base 100): 69","Culture: Plantes à fibres <br>Année: 2011 <br>Surface (base 100): 72","Culture: Plantes à fibres <br>Année: 2012 <br>Surface (base 100): 92","Culture: Plantes à fibres <br>Année: 2013 <br>Surface (base 100): 78","Culture: Plantes à fibres <br>Année: 2014 <br>Surface (base 100): 86"],"type":"scatter","mode":"markers+lines","marker":{"autocolorscale":false,"color":"rgba(126,192,238,1)","opacity":1,"size":5.6692913385826778,"symbol":"circle","line":{"width":1.8897637795275593,"color":"rgba(126,192,238,1)"}},"hoveron":"points","name":"Plantes à fibres","legendgroup":"Plantes à fibres","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","line":{"width":1.8897637795275593,"color":"rgba(126,192,238,1)","dash":"solid"},"frame":null},{"x":[1,2,3,4,5,6,7,8,9],"y":[100,113.4283258418381,127.47668352844217,134.35301038307429,151.10826464589323,172.91613837436398,129.96554144403007,160.63570229283653,167.06971978732147],"text":["Culture: Plantes à fibres <br>Année: 2015 <br>Surface (base 100): 100","Culture: Plantes à fibres <br>Année: 2016 <br>Surface (base 100): 113","Culture: Plantes à fibres <br>Année: 2017 <br>Surface (base 100): 127","Culture: Plantes à fibres <br>Année: 2018 <br>Surface (base 100): 134","Culture: Plantes à fibres <br>Année: 2019 <br>Surface (base 100): 151","Culture: Plantes à fibres <br>Année: 2020 <br>Surface (base 100): 173","Culture: Plantes à fibres <br>Année: 2021 <br>Surface (base 100): 130","Culture: Plantes à fibres <br>Année: 2022 <br>Surface (base 100): 161","Culture: Plantes à fibres <br>Année: 2023 <br>Surface (base 100): 167"],"type":"scatter","mode":"markers+lines","marker":{"autocolorscale":false,"color":"rgba(126,192,238,1)","opacity":1,"size":5.6692913385826778,"symbol":"circle","line":{"width":1.8897637795275593,"color":"rgba(126,192,238,1)"}},"hoveron":"points","name":"Plantes à fibres","legendgroup":"Plantes à fibres","showlegend":false,"xaxis":"x2","yaxis":"y","hoverinfo":"text","line":{"width":1.8897637795275593,"color":"rgba(126,192,238,1)","dash":"solid"},"frame":null},{"x":[1,2,3,4,5,6,7,8],"y":[100,103.79522329549704,109.80218455799573,118.26394030248157,122.13052745525887,129.32493302443075,138.79217398278541,142.87186208595898],"text":["Culture: Fruits à coque <br>Année: 2007 <br>Surface (base 100): 100","Culture: Fruits à coque <br>Année: 2008 <br>Surface (base 100): 104","Culture: Fruits à coque <br>Année: 2009 <br>Surface (base 100): 110","Culture: Fruits à coque <br>Année: 2010 <br>Surface (base 100): 118","Culture: Fruits à coque <br>Année: 2011 <br>Surface (base 100): 122","Culture: Fruits à coque <br>Année: 2012 <br>Surface (base 100): 129","Culture: Fruits à coque <br>Année: 2013 <br>Surface (base 100): 139","Culture: Fruits à coque <br>Année: 2014 <br>Surface (base 100): 143"],"type":"scatter","mode":"markers+lines","marker":{"autocolorscale":false,"color":"rgba(251,154,153,1)","opacity":1,"size":5.6692913385826778,"symbol":"circle","line":{"width":1.8897637795275593,"color":"rgba(251,154,153,1)"}},"hoveron":"points","name":"Fruits à coque","legendgroup":"Fruits à coque","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","line":{"width":1.8897637795275593,"color":"rgba(251,154,153,1)","dash":"solid"},"frame":null},{"x":[1,2,3,4,5,6,7,8,9],"y":[100,104.62860282085305,110.92348588336355,115.80869770279656,124.10287731304335,128.07731542713358,133.39441985357644,137.70184568693566,139.11555555729046],"text":["Culture: Fruits à coque <br>Année: 2015 <br>Surface (base 100): 100","Culture: Fruits à coque <br>Année: 2016 <br>Surface (base 100): 105","Culture: Fruits à coque <br>Année: 2017 <br>Surface (base 100): 111","Culture: Fruits à coque <br>Année: 2018 <br>Surface (base 100): 116","Culture: Fruits à coque <br>Année: 2019 <br>Surface (base 100): 124","Culture: Fruits à coque <br>Année: 2020 <br>Surface (base 100): 128","Culture: Fruits à coque <br>Année: 2021 <br>Surface (base 100): 133","Culture: Fruits à coque <br>Année: 2022 <br>Surface (base 100): 138","Culture: Fruits à coque <br>Année: 2023 <br>Surface (base 100): 139"],"type":"scatter","mode":"markers+lines","marker":{"autocolorscale":false,"color":"rgba(251,154,153,1)","opacity":1,"size":5.6692913385826778,"symbol":"circle","line":{"width":1.8897637795275593,"color":"rgba(251,154,153,1)"}},"hoveron":"points","name":"Fruits à coque","legendgroup":"Fruits à coque","showlegend":false,"xaxis":"x2","yaxis":"y","hoverinfo":"text","line":{"width":1.8897637795275593,"color":"rgba(251,154,153,1)","dash":"solid"},"frame":null},{"x":[1,2,3,4,5,6,7,8],"y":[100,92.969386317644819,128.04589361300731,155.13171140977008,181.81359366211043,231.6480495231481,240.9592378211558,263.54860819332384],"text":["Culture: Légumineuses à grains <br>Année: 2007 <br>Surface (base 100): 100","Culture: Légumineuses à grains <br>Année: 2008 <br>Surface (base 100): 93","Culture: Légumineuses à grains <br>Année: 2009 <br>Surface (base 100): 128","Culture: Légumineuses à grains <br>Année: 2010 <br>Surface (base 100): 155","Culture: Légumineuses à grains <br>Année: 2011 <br>Surface (base 100): 182","Culture: Légumineuses à grains <br>Année: 2012 <br>Surface (base 100): 232","Culture: Légumineuses à grains <br>Année: 2013 <br>Surface (base 100): 241","Culture: Légumineuses à grains <br>Année: 2014 <br>Surface (base 100): 264"],"type":"scatter","mode":"markers+lines","marker":{"autocolorscale":false,"color":"rgba(144,238,144,1)","opacity":1,"size":5.6692913385826778,"symbol":"circle","line":{"width":1.8897637795275593,"color":"rgba(144,238,144,1)"}},"hoveron":"points","name":"Légumineuses à grains","legendgroup":"Légumineuses à grains","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","line":{"width":1.8897637795275593,"color":"rgba(144,238,144,1)","dash":"solid"},"frame":null},{"x":[1,2,3,4,5,6,7,8,9],"y":[100,116.71294383955018,204.37902920955651,264.72717398129726,288.48755606528084,225.24874157085119,204.52571128141003,172.23683913408129,202.82718351513532],"text":["Culture: Légumineuses à grains <br>Année: 2015 <br>Surface (base 100): 100","Culture: Légumineuses à grains <br>Année: 2016 <br>Surface (base 100): 117","Culture: Légumineuses à grains <br>Année: 2017 <br>Surface (base 100): 204","Culture: Légumineuses à grains <br>Année: 2018 <br>Surface (base 100): 265","Culture: Légumineuses à grains <br>Année: 2019 <br>Surface (base 100): 288","Culture: Légumineuses à grains <br>Année: 2020 <br>Surface (base 100): 225","Culture: Légumineuses à grains <br>Année: 2021 <br>Surface (base 100): 205","Culture: Légumineuses à grains <br>Année: 2022 <br>Surface (base 100): 172","Culture: Légumineuses à grains <br>Année: 2023 <br>Surface (base 100): 203"],"type":"scatter","mode":"markers+lines","marker":{"autocolorscale":false,"color":"rgba(144,238,144,1)","opacity":1,"size":5.6692913385826778,"symbol":"circle","line":{"width":1.8897637795275593,"color":"rgba(144,238,144,1)"}},"hoveron":"points","name":"Légumineuses à grains","legendgroup":"Légumineuses à grains","showlegend":false,"xaxis":"x2","yaxis":"y","hoverinfo":"text","line":{"width":1.8897637795275593,"color":"rgba(144,238,144,1)","dash":"solid"},"frame":null}],"layout":{"margin":{"t":55.452054794520549,"r":7.3059360730593621,"b":40.182648401826491,"l":43.105022831050235},"font":{"color":"rgba(0,0,0,1)","family":"","size":14.611872146118724},"title":{"text":"Évolution des 10 cultures aux taux de croissance moyen le plus élevé","font":{"color":"rgba(0,0,0,1)","family":"","size":17.534246575342465},"x":0,"xref":"paper"},"xaxis":{"domain":[0,0.49592302674494454],"automargin":true,"type":"linear","autorange":false,"range":[0.40000000000000002,8.5999999999999996],"tickmode":"array","ticktext":["2007","2008","2009","2010","2011","2012","2013","2014"],"tickvals":[1,2,3,4,5,6,7,8],"categoryorder":"array","categoryarray":["2007","2008","2009","2010","2011","2012","2013","2014"],"nticks":null,"ticks":"","tickcolor":null,"ticklen":3.6529680365296811,"tickwidth":0,"showticklabels":true,"tickfont":{"color":"rgba(77,77,77,1)","family":"","size":11.68949771689498},"tickangle":-0,"showline":false,"linecolor":null,"linewidth":0,"showgrid":true,"gridcolor":"rgba(235,235,235,1)","gridwidth":0.66417600664176002,"zeroline":false,"anchor":"y","title":"","hoverformat":".2f"},"annotations":[{"text":"Année","x":0.5,"y":0,"showarrow":false,"ax":0,"ay":0,"font":{"color":"rgba(0,0,0,1)","family":"","size":14.611872146118724},"xref":"paper","yref":"paper","textangle":-0,"xanchor":"center","yanchor":"top","annotationType":"axis","yshift":-21.917808219178088},{"text":"Surface des cultures (en base 100, <br /> année de référence étant l'année d'introduction de la culture)","x":0,"y":0.5,"showarrow":false,"ax":0,"ay":0,"font":{"color":"rgba(0,0,0,1)","family":"","size":14.611872146118724},"xref":"paper","yref":"paper","textangle":-90,"xanchor":"right","yanchor":"center","annotationType":"axis","xshift":-27.762557077625573},{"text":"0","x":0.24796151337247227,"y":1,"showarrow":false,"ax":0,"ay":0,"font":{"color":"rgba(26,26,26,1)","family":"","size":11.68949771689498},"xref":"paper","yref":"paper","textangle":-0,"xanchor":"center","yanchor":"bottom"},{"text":"1","x":0.7520384866275277,"y":1,"showarrow":false,"ax":0,"ay":0,"font":{"color":"rgba(26,26,26,1)","family":"","size":11.68949771689498},"xref":"paper","yref":"paper","textangle":-0,"xanchor":"center","yanchor":"bottom"}],"yaxis":{"domain":[0,1],"automargin":true,"type":"linear","autorange":false,"range":[46.666646384919595,300.00283747863136],"tickmode":"array","ticktext":["50","100","150","200","250","300"],"tickvals":[50,100,150,200,250,300],"categoryorder":"array","categoryarray":["50","100","150","200","250","300"],"nticks":null,"ticks":"","tickcolor":null,"ticklen":3.6529680365296811,"tickwidth":0,"showticklabels":true,"tickfont":{"color":"rgba(77,77,77,1)","family":"","size":11.68949771689498},"tickangle":-0,"showline":false,"linecolor":null,"linewidth":0,"showgrid":true,"gridcolor":"rgba(235,235,235,1)","gridwidth":0.66417600664176002,"zeroline":false,"anchor":"x","title":"","hoverformat":".2f"},"shapes":[{"type":"rect","fillcolor":null,"line":{"color":null,"width":0,"linetype":[]},"yref":"paper","xref":"paper","x0":0,"x1":0.49592302674494454,"y0":0,"y1":1},{"type":"rect","fillcolor":null,"line":{"color":null,"width":0,"linetype":[]},"yref":"paper","xref":"paper","x0":0,"x1":0.49592302674494454,"y0":0,"y1":23.37899543378996,"yanchor":1,"ysizemode":"pixel"},{"type":"rect","fillcolor":null,"line":{"color":null,"width":0,"linetype":[]},"yref":"paper","xref":"paper","x0":0.5040769732550554,"x1":1,"y0":0,"y1":1},{"type":"rect","fillcolor":null,"line":{"color":null,"width":0,"linetype":[]},"yref":"paper","xref":"paper","x0":0.5040769732550554,"x1":1,"y0":0,"y1":23.37899543378996,"yanchor":1,"ysizemode":"pixel"}],"xaxis2":{"type":"linear","autorange":false,"range":[0.40000000000000002,9.5999999999999996],"tickmode":"array","ticktext":["2015","2016","2017","2018","2019","2020","2021","2022","2023"],"tickvals":[1,2,3,4,5,6,6.9999999999999991,8,9],"categoryorder":"array","categoryarray":["2015","2016","2017","2018","2019","2020","2021","2022","2023"],"nticks":null,"ticks":"","tickcolor":null,"ticklen":3.6529680365296811,"tickwidth":0,"showticklabels":true,"tickfont":{"color":"rgba(77,77,77,1)","family":"","size":11.68949771689498},"tickangle":-0,"showline":false,"linecolor":null,"linewidth":0,"showgrid":true,"domain":[0.5040769732550554,1],"gridcolor":"rgba(235,235,235,1)","gridwidth":0.66417600664176002,"zeroline":false,"anchor":"y","title":"","hoverformat":".2f"},"showlegend":true,"legend":{"bgcolor":null,"bordercolor":null,"borderwidth":0,"font":{"color":"rgba(0,0,0,1)","family":"","size":11.68949771689498},"title":{"text":"LIBELLE_GROUPE_CULTURE","font":{"color":"rgba(0,0,0,1)","family":"","size":14.611872146118724}}},"hovermode":"closest","barmode":"relative"},"config":{"doubleClick":"reset","modeBarButtonsToAdd":["hoverclosest","hovercompare"],"showSendToCloud":false},"source":"A","attrs":{"b3c676363e7":{"x":{},"y":{},"colour":{},"text":{},"type":"scatter"},"b3c5a5289e":{"x":{},"y":{},"colour":{},"text":{}}},"cur_data":"b3c676363e7","visdat":{"b3c676363e7":["function (y) ","x"],"b3c5a5289e":["function (y) ","x"]},"highlight":{"on":"plotly_click","persistent":false,"dynamic":false,"selectize":false,"opacityDim":0.20000000000000001,"selected":{"opacity":1},"debounce":0},"shinyEvents":["plotly_hover","plotly_click","plotly_selected","plotly_relayout","plotly_brushed","plotly_brushing","plotly_clickannotation","plotly_doubleclick","plotly_deselect","plotly_afterplot","plotly_sunburstclick"],"base_url":"https://plot.ly"},"evals":[],"jsHooks":[]}</script>
+</div>
+</div>
+<p>On observe une dynamique particulièrement marquée pour <strong>les légumineuses à grains</strong>, dont la surface a presque triplé entre 2015 et 2018, passant de 100 à 280, avant de légèrement reculer tout en restant bien au-dessus de son niveau initial autour de 230. Cette trajectoire reflète directement les effets incitatifs de la réforme de la PAC de 2015, notamment à travers le verdissement et la valorisation des cultures fixant l’azote ( <a href="https://www.touteleurope.eu/agriculture-et-peche/la-pac-2014-2020/"><code>PAC 2015</code></a>.</p>
+<p>Le <strong>fourrage</strong> connaissent également une progression continue, avec un indice passant de 100 en 2015 à près de 170 en 2023, tout comme <strong>les autres oléagineux</strong>, qui atteignent 150 à 160 sur la période. <strong>Les protéagineux</strong>, bien que moins spectaculaires, atteignent un indice de 140 en 2023, contre 100 au point de départ. À l’inverse, <strong>les vignes</strong> restent quasiment stables, oscillant autour de l’indice 100–110 sur l’ensemble de la période, tandis que <strong>les fruits à coque et les légumes ou fleurs</strong> progressent lentement, atteignant des indices compris entre 120 et 140.</p>
+</section>
+<section id="analyse-ciblée-les-10-groupes-de-culture-qui-ont-la-croissance-moyenne-la-plus-faible-en-termes-de-surfaces-cultivées" class="level3">
+<h3 class="anchored" data-anchor-id="analyse-ciblée-les-10-groupes-de-culture-qui-ont-la-croissance-moyenne-la-plus-faible-en-termes-de-surfaces-cultivées">Analyse ciblée : les 10 groupes de culture qui ont la croissance moyenne la plus faible (en termes de surfaces cultivées)</h3>
+<div class="cell">
+<div class="cell-output-display">
+<div class="plotly html-widget html-fill-item" id="htmlwidget-83c99dbf4d9069999e2d" style="width:100%;height:464px;"></div>
+<script type="application/json" data-for="htmlwidget-83c99dbf4d9069999e2d">{"x":{"data":[{"x":[1,2,3,4,5,6,7,8],"y":[100,96.339498825658751,95.632979832984745,91.64754504535496,91.843825858994848,91.704630349677586,91.624643089698125,89.506480990755549],"text":["Culture: Prairies permanentes <br>Année: 2007 <br>Surface (base 100) 100","Culture: Prairies permanentes <br>Année: 2008 <br>Surface (base 100) 96","Culture: Prairies permanentes <br>Année: 2009 <br>Surface (base 100) 96","Culture: Prairies permanentes <br>Année: 2010 <br>Surface (base 100) 92","Culture: Prairies permanentes <br>Année: 2011 <br>Surface (base 100) 92","Culture: Prairies permanentes <br>Année: 2012 <br>Surface (base 100) 92","Culture: Prairies permanentes <br>Année: 2013 <br>Surface (base 100) 92","Culture: Prairies permanentes <br>Année: 2014 <br>Surface (base 100) 90"],"type":"scatter","mode":"markers+lines","marker":{"autocolorscale":false,"color":"rgba(28,134,238,1)","opacity":1,"size":5.6692913385826778,"symbol":"circle","line":{"width":1.8897637795275593,"color":"rgba(28,134,238,1)"}},"hoveron":"points","name":"Prairies permanentes","legendgroup":"Prairies permanentes","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","line":{"width":1.8897637795275593,"color":"rgba(28,134,238,1)","dash":"solid"},"frame":null},{"x":[1,2,3,4,5,6,7,8,9],"y":[100,100.80339552599497,100.403634193009,114.51479125208697,114.90975698741393,115.31226543024191,114.78654193578308,114.09953761520426,113.21547235910714],"text":["Culture: Prairies permanentes <br>Année: 2015 <br>Surface (base 100) 100","Culture: Prairies permanentes <br>Année: 2016 <br>Surface (base 100) 101","Culture: Prairies permanentes <br>Année: 2017 <br>Surface (base 100) 100","Culture: Prairies permanentes <br>Année: 2018 <br>Surface (base 100) 115","Culture: Prairies permanentes <br>Année: 2019 <br>Surface (base 100) 115","Culture: Prairies permanentes <br>Année: 2020 <br>Surface (base 100) 115","Culture: Prairies permanentes <br>Année: 2021 <br>Surface (base 100) 115","Culture: Prairies permanentes <br>Année: 2022 <br>Surface (base 100) 114","Culture: Prairies permanentes <br>Année: 2023 <br>Surface (base 100) 113"],"type":"scatter","mode":"markers+lines","marker":{"autocolorscale":false,"color":"rgba(28,134,238,1)","opacity":1,"size":5.6692913385826778,"symbol":"circle","line":{"width":1.8897637795275593,"color":"rgba(28,134,238,1)"}},"hoveron":"points","name":"Prairies permanentes","legendgroup":"Prairies permanentes","showlegend":false,"xaxis":"x2","yaxis":"y2","hoverinfo":"text","line":{"width":1.8897637795275593,"color":"rgba(28,134,238,1)","dash":"solid"},"frame":null},{"x":[1,2,3,4,5,6,7,8],"y":[100,105.66496475682263,97.903020966816769,101.73945592745643,103.54285443205104,100.09906055457702,101.82345383814844,103.05118523882932],"text":["Culture: Blé tendre <br>Année: 2007 <br>Surface (base 100) 100","Culture: Blé tendre <br>Année: 2008 <br>Surface (base 100) 106","Culture: Blé tendre <br>Année: 2009 <br>Surface (base 100) 98","Culture: Blé tendre <br>Année: 2010 <br>Surface (base 100) 102","Culture: Blé tendre <br>Année: 2011 <br>Surface (base 100) 104","Culture: Blé tendre <br>Année: 2012 <br>Surface (base 100) 100","Culture: Blé tendre <br>Année: 2013 <br>Surface (base 100) 102","Culture: Blé tendre <br>Année: 2014 <br>Surface (base 100) 103"],"type":"scatter","mode":"markers+lines","marker":{"autocolorscale":false,"color":"rgba(227,26,28,1)","opacity":1,"size":5.6692913385826778,"symbol":"circle","line":{"width":1.8897637795275593,"color":"rgba(227,26,28,1)"}},"hoveron":"points","name":"Blé tendre","legendgroup":"Blé tendre","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","line":{"width":1.8897637795275593,"color":"rgba(227,26,28,1)","dash":"solid"},"frame":null},{"x":[1,2,3,4,5,6,7,8,9],"y":[100,99.387616520843778,95.815445278467848,94.137998511152119,97.141560043601501,81.993737247207449,95.572953273435317,89.970715418156445,92.107489008169523],"text":["Culture: Blé tendre <br>Année: 2015 <br>Surface (base 100) 100","Culture: Blé tendre <br>Année: 2016 <br>Surface (base 100) 99","Culture: Blé tendre <br>Année: 2017 <br>Surface (base 100) 96","Culture: Blé tendre <br>Année: 2018 <br>Surface (base 100) 94","Culture: Blé tendre <br>Année: 2019 <br>Surface (base 100) 97","Culture: Blé tendre <br>Année: 2020 <br>Surface (base 100) 82","Culture: Blé tendre <br>Année: 2021 <br>Surface (base 100) 96","Culture: Blé tendre <br>Année: 2022 <br>Surface (base 100) 90","Culture: Blé tendre <br>Année: 2023 <br>Surface (base 100) 92"],"type":"scatter","mode":"markers+lines","marker":{"autocolorscale":false,"color":"rgba(227,26,28,1)","opacity":1,"size":5.6692913385826778,"symbol":"circle","line":{"width":1.8897637795275593,"color":"rgba(227,26,28,1)"}},"hoveron":"points","name":"Blé tendre","legendgroup":"Blé tendre","showlegend":false,"xaxis":"x2","yaxis":"y2","hoverinfo":"text","line":{"width":1.8897637795275593,"color":"rgba(227,26,28,1)","dash":"solid"},"frame":null},{"x":[1,2,3,4,5,6,7,8],"y":[100,110.70153355299975,111.37785091541414,103.67985074723644,103.34990506073869,106.52871759654303,113.11546853482793,111.08652254413538],"text":["Culture: Maïs grain et ensilage <br>Année: 2007 <br>Surface (base 100) 100","Culture: Maïs grain et ensilage <br>Année: 2008 <br>Surface (base 100) 111","Culture: Maïs grain et ensilage <br>Année: 2009 <br>Surface (base 100) 111","Culture: Maïs grain et ensilage <br>Année: 2010 <br>Surface (base 100) 104","Culture: Maïs grain et ensilage <br>Année: 2011 <br>Surface (base 100) 103","Culture: Maïs grain et ensilage <br>Année: 2012 <br>Surface (base 100) 107","Culture: Maïs grain et ensilage <br>Année: 2013 <br>Surface (base 100) 113","Culture: Maïs grain et ensilage <br>Année: 2014 <br>Surface (base 100) 111"],"type":"scatter","mode":"markers+lines","marker":{"autocolorscale":false,"color":"rgba(0,139,0,1)","opacity":1,"size":5.6692913385826778,"symbol":"circle","line":{"width":1.8897637795275593,"color":"rgba(0,139,0,1)"}},"hoveron":"points","name":"Maïs grain et ensilage","legendgroup":"Maïs grain et ensilage","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","line":{"width":1.8897637795275593,"color":"rgba(0,139,0,1)","dash":"solid"},"frame":null},{"x":[1,2,3,4,5,6,7,8,9],"y":[100,91.313000001940779,90.366264215216717,90.428094121696631,94.531096520371122,98.555422751205057,88.996771233256425,86.867888703087729,82.565539407771183],"text":["Culture: Maïs grain et ensilage <br>Année: 2015 <br>Surface (base 100) 100","Culture: Maïs grain et ensilage <br>Année: 2016 <br>Surface (base 100) 91","Culture: Maïs grain et ensilage <br>Année: 2017 <br>Surface (base 100) 90","Culture: Maïs grain et ensilage <br>Année: 2018 <br>Surface (base 100) 90","Culture: Maïs grain et ensilage <br>Année: 2019 <br>Surface (base 100) 95","Culture: Maïs grain et ensilage <br>Année: 2020 <br>Surface (base 100) 99","Culture: Maïs grain et ensilage <br>Année: 2021 <br>Surface (base 100) 89","Culture: Maïs grain et ensilage <br>Année: 2022 <br>Surface (base 100) 87","Culture: Maïs grain et ensilage <br>Année: 2023 <br>Surface (base 100) 83"],"type":"scatter","mode":"markers+lines","marker":{"autocolorscale":false,"color":"rgba(0,139,0,1)","opacity":1,"size":5.6692913385826778,"symbol":"circle","line":{"width":1.8897637795275593,"color":"rgba(0,139,0,1)"}},"hoveron":"points","name":"Maïs grain et ensilage","legendgroup":"Maïs grain et ensilage","showlegend":false,"xaxis":"x2","yaxis":"y2","hoverinfo":"text","line":{"width":1.8897637795275593,"color":"rgba(0,139,0,1)","dash":"solid"},"frame":null},{"x":[1,2,3,4,5,6,7,8],"y":[100,100.02358424171791,98.655566877949695,103.11235422244285,104.11122617574703,104.07467779173717,103.61830584527635,99.711696116213616],"text":["Culture: Prairies temporaires <br>Année: 2007 <br>Surface (base 100) 100","Culture: Prairies temporaires <br>Année: 2008 <br>Surface (base 100) 100","Culture: Prairies temporaires <br>Année: 2009 <br>Surface (base 100) 99","Culture: Prairies temporaires <br>Année: 2010 <br>Surface (base 100) 103","Culture: Prairies temporaires <br>Année: 2011 <br>Surface (base 100) 104","Culture: Prairies temporaires <br>Année: 2012 <br>Surface (base 100) 104","Culture: Prairies temporaires <br>Année: 2013 <br>Surface (base 100) 104","Culture: Prairies temporaires <br>Année: 2014 <br>Surface (base 100) 100"],"type":"scatter","mode":"markers+lines","marker":{"autocolorscale":false,"color":"rgba(106,61,154,1)","opacity":1,"size":5.6692913385826778,"symbol":"circle","line":{"width":1.8897637795275593,"color":"rgba(106,61,154,1)"}},"hoveron":"points","name":"Prairies temporaires","legendgroup":"Prairies temporaires","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","line":{"width":1.8897637795275593,"color":"rgba(106,61,154,1)","dash":"solid"},"frame":null},{"x":[1,2,3,4,5,6,7,8,9],"y":[100,96.10713936557336,94.820932763393415,58.208433541944274,61.703988315946546,58.67758762795264,59.013295191726897,56.80594030275752,56.24779531558147],"text":["Culture: Prairies temporaires <br>Année: 2015 <br>Surface (base 100) 100","Culture: Prairies temporaires <br>Année: 2016 <br>Surface (base 100) 96","Culture: Prairies temporaires <br>Année: 2017 <br>Surface (base 100) 95","Culture: Prairies temporaires <br>Année: 2018 <br>Surface (base 100) 58","Culture: Prairies temporaires <br>Année: 2019 <br>Surface (base 100) 62","Culture: Prairies temporaires <br>Année: 2020 <br>Surface (base 100) 59","Culture: Prairies temporaires <br>Année: 2021 <br>Surface (base 100) 59","Culture: Prairies temporaires <br>Année: 2022 <br>Surface (base 100) 57","Culture: Prairies temporaires <br>Année: 2023 <br>Surface (base 100) 56"],"type":"scatter","mode":"markers+lines","marker":{"autocolorscale":false,"color":"rgba(106,61,154,1)","opacity":1,"size":5.6692913385826778,"symbol":"circle","line":{"width":1.8897637795275593,"color":"rgba(106,61,154,1)"}},"hoveron":"points","name":"Prairies temporaires","legendgroup":"Prairies temporaires","showlegend":false,"xaxis":"x2","yaxis":"y2","hoverinfo":"text","line":{"width":1.8897637795275593,"color":"rgba(106,61,154,1)","dash":"solid"},"frame":null},{"x":[1,2,3,4,5,6,7,8],"y":[100,106.00876165141592,110.03462644828599,90.876788215773345,88.651663705222916,98.306323091237914,93.04715516506775,102.28130843751811],"text":["Culture: Orge <br>Année: 2007 <br>Surface (base 100) 100","Culture: Orge <br>Année: 2008 <br>Surface (base 100) 106","Culture: Orge <br>Année: 2009 <br>Surface (base 100) 110","Culture: Orge <br>Année: 2010 <br>Surface (base 100) 91","Culture: Orge <br>Année: 2011 <br>Surface (base 100) 89","Culture: Orge <br>Année: 2012 <br>Surface (base 100) 98","Culture: Orge <br>Année: 2013 <br>Surface (base 100) 93","Culture: Orge <br>Année: 2014 <br>Surface (base 100) 102"],"type":"scatter","mode":"markers+lines","marker":{"autocolorscale":false,"color":"rgba(255,127,0,1)","opacity":1,"size":5.6692913385826778,"symbol":"circle","line":{"width":1.8897637795275593,"color":"rgba(255,127,0,1)"}},"hoveron":"points","name":"Orge","legendgroup":"Orge","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","line":{"width":1.8897637795275593,"color":"rgba(255,127,0,1)","dash":"solid"},"frame":null},{"x":[1,2,3,4,5,6,7,8,9],"y":[100,104.07201251125828,103.37867310576294,96.135703328175268,106.14831939403489,107.072606498293,93.736139142554492,100.90179460225485,99.43667446045589],"text":["Culture: Orge <br>Année: 2015 <br>Surface (base 100) 100","Culture: Orge <br>Année: 2016 <br>Surface (base 100) 104","Culture: Orge <br>Année: 2017 <br>Surface (base 100) 103","Culture: Orge <br>Année: 2018 <br>Surface (base 100) 96","Culture: Orge <br>Année: 2019 <br>Surface (base 100) 106","Culture: Orge <br>Année: 2020 <br>Surface (base 100) 107","Culture: Orge <br>Année: 2021 <br>Surface (base 100) 94","Culture: Orge <br>Année: 2022 <br>Surface (base 100) 101","Culture: Orge <br>Année: 2023 <br>Surface (base 100) 99"],"type":"scatter","mode":"markers+lines","marker":{"autocolorscale":false,"color":"rgba(255,127,0,1)","opacity":1,"size":5.6692913385826778,"symbol":"circle","line":{"width":1.8897637795275593,"color":"rgba(255,127,0,1)"}},"hoveron":"points","name":"Orge","legendgroup":"Orge","showlegend":false,"xaxis":"x2","yaxis":"y2","hoverinfo":"text","line":{"width":1.8897637795275593,"color":"rgba(255,127,0,1)","dash":"solid"},"frame":null},{"x":[1,2,3,4,5,6,7,8],"y":[100,99.07504392753313,115.99534816702457,116.22392098027699,123.44332188623908,126.18934628033682,112.04610835233095,117.31510928775005],"text":["Culture: Colza <br>Année: 2007 <br>Surface (base 100) 100","Culture: Colza <br>Année: 2008 <br>Surface (base 100) 99","Culture: Colza <br>Année: 2009 <br>Surface (base 100) 116","Culture: Colza <br>Année: 2010 <br>Surface (base 100) 116","Culture: Colza <br>Année: 2011 <br>Surface (base 100) 123","Culture: Colza <br>Année: 2012 <br>Surface (base 100) 126","Culture: Colza <br>Année: 2013 <br>Surface (base 100) 112","Culture: Colza <br>Année: 2014 <br>Surface (base 100) 117"],"type":"scatter","mode":"markers+lines","marker":{"autocolorscale":false,"color":"rgba(0,0,0,1)","opacity":1,"size":5.6692913385826778,"symbol":"circle","line":{"width":1.8897637795275593,"color":"rgba(0,0,0,1)"}},"hoveron":"points","name":"Colza","legendgroup":"Colza","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","line":{"width":1.8897637795275593,"color":"rgba(0,0,0,1)","dash":"solid"},"frame":null},{"x":[1,2,3,4,5,6,7,8,9],"y":[100,103.02055969727371,93.232449925227243,107.50802970435656,73.992712618302718,73.91466284169816,65.007935290646628,81.584156388850403,90.307846549768115],"text":["Culture: Colza <br>Année: 2015 <br>Surface (base 100) 100","Culture: Colza <br>Année: 2016 <br>Surface (base 100) 103","Culture: Colza <br>Année: 2017 <br>Surface (base 100) 93","Culture: Colza <br>Année: 2018 <br>Surface (base 100) 108","Culture: Colza <br>Année: 2019 <br>Surface (base 100) 74","Culture: Colza <br>Année: 2020 <br>Surface (base 100) 74","Culture: Colza <br>Année: 2021 <br>Surface (base 100) 65","Culture: Colza <br>Année: 2022 <br>Surface (base 100) 82","Culture: Colza <br>Année: 2023 <br>Surface (base 100) 90"],"type":"scatter","mode":"markers+lines","marker":{"autocolorscale":false,"color":"rgba(0,0,0,1)","opacity":1,"size":5.6692913385826778,"symbol":"circle","line":{"width":1.8897637795275593,"color":"rgba(0,0,0,1)"}},"hoveron":"points","name":"Colza","legendgroup":"Colza","showlegend":false,"xaxis":"x2","yaxis":"y2","hoverinfo":"text","line":{"width":1.8897637795275593,"color":"rgba(0,0,0,1)","dash":"solid"},"frame":null},{"x":[1,2,3,4,5,6,7,8],"y":[100,95.206106804825509,99.980469290489637,109.00593036240498,97.095186662175365,103.11909925253057,91.408344575322246,87.521975703359445],"text":["Culture: Autres céréales <br>Année: 2007 <br>Surface (base 100) 100","Culture: Autres céréales <br>Année: 2008 <br>Surface (base 100) 95","Culture: Autres céréales <br>Année: 2009 <br>Surface (base 100) 100","Culture: Autres céréales <br>Année: 2010 <br>Surface (base 100) 109","Culture: Autres céréales <br>Année: 2011 <br>Surface (base 100) 97","Culture: Autres céréales <br>Année: 2012 <br>Surface (base 100) 103","Culture: Autres céréales <br>Année: 2013 <br>Surface (base 100) 91","Culture: Autres céréales <br>Année: 2014 <br>Surface (base 100) 88"],"type":"scatter","mode":"markers+lines","marker":{"autocolorscale":false,"color":"rgba(255,215,0,1)","opacity":1,"size":5.6692913385826778,"symbol":"circle","line":{"width":1.8897637795275593,"color":"rgba(255,215,0,1)"}},"hoveron":"points","name":"Autres céréales","legendgroup":"Autres céréales","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","line":{"width":1.8897637795275593,"color":"rgba(255,215,0,1)","dash":"solid"},"frame":null},{"x":[1,2,3,4,5,6,7,8,9],"y":[100,108.65608819996562,109.21087783922839,103.68532737276028,101.16690871201376,104.50967684351575,115.59858094078687,106.90942684397733,100.92427890508004],"text":["Culture: Autres céréales <br>Année: 2015 <br>Surface (base 100) 100","Culture: Autres céréales <br>Année: 2016 <br>Surface (base 100) 109","Culture: Autres céréales <br>Année: 2017 <br>Surface (base 100) 109","Culture: Autres céréales <br>Année: 2018 <br>Surface (base 100) 104","Culture: Autres céréales <br>Année: 2019 <br>Surface (base 100) 101","Culture: Autres céréales <br>Année: 2020 <br>Surface (base 100) 105","Culture: Autres céréales <br>Année: 2021 <br>Surface (base 100) 116","Culture: Autres céréales <br>Année: 2022 <br>Surface (base 100) 107","Culture: Autres céréales <br>Année: 2023 <br>Surface (base 100) 101"],"type":"scatter","mode":"markers+lines","marker":{"autocolorscale":false,"color":"rgba(255,215,0,1)","opacity":1,"size":5.6692913385826778,"symbol":"circle","line":{"width":1.8897637795275593,"color":"rgba(255,215,0,1)"}},"hoveron":"points","name":"Autres céréales","legendgroup":"Autres céréales","showlegend":false,"xaxis":"x2","yaxis":"y2","hoverinfo":"text","line":{"width":1.8897637795275593,"color":"rgba(255,215,0,1)","dash":"solid"},"frame":null},{"x":[1,2,3],"y":[100,57.229830870544006,51.619590665352263],"text":["Culture: Gel (surfaces gelées sans production) <br>Année: 2007 <br>Surface (base 100) 100","Culture: Gel (surfaces gelées sans production) <br>Année: 2008 <br>Surface (base 100) 57","Culture: Gel (surfaces gelées sans production) <br>Année: 2009 <br>Surface (base 100) 52"],"type":"scatter","mode":"markers+lines","marker":{"autocolorscale":false,"color":"rgba(126,192,238,1)","opacity":1,"size":5.6692913385826778,"symbol":"circle","line":{"width":1.8897637795275593,"color":"rgba(126,192,238,1)"}},"hoveron":"points","name":"Gel (surfaces gelées sans production)","legendgroup":"Gel (surfaces gelées sans production)","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","line":{"width":1.8897637795275593,"color":"rgba(126,192,238,1)","dash":"solid"},"frame":null},{"x":[1,2,3,4,5,6,7,8,9],"y":[100,94.387380012427897,97.599524111770705,99.591790349523166,96.805161058182861,103.4007807231023,96.373155309092439,105.30675660673398,97.485132294867341],"text":["Culture: Gel (surfaces gelées sans production) <br>Année: 2015 <br>Surface (base 100) 100","Culture: Gel (surfaces gelées sans production) <br>Année: 2016 <br>Surface (base 100) 94","Culture: Gel (surfaces gelées sans production) <br>Année: 2017 <br>Surface (base 100) 98","Culture: Gel (surfaces gelées sans production) <br>Année: 2018 <br>Surface (base 100) 100","Culture: Gel (surfaces gelées sans production) <br>Année: 2019 <br>Surface (base 100) 97","Culture: Gel (surfaces gelées sans production) <br>Année: 2020 <br>Surface (base 100) 103","Culture: Gel (surfaces gelées sans production) <br>Année: 2021 <br>Surface (base 100) 96","Culture: Gel (surfaces gelées sans production) <br>Année: 2022 <br>Surface (base 100) 105","Culture: Gel (surfaces gelées sans production) <br>Année: 2023 <br>Surface (base 100) 97"],"type":"scatter","mode":"markers+lines","marker":{"autocolorscale":false,"color":"rgba(126,192,238,1)","opacity":1,"size":5.6692913385826778,"symbol":"circle","line":{"width":1.8897637795275593,"color":"rgba(126,192,238,1)"}},"hoveron":"points","name":"Gel (surfaces gelées sans production)","legendgroup":"Gel (surfaces gelées sans production)","showlegend":false,"xaxis":"x2","yaxis":"y2","hoverinfo":"text","line":{"width":1.8897637795275593,"color":"rgba(126,192,238,1)","dash":"solid"},"frame":null},{"x":[1,2,3,4,5,6,7,8],"y":[100,96.33122352298173,123.38207551488387,118.12665120353326,121.44430203698691,119.29824820662449,107.59273762501442,87.068143600813514],"text":["Culture: Riz <br>Année: 2007 <br>Surface (base 100) 100","Culture: Riz <br>Année: 2008 <br>Surface (base 100) 96","Culture: Riz <br>Année: 2009 <br>Surface (base 100) 123","Culture: Riz <br>Année: 2010 <br>Surface (base 100) 118","Culture: Riz <br>Année: 2011 <br>Surface (base 100) 121","Culture: Riz <br>Année: 2012 <br>Surface (base 100) 119","Culture: Riz <br>Année: 2013 <br>Surface (base 100) 108","Culture: Riz <br>Année: 2014 <br>Surface (base 100) 87"],"type":"scatter","mode":"markers+lines","marker":{"autocolorscale":false,"color":"rgba(251,154,153,1)","opacity":1,"size":5.6692913385826778,"symbol":"circle","line":{"width":1.8897637795275593,"color":"rgba(251,154,153,1)"}},"hoveron":"points","name":"Riz","legendgroup":"Riz","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","line":{"width":1.8897637795275593,"color":"rgba(251,154,153,1)","dash":"solid"},"frame":null},{"x":[1,2,3,4,5,6,7,8,9],"y":[100,100.74952713604091,103.07356847576771,84.874825532333773,97.428320583312583,96.516338327328441,81.757837239803138,76.701837439541279,82.784347669455087],"text":["Culture: Riz <br>Année: 2015 <br>Surface (base 100) 100","Culture: Riz <br>Année: 2016 <br>Surface (base 100) 101","Culture: Riz <br>Année: 2017 <br>Surface (base 100) 103","Culture: Riz <br>Année: 2018 <br>Surface (base 100) 85","Culture: Riz <br>Année: 2019 <br>Surface (base 100) 97","Culture: Riz <br>Année: 2020 <br>Surface (base 100) 97","Culture: Riz <br>Année: 2021 <br>Surface (base 100) 82","Culture: Riz <br>Année: 2022 <br>Surface (base 100) 77","Culture: Riz <br>Année: 2023 <br>Surface (base 100) 83"],"type":"scatter","mode":"markers+lines","marker":{"autocolorscale":false,"color":"rgba(251,154,153,1)","opacity":1,"size":5.6692913385826778,"symbol":"circle","line":{"width":1.8897637795275593,"color":"rgba(251,154,153,1)"}},"hoveron":"points","name":"Riz","legendgroup":"Riz","showlegend":false,"xaxis":"x2","yaxis":"y2","hoverinfo":"text","line":{"width":1.8897637795275593,"color":"rgba(251,154,153,1)","dash":"solid"},"frame":null},{"x":[5,6,8],"y":[100,2.3485204237542976,20.226018435126882],"text":["Culture: Canne à sucre <br>Année: 2011 <br>Surface (base 100) 100","Culture: Canne à sucre <br>Année: 2012 <br>Surface (base 100) 2","Culture: Canne à sucre <br>Année: 2014 <br>Surface (base 100) 20"],"type":"scatter","mode":"markers+lines","marker":{"autocolorscale":false,"color":"rgba(144,238,144,1)","opacity":1,"size":5.6692913385826778,"symbol":"circle","line":{"width":1.8897637795275593,"color":"rgba(144,238,144,1)"}},"hoveron":"points","name":"Canne à sucre","legendgroup":"Canne à sucre","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","line":{"width":1.8897637795275593,"color":"rgba(144,238,144,1)","dash":"solid"},"frame":null}],"layout":{"margin":{"t":55.452054794520549,"r":7.3059360730593621,"b":40.182648401826491,"l":43.105022831050235},"font":{"color":"rgba(0,0,0,1)","family":"","size":14.611872146118724},"title":{"text":"Évolution des 10 cultures aux taux de croissance moyen le plus faible","font":{"color":"rgba(0,0,0,1)","family":"","size":17.534246575342465},"x":0,"xref":"paper"},"xaxis":{"domain":[0,1],"automargin":true,"type":"linear","autorange":false,"range":[0.40000000000000002,8.5999999999999996],"tickmode":"array","ticktext":["2007","2008","2009","2010","2011","2012","2013","2014"],"tickvals":[1,2,3,4,5,6,7,8],"categoryorder":"array","categoryarray":["2007","2008","2009","2010","2011","2012","2013","2014"],"nticks":null,"ticks":"","tickcolor":null,"ticklen":3.6529680365296811,"tickwidth":0,"showticklabels":true,"tickfont":{"color":"rgba(77,77,77,1)","family":"","size":11.68949771689498},"tickangle":-0,"showline":false,"linecolor":null,"linewidth":0,"showgrid":true,"gridcolor":"rgba(235,235,235,1)","gridwidth":0.66417600664176002,"zeroline":false,"anchor":"y","title":"","hoverformat":".2f"},"annotations":[{"text":"Année","x":0.5,"y":0,"showarrow":false,"ax":0,"ay":0,"font":{"color":"rgba(0,0,0,1)","family":"","size":14.611872146118724},"xref":"paper","yref":"paper","textangle":-0,"xanchor":"center","yanchor":"top","annotationType":"axis","yshift":-21.917808219178088},{"text":"Surface des cultures (en base 100, <br /> année de référence étant l'année d'introduction de la culture)","x":0,"y":0.5,"showarrow":false,"ax":0,"ay":0,"font":{"color":"rgba(0,0,0,1)","family":"","size":14.611872146118724},"xref":"paper","yref":"paper","textangle":-90,"xanchor":"right","yanchor":"center","annotationType":"axis","xshift":-27.762557077625573},{"text":"0","x":0.5,"y":1,"showarrow":false,"ax":0,"ay":0,"font":{"color":"rgba(26,26,26,1)","family":"","size":11.68949771689498},"xref":"paper","yref":"paper","textangle":-0,"xanchor":"center","yanchor":"bottom"},{"text":"1","x":0.5,"y":0.47602739726027399,"showarrow":false,"ax":0,"ay":0,"font":{"color":"rgba(26,26,26,1)","family":"","size":11.68949771689498},"xref":"paper","yref":"paper","textangle":-0,"xanchor":"center","yanchor":"bottom"}],"yaxis":{"domain":[0.52397260273972601,1],"automargin":true,"type":"linear","autorange":false,"range":[-3.8435208690748293,132.38138757316594],"tickmode":"array","ticktext":["0","25","50","75","100","125"],"tickvals":[0,25,50,75,100,125.00000000000001],"categoryorder":"array","categoryarray":["0","25","50","75","100","125"],"nticks":null,"ticks":"","tickcolor":null,"ticklen":3.6529680365296811,"tickwidth":0,"showticklabels":true,"tickfont":{"color":"rgba(77,77,77,1)","family":"","size":11.68949771689498},"tickangle":-0,"showline":false,"linecolor":null,"linewidth":0,"showgrid":true,"gridcolor":"rgba(235,235,235,1)","gridwidth":0.66417600664176002,"zeroline":false,"anchor":"x","title":"","hoverformat":".2f"},"shapes":[{"type":"rect","fillcolor":null,"line":{"color":null,"width":0,"linetype":[]},"yref":"paper","xref":"paper","x0":0,"x1":1,"y0":0.52397260273972601,"y1":1},{"type":"rect","fillcolor":null,"line":{"color":null,"width":0,"linetype":[]},"yref":"paper","xref":"paper","x0":0,"x1":1,"y0":0,"y1":23.37899543378996,"yanchor":1,"ysizemode":"pixel"},{"type":"rect","fillcolor":null,"line":{"color":null,"width":0,"linetype":[]},"yref":"paper","xref":"paper","x0":0,"x1":1,"y0":0,"y1":0.47602739726027399},{"type":"rect","fillcolor":null,"line":{"color":null,"width":0,"linetype":[]},"yref":"paper","xref":"paper","x0":0,"x1":1,"y0":0,"y1":23.37899543378996,"yanchor":0.47602739726027399,"ysizemode":"pixel"}],"xaxis2":{"type":"linear","autorange":false,"range":[0.40000000000000002,9.5999999999999996],"tickmode":"array","ticktext":["2015","2016","2017","2018","2019","2020","2021","2022","2023"],"tickvals":[1,2,3,4,5,6,6.9999999999999991,8,9],"categoryorder":"array","categoryarray":["2015","2016","2017","2018","2019","2020","2021","2022","2023"],"nticks":null,"ticks":"","tickcolor":null,"ticklen":3.6529680365296811,"tickwidth":0,"showticklabels":true,"tickfont":{"color":"rgba(77,77,77,1)","family":"","size":11.68949771689498},"tickangle":-0,"showline":false,"linecolor":null,"linewidth":0,"showgrid":true,"domain":[0,1],"gridcolor":"rgba(235,235,235,1)","gridwidth":0.66417600664176002,"zeroline":false,"anchor":"y2","title":"","hoverformat":".2f"},"yaxis2":{"type":"linear","autorange":false,"range":[53.280256034321198,118.56612022204715],"tickmode":"array","ticktext":["60","80","100"],"tickvals":[60,80,100],"categoryorder":"array","categoryarray":["60","80","100"],"nticks":null,"ticks":"","tickcolor":null,"ticklen":3.6529680365296811,"tickwidth":0,"showticklabels":true,"tickfont":{"color":"rgba(77,77,77,1)","family":"","size":11.68949771689498},"tickangle":-0,"showline":false,"linecolor":null,"linewidth":0,"showgrid":true,"domain":[0,0.47602739726027399],"gridcolor":"rgba(235,235,235,1)","gridwidth":0.66417600664176002,"zeroline":false,"anchor":"x2","title":"","hoverformat":".2f"},"showlegend":true,"legend":{"bgcolor":null,"bordercolor":null,"borderwidth":0,"font":{"color":"rgba(0,0,0,1)","family":"","size":11.68949771689498},"title":{"text":"LIBELLE_GROUPE_CULTURE","font":{"color":"rgba(0,0,0,1)","family":"","size":14.611872146118724}}},"hovermode":"closest","barmode":"relative"},"config":{"doubleClick":"reset","modeBarButtonsToAdd":["hoverclosest","hovercompare"],"showSendToCloud":false},"source":"A","attrs":{"b3c68c94fe2":{"x":{},"y":{},"colour":{},"text":{},"type":"scatter"},"b3c4ebb67b4":{"x":{},"y":{},"colour":{},"text":{}}},"cur_data":"b3c68c94fe2","visdat":{"b3c68c94fe2":["function (y) ","x"],"b3c4ebb67b4":["function (y) ","x"]},"highlight":{"on":"plotly_click","persistent":false,"dynamic":false,"selectize":false,"opacityDim":0.20000000000000001,"selected":{"opacity":1},"debounce":0},"shinyEvents":["plotly_hover","plotly_click","plotly_selected","plotly_relayout","plotly_brushed","plotly_brushing","plotly_clickannotation","plotly_doubleclick","plotly_deselect","plotly_afterplot","plotly_sunburstclick"],"base_url":"https://plot.ly"},"evals":[],"jsHooks":[]}</script>
+</div>
+</div>
+<p>Plusieurs cultures montrent une tendance à la stagnation : c’est notamment le cas du <strong>blé tendre</strong> et du <strong>maïs</strong>, dont les indices oscillent autour de 100 à 110 sur toute la période, traduisant une stabilité des surfaces cultivées. <strong>Le colza</strong> connaît une évolution plus irrégulière : après un recul net en 2018 (indice à 85), il remonte progressivement pour se stabiliser autour de 100 à 110 en 2023. <strong>Le riz</strong> reste également stable, avec des variations limitées entre 90 et 110. En revanche, certaines cultures présentent une baisse marquée : <strong>les prairies temporaires</strong> voient leur indice chuter de 100 à environ 60 en 2023, traduisant un fort recul relatif. Cette baisse peut s’expliquer par les requalifications en prairies permanentes dans le contexte réglementaire post-2018.</p>
+<p><strong>Les surfaces gelées sans production</strong> affichent également une baisse tendancielle, passant de 100 à environ 70–80, en lien probable avec une raréfaction des surfaces laissées en jachère ou non cultivées. Le cas des <strong>autres céréales</strong> est plus hétérogène, mais tend à rester sous l’indice 110.</p>
+</section>
+<section id="analyse-de-lhétérogénéité-de-la-croissance-des-surfaces-de-culture-de-2019-à-2023" class="level3">
+<h3 class="anchored" data-anchor-id="analyse-de-lhétérogénéité-de-la-croissance-des-surfaces-de-culture-de-2019-à-2023">Analyse de l’hétérogénéité de la croissance des surfaces de culture de 2019 à 2023</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>select_annees <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">2008</span>, <span class="dv">2013</span>, <span class="dv">2018</span>, <span class="dv">2023</span>)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>select_cultures <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"Légumineuses à grains"</span>, <span class="st">"Fourrage"</span>, <span class="st">"Colza"</span>, <span class="st">"Riz"</span>)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>density_commune <span class="ot">&lt;-</span> RPG_R53 <span class="sc">|&gt;</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(year <span class="sc">%in%</span> select_annees,</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>         LIBELLE_GROUPE_CULTURE <span class="sc">%in%</span> select_cultures)</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(density_commune, <span class="fu">aes</span>(<span class="at">x =</span> <span class="fu">as.numeric</span>(surf_code_group_perc),  <span class="at">color =</span> <span class="fu">as.factor</span>(year))) <span class="sc">+</span> </span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_density</span>(<span class="at">size =</span> <span class="fl">0.5</span>) <span class="sc">+</span> </span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span> LIBELLE_GROUPE_CULTURE, <span class="at">scales =</span> <span class="st">"free_y"</span>) <span class="sc">+</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_x_continuous</span>(<span class="at">labels =</span> scales<span class="sc">::</span><span class="fu">percent_format</span>(<span class="at">accuracy =</span> <span class="dv">1</span>)) <span class="sc">+</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"Distribution de la part de surface agricole utilisé par une culture à l'échelle de la commune par année"</span>,</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">"Part de la surface agricole totale (par commune)"</span>,</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">"Densité"</span></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">"bottom"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="RPG_AnalyzeData_France_files/figure-html/unnamed-chunk-1-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggsave</span>(<span class="fu">here</span>(dir<span class="sc">$</span>output, <span class="st">"densite_culture.pdf"</span>), <span class="at">width =</span> <span class="dv">16</span>, <span class="at">height =</span> <span class="dv">10</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Ce graphique illustre la distribution de la part de la surface agricole totale consacrée à quatre cultures, dont deux émergentes - fourrages et légumineuses à grains - et deux en déclin - riz et colza - dans les communes françaises, pour les années 2008, 2018 et 2023.</p>
+<p>Pour le colza, la distribution reste globalement stable sur les trois années, concentrée entre 5 % et 15 % de la surface agricole communale. La faible dispersion et l’absence de déplacement significatif de la courbe indiquent que la culture du colza est restée relativement constante dans son implantation territoriale et dans son importance relative au sein des systèmes agricoles communaux.</p>
+<p>En revanche, le cas des fourrages montre une dynamique très marquée. En 2008, un pic de densité très élevé apparaît proche de 0 %, reflétant une multitude de communes où les fourrages occupaient une place négligeable ou marginale. En 2018 et plus encore en 2023, cette courbe s’aplatit et s’étale, suggérant une diffusion plus large des fourrages dans les SAU communales, et une augmentation de leur part relative dans de nombreuses zones.</p>
+<p>Les légumineuses à grains présentent une évolution similaire mais plus spectaculaire. En 2008, leur part dans la superficie agricole est quasi nulle dans l’écrasante majorité des communes. En 2018 puis 2023, on observe une montée de la densité autour de 2 à 5 %, montrant une adoption progressive de ces cultures à l’échelle locale. Cette tendance est en cohérence avec l’essor déjà identifié précédemment : les légumineuses ont bénéficié d’incitations fortes à partir de 2015, en tant que cultures fixant l’azote, valorisées dans le cadre du verdissement de la PAC.</p>
+<p>Enfin, le riz présente une dynamique plus complexe. En 2008, la courbe est plus aplatie, traduisant une répartition assez hétérogène des parts, parfois significatives (&gt;25 %) dans certaines communes. En 2018, la densité se concentre autour de 5–10 %, signe d’une certaine homogénéisation. En 2023, la densité baisse légèrement mais reste comparable. Cette stabilité relative traduit probablement la nature très géographiquement contrainte de cette culture, principalement concentrée dans quelques zones comme la Camargue.</p>
+</section>
+</section>
+<section id="analyse-de-la-diversité-culturale-par-commune" class="level2">
+<h2 class="anchored" data-anchor-id="analyse-de-la-diversité-culturale-par-commune">Analyse de la diversité culturale par commune</h2>
+<section id="evolution-moyenne-du-nombre-de-culture-différentes" class="level3">
+<h3 class="anchored" data-anchor-id="evolution-moyenne-du-nombre-de-culture-différentes">Evolution moyenne du nombre de culture différentes</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>RPG_R53 <span class="sc">%&gt;%</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(year, name) <span class="sc">%&gt;%</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">N_Cultures =</span> <span class="fu">n_distinct</span>(LIBELLE_GROUPE_CULTURE), <span class="at">.groups =</span> <span class="st">"drop"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(year) <span class="sc">%&gt;%</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">moyenne_cultures =</span> <span class="fu">mean</span>(N_Cultures)) <span class="sc">%&gt;%</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> year, <span class="at">y =</span> moyenne_cultures)) <span class="sc">+</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_col</span>(<span class="at">colour =</span> <span class="st">"lightgrey"</span>) <span class="sc">+</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Évolution moyenne du nombre de cultures différentes"</span>, <span class="at">y =</span> <span class="st">"Nombre moyen de cultures distinctes par communes"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="RPG_AnalyzeData_France_files/figure-html/unnamed-chunk-2-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>On observe au niveau de la France, une hausse de la diversité culturale, passant de 9,3 à 11,7 cultures distinctes par commune en moyenne, entre 2007 et 2023. On observe une forte hausse en 2015, probablement suite à l’incitation à la diversification mise en place par la réglementation PAC en 2015 en France.</p>
+<!-- ### Indice de Shannon par commune et par année -->
+<!-- ```{r} -->
+<!-- #|echo: false -->
+<!-- #|message: false -->
+<!-- #|warning: false -->
+<!-- # Calcul de l'indice de Shannon -->
+<!-- shannon_index <- RPG_R53 %>% -->
+<!--   group_by(year, name, LIBELLE_GROUPE_CULTURE) %>% -->
+<!--   summarise(surface_culture = sum(surf_code_group_m2), .groups = "drop") %>% -->
+<!--   group_by(year, name) %>% -->
+<!--   mutate(total_surface = sum(surface_culture), -->
+<!--          proportion = surface_culture / total_surface) %>% -->
+<!--   summarise(shannon = -sum(proportion * log(proportion), na.rm = TRUE), .groups = "drop") %>% -->
+<!--   group_by(year) %>% -->
+<!--   summarise(moyenne_shannon = mean(shannon, na.rm = TRUE), .groups = "drop") -->
+<!-- # Graphique de la diversité culturale à partir de l'indice de Shannon moyen -->
+<!-- ggplot(shannon_index, aes(x = year, y = moyenne_shannon, group = 1)) + -->
+<!--   geom_line(color = "#E31A1C", size = 0.5) + -->
+<!--   geom_point(color = "red", size = 2) + -->
+<!--   labs(title = "Évolution de la diversité culturale (Indice de Shannon)", -->
+<!--        x = "Année", -->
+<!--        y = "Indice de Shannon moyen") + -->
+<!--   theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 10)) -->
+<!-- ``` -->
+</section>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const onCopySuccess = function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
+  });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
