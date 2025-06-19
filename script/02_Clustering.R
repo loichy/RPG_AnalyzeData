@@ -93,6 +93,19 @@ fviz_cluster(clustering,
                      labels = cluster_labels) +
   labs(color = "Production dominante")
 
+## Cluster by regions
 
+RegionCode_vector <- unique(RPG_Aggregated_ALL_wide$region_code)
 
+ClusterRegion <- lapply(RegionCode_vector, function(region_code) {
+  RPG_wide_region <- RPG_Aggregated_ALL_wide %>% 
+    filter(region_code == region_code) %>%
+    select(all_of(columns_to_select)) %>%
+    na.omit()
+  
+  # ggsave()
+  
+  return(top_cultures_by_cluster)
+  
+}
 
