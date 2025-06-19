@@ -1,0 +1,249 @@
+---
+title: "k-means_methodes"
+author: "Aziliz"
+date: "2025-06-04"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Documentation à propos du clustering
+
+<https://www.tidymodels.org/learn/statistics/k-means/>
+
+Comment fonctionne le K-means ? But : assigner chaque observation à un cluster k
+
+```         
+1- Spécifier le nombre de clusters 
+2- Chaque observation seule est assignée temporairement à un centroïde qui lui est proche 
+3- Le centroïde de chaque cluster est calculé selon l'ensemble des observations assignées au cluster
+```
+
+Nb : les centroïdes des clusters peuvent bouger =\> réassigner certaines observations à un centroïde devenu plus proche
+
+**= processus itératif de calcul des centroïdes et d'assignation des observation à celui qui leur est le plus proche** **STOP : quand plus rien ne bouge** **=\> chaque observation est assignée à son cluster final !**
+
+Practical Guide To Cluster Analysis in R - Alboukadel Kassambara <https://xsliulab.github.io/Workshop/2021/week10/r-cluster-book.pdf>
+
+**But du clustering** = identifier des groupes d'objets similaires au sein d'un ensemble de données
+
+**K-means clustering** (MacQuenn, 1967) : algorithme d'apprentissage automatique le plus couramment utilisé pour partitionner un ensemble de données en un ensemble de k clusters. Chaque cluster est représenté par son centre (*centroid*) = les principaux points assignés au cluster. - (chapitre 4)
+
+Nb : utilisation des moyennes comme centre des clusters
+
+Comment définir un cluster ? Plusieurs méthodes et algorithmes possible mais le plus utilisé : \* le Hartigan-Wong algorithme : intérieur d'un cluster = somme des carrés des distances euclidiennes entre les éléments et le centroïde correspondant
+
+**Fonctionnement général du clustering (K-means) : assignation de chaque observation à un cluster --\> calcul de la valeur principal de chaque cluster (centroid) --\> vérification par l'algorithme que chaque observation est bien dans le cluster le plus proche d'un centroïde --\> réassignation si ce n'est pas le cas --\> modification des clusters --\> nouveau calcul des centroïdes des clusters ...**
+
+Etape 1 : indiquer le nombre de clusters qui seront générés dans le solution finale
+
+Comment choisir le bon nombre de clusters k que l'on veut au final? --\> fonction **fviz_nbclust()** = solution efficace pour estimer le nombre optimal de clusters
+
+=\> kmeans(df, 4 (= nombre de clusters k), nstart = n) Nb : mieux vaut indiquer un grand nombre (25, 50) pour *nstart* pour avoir une plus grande stabilité. *Nstart* : choix de n assignations de départ et R garde celle avec la variance la plus faible au sein du cluster
+
+Tirer un graphique de cela il faut utiliser le **PCA** (Principal Component Analysis) pour réduire le nombre de dimension des données qui ont plus de 2 variables. But : faire un graphique en se basant sur les coordonnées des deux composantes principales
+
+-   **K-Medoids** = chaque cluster est représenté par l'un des points qu'il contient (*medoid*)
+
+Medioïde = objet au sein d'une grappe pour lequel la dissimilarité moyenne entre lui et tous les autres membres de la grappe est minimale
+
+Algorithme principalement utilisé : **PAM** (Partitioning Around Medoids, Kaufman et Rousseeuw - 1990) - (chapitre 5)
+
+Nb : pour les grands jeux de données mieux vaut privilégier l'utilisation de l'algorithme **CLARA** (chapitre 6)
+
+Comment fonctionne cet algorithme ? 1. Sélectionne k objets qui deviendront les médioïdes
+
+2.  Calcul de la matrice de dissimilarité si elle n'a pas été fournie
+
+3.  Affecte chaque objet à son médioïde le plus proche
+
+4.  Pour chaque grappe, recherche si l'un des objets de la grappe diminue le coefficient de dissimilarité moyen ; si c'est le cas, sélectionne l'entité qui diminue ce coefficient.
+
+5.  Si au moins un médoïde a changé, retour à (3), sinon fin l'algorithme.
+
+L'algorithme PAM demande à l'utilisateur de connaître les données et d'indiquer le nombre approprié de grappes à produire. Ce nombre peut être estimé à l'aide de la fonction **fviz_nbclust** [dans le paquetage R de *factoextra*].
+
+Après avoir effectué le regroupement PAM, la fonction R **fviz_cluster()** [paquet factoextra] peut être utilisée pour visualiser les résultats. Le format est **fviz_cluster(pam.res)**, où pam.res est le résultat du PAM.
+
+# Objectifs avec la méthode du clustering
+
+1- Grouper les communes par spécialité de production agricole
+
+2- Comprendre la signification de ces groupes (comment l'algorithme en est arrivée là)
+
+3- Construire une carte des communes représentant les spécifications (par un code couleur par exemple)
+
+# Mise en application du clustering
+
+## Préparation de l'environnement
+
+```{r, echo = FALSE}
+# Clean memory 
+rm(list=ls())
+gc()
+
+# Load package
+if (!require("pacman")) install.packages("pacman")
+pacman::p_load(cluster, factoextra, dplyr, here, tidyr, tibble, FactoMineR)
+
+# List directories 
+dir <- list()
+dir$root <- here()
+dir$data <- here(dir$root, "data")
+dir$raw <- here(dir$data, "raw")
+dir$derived <- here(dir$data, "derived")
+dir$final <- here(dir$data, "final")
+dir$script <- here(dir$root, "script")
+dir$output <- here(dir$root, "output")
+
+# Create non existing directories
+lapply(dir, function(i) dir.create(i, recursive = T, showWarnings = F))
+```
+
+## Détermination du nombre de clusters optimal
+
+NB : subjectif, dépend de la méthode employées pour mesurer les similarités entre les paramètres : méthodes directes (`elbow` and `silhouette`) ou méthode de test statistique (`gap statistic`)
+
+-   `Elbow method` : faire varier le nombre de clusters k entre 1 et 10 et pour chaque k le WSS (mesure la compacité du regroupement). Le but est ensuite d'en tirer un graphique, k-optimal sera indiqué par une courbure, un "coude".
+
+-   `Average silhouette method` : mesure la qualité d'un clustering (un indice élevé indique l'optimalité du clustering) A l'inverse de "Elbow", ici, le k-optimal sur le graphique sera le maximum de la courbe.
+
+-   `Gap statistic method` : comapraison des variations à l'intérieur des "grappes" pour différentes valeurs de k avec leurs valeurs attendues dans le cadre d'une distribution de référence des valeurs. k-optimal = valeur qui maximise le "gap statistic"
+
+Maintenant, le but est de l'automatiser pour qu'il soit calculer dans le script et que la suite du script s'en serve automatiquement pour construire les clusters.
+
+## Application de la méthode CLARA à partir du manuel d'Alboukadel Kassambara
+
+Raisonnement : - nettoyer les données - garder seulement les données numériques - standardiser les données - appliquer le clustering CLARA - visualiser le clustering
+
+```{r}
+RPG_wide <- readRDS(here(dir$raw, "RPG_Aggregated_Brittany_wide.rds"))
+
+RPG_clean_2023 <- RPG_wide %>%
+  filter(year == 2023) %>%
+  na.omit()
+
+# Sélectionner colonnes des groupes de culture
+columns_to_select <- paste0("parcel_cult_code_group_perc_G", 1:25)
+
+# Exclusion des colonnes constantes
+constant_cols <- which(apply(RPG_clean_2023[, columns_to_select], 2, function(x) var(x, na.rm = TRUE) == 0))
+names(constant_cols)
+variable_columns <- setdiff(columns_to_select, names(constant_cols))
+
+# Standardisation
+commune_scaled <- RPG_clean_2023 %>%
+  select(all_of(variable_columns)) %>%
+  scale()
+    
+# Détermination du nombre de cluster optimal
+sil_data <- fviz_nbclust(commune_scaled, clara, method = "silhouette", correct.d=TRUE)
+optimal_k <- which.max(sil_data$data$y)
+
+# Clustering final
+set.seed(123)
+clustering <- clara(commune_scaled, k = optimal_k, samples = 50, pamLike = TRUE, correct.d = TRUE)
+
+# Graphique
+fviz_cluster(clustering, 
+             data = commune_scaled,
+             ellipse.type = "t", 
+             geom = "point", pointsize = 1,
+             ggtheme = theme_minimal())
+```
+
+*Note : certaines cultures ne sont pas prises en compte dans le clustering, car elles présentent une variance constante ie. ils s'agit de cultures qui n'ont pas été cultivées en 2023.*
+
+Dim1 et Dim2 correspondent aux deux premières composantes principales. La première dimension explique 12,5% de la variance totale des données alors que la deuxième en explique 8,9%.
+
+L'analyse visuelle met en évidence trois clusters bien différenciés, correspondant à des profils agricoles distincts. Le cluster 1, représenté en rouge, se distingue par une forte compacité et une nette séparation le long de l’axe principal (Dim1), ce qui suggère un profil homogène et spécifique des communes qui le composent — potentiellement des communes à forte spécialisation agricole. Le cluster 2, en vert, montre également une certaine compacité mais est positionné à proximité du cluster rouge, ce qui indique des similarités partielles, tout en conservant des caractéristiques propres. En revanche, le cluster 3, en bleu, apparaît nettement plus dispersé, occupant une large portion de l’espace des deux premières composantes. Cette dispersion traduit une plus grande hétérogénéité interne : il s’agit sans doute de communes aux pratiques agricoles plus diversifiées, moins structurées, ou en transition entre différents systèmes de culture.
+
+Il est possible d'étudier quelles variables influencent le plus Dim1 et Dim2, ce qui peut nous renseigner davantage sur la construction de ces clusters et de la visualisation finale.
+
+```{r}
+res.pca <- PCA(commune_scaled, graph = FALSE)
+
+# Contributions des variables à Dim1 et Dim2
+fviz_contrib(res.pca, choice = "var", axes = 1) 
+fviz_contrib(res.pca, choice = "var", axes = 2) 
+```
+
+Ainsi, ces histogrammes nous montre que les groupes de cultures G18, G1, G2, G16 et G5 sont ceux qui influencent le plus Dim1 alors que pour Dim2 c'est très largement G19 puis en plus faible proportion G3, G5, G25 ou G11.
+
+Notons que nous avons ici de faibles proportions de variance expliquée par Dim1 et Dim2, cela s'explique par la multiplicité des dimensions qui existent dans notre cas. Je tend à supposer donc que l'interprétation en cluster en tout cas par la visualisation n'est peut-être pas tant représentative de l'ensemble des données que ça...
+
+```{r}
+fviz_eig(res.pca, addlabels = TRUE, ylim = c(0, 50))
+```
+
+Pour expliquer au moins 50% de la variance totale, il faudrait 10 dimensions.
+
+## Analyse des profils moyens des clusters
+
+```{r}
+# Ajouter les clusters aux données originales
+RPG_clean_2023 <- cbind(RPG_clean_2023, cluster = clustering$clustering)
+```
+
+```{r}
+# Sélection des colonnes d'intérêt
+columns_to_select <- paste0("parcel_cult_code_group_perc_G", 1:25)
+
+# Moyennes par cluster
+cluster_profiles <- RPG_clean_2023 %>%
+  select(cluster, all_of(columns_to_select)) %>%
+  group_by(cluster) %>%
+  summarise(across(everything(), mean, na.rm = TRUE))
+
+```
+
+```{r}
+
+# Mettre en format long pour faciliter l’analyse
+cluster_profiles_long <- cluster_profiles %>%
+  pivot_longer(
+    cols = -cluster,
+    names_to = "groupe_culture",
+    values_to = "moyenne"
+  )
+
+# Identifier les 3 groupes de culture les plus représentés dans chaque cluster
+top_cultures_by_cluster <- cluster_profiles_long %>%
+  group_by(cluster) %>%
+  arrange(desc(moyenne), .by_group = TRUE) %>%
+  slice_head(n = 3)
+print(top_cultures_by_cluster)
+```
+
+
+La culture dominante dans les clusters 1 et 2 est la culture 18, correspondant aux **prairies permanentes** avec une représentation respectivement de 34%, 25%. Pour le cluster 3, les **prairies permanentes** se trouvent à la deuxième position du classement avec 19%. Cela paraît logique dans la mesure où il s'agit de la culture dominante d'une manière générale en Bretagne, avec la plus grande surface agricole totale dédiée au pâturage. Les trois clusters partagent aussi la culture 2, c'est-à-dire **le maïs**, comme dominante, en troisième position pour le cluster 1 et 3 avec 17% de représentation, alors qu'elle constitue la deuxième culture la plus dominante dans le cluster 2.
+
+Renforçant l'idée d'une plus faible similarité entre le cluster 3 et les deux premiers, on trouve que la culture la plus dominante à 24% dans le cluster 3 est la culture 25, ie. **les légumes ou fleurs**. Nous pouvons alors regarder géographiquement comment est situé le cluster 3 pour conclure sur cette différence par rapport aux autres clusters.
+
+## Visualisation cartographique du clustering
+
+```{r}
+library(dplyr)
+library(sf)
+
+# Charger le shapefile des communes
+communes_sf <- st_read("data/shapefiles/communes-20220101.shp") 
+
+# Joindre les données de cluster avec la géométrie + enlever les communes hors Bretagne
+communes_sf <- communes_sf |>
+  mutate(code_commune = as.character(insee))
+
+RPG_map_data <- communes_sf |>
+  left_join(RPG_clean_2023, by = "insee") |>
+  na.omit()
+
+# Visualiser la carte
+ggplot(RPG_map_data) +
+  geom_sf(aes(fill = as.factor(cluster)), color = "white", size = 0.1) +
+  scale_fill_viridis_d(name = "Cluster") +
+  theme_minimal() +
+  labs(title = "Clustering des communes en Bretagne (2023)",
+       caption = "Source : RPG 2023, traitement personnel")
+
+```

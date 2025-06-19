@@ -53,6 +53,8 @@ c25 <- c(
 ```
 
 
+
+
 ## Introduction
 
 Ce document présente la répartition des cultures en France à partir des données du **Registre Parcellaire Graphique** (RPG). Le RPG est une base de données géographique qui recense les parcelles agricoles et les cultures qui y sont pratiquées. Ces données sont déclarées par les agriculteurs dans le cadre de leur déclaration de la Politique Agricole Commune. Elles sont en [libre accès](https://geoservices.ign.fr/rpg) et sont mises à jour chaque année. 
@@ -60,6 +62,8 @@ Ce document présente la répartition des cultures en France à partir des donn�
 L'objectif de cette analyse est de visualiser la diversité des cultures pratiquées en Bretagne et d'identifier les principales cultures présentes dans la région. En particulier, nous souhaitons identifier les dynamiques des cultures (cultures émergentes ou en déclin) ainsi que leur répartition spatiale. Cette analyse utilise les données du RPG sur 17 années (2007-2023), aggrégées à l'échelle de la commune. Les scripts permettant de collecter, et préparer les données du RPG sont disponibles sur GitHub dans le dépôts [`RPG_PrepareData`](https://github.com/loichy/RPG_PrepareData) Nous disposons ainsi de l'usage des sols entre 24 et 28 grands groupes de culture. Nous mesurons la surface dédié à chaque groupe de culture par commune et année, ainsi que le nombre de parcelles.
 
 Dans une première partie, nous présentons l'usage des sols de manière globale en France sur la période 2007-2023. Dans la deuxième section, nous étudions la dynamique des usages des sols, en étudiant en particulier l'expansion des cultures émergentes et le déclin des cultures en perte de vitesse. Enfin, nous étudions la diversité des cultures à l'échelle des communes et son évolution dans le temps.
+
+
 
 ```{r load-data, include=FALSE}
 # Load data
@@ -69,11 +73,15 @@ RPG_R53_wide <- readRDS(here(dir$raw, "RPG_Aggregated_All_wide.rds"))
 ```
 
 
+
+
 ## Le mix cultural en France: une présentation générale
 
 ### Evolution de la surface agricole en France
 
 Le graphique ci-dessous montre l'évolution sur la période 2007-2023 de la surface agricole totale en France ainsi que sa distribution entre communes.
+
+
 
 ```{r agri-area, include=FALSE}
 total_agri_per_year <- RPG_R53_wide %>%
@@ -118,6 +126,8 @@ ggplot(RPG_R53_wide, aes(x = factor(year), y = as.numeric(surf_agri_geo_unit_m2)
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 ```
 
+
+
 Ce graphique montre que la surface agricole utilisée totale en France reste  stable dans le temps (ligne rouge). De manière générale, on observe une légère augmentation de la surface agricole totale, à hauteur de 2% entre 2007 et 2023. La surface agricole française totale a atteint un premier maximum en 2012, puis suite à une diminution jusqu'en 2019, un nouveau maximum en 2021.
 
 La distribution de la surface agricole totale par commune montre également une stabilité importante (graphiques en violon, et boite à moustache associée). Près de 90% des communes en Bretagne ont une surface agricole utilisée inférieures à 3000 ha, et la médiane de la surface agricole utilisée des communes restent stable dans le temps (environ 1 080 ha).
@@ -127,6 +137,8 @@ La distribution de la surface agricole totale par commune montre également une 
 #### Surface agricole par culture
 
 La tableau ci-dessous présente les surfaces agricoles utilisés par culture en France sur la période 2007-2023. Il s'agit du total des surfaces par culture sur toutes les parcelles, qui est calculé par année et dont nous présentons ici la moyenne sur la période 2007-2023.
+
+
 
 ```{r desc-stat, include=FALSE}
 # Descriptive statistics
@@ -193,6 +205,8 @@ knitr::kable(RPG_R53_desc_clean,
 
 ```
 
+
+
 La surface agricole totale est de `r round(as.numeric(total_surf_agri) / 10000, 1)` ha. 
 
 La culture la plus répandue en France sont **les prairies permanentes**, qui représente `r round(RPG_R53_desc$surf_perc[1] * 100, 1)` % de la surface agricole totale. Les prairies permanentes sont suivies par **le blé tendre et le maïs**, qui représentent respectivement `r round(RPG_R53_desc$surf_perc[2] * 100, 1)` % et `r round(RPG_R53_desc$surf_perc[4] * 100, 1)` % de la surface agricole totale. **Les prairies temporaires, les estives et landes et l'orge** complètent le tableau des principales cultures, représentant respectivement `r round(RPG_R53_desc$surf_perc[3] * 100, 1)` %, `r round(RPG_R53_desc$surf_perc[5] * 100, 1)` % et `r round(RPG_R53_desc$surf_perc[6] * 100, 1)` % de la surface agricole totale.
@@ -200,6 +214,8 @@ La culture la plus répandue en France sont **les prairies permanentes**, qui re
 #### Part de parcelles agricoles par culture
 
 La figure ci-dessous représente le pourcentage de parcelles agricoles par type de culture en France pour quatre années (2007, 2012, 2017 et 2023). Il s'agit du nombre de parcelles par culture divisé par le nombre total de parcelles recensés par le RPG en Bretagne sur l'année.
+
+
 
 ```{r nb-parcels, include=FALSE}
 
@@ -244,6 +260,8 @@ ggsave(here(dir$output, "Pourcentage_parcelles_culture.pdf"), width = 10, height
 
 ```
 
+
+
 Initialement, on retrouve les plus grandes cultures en terme de surface agricole comme occupant la majorité des parcelles. En effet, **les prairies permanentes** occupent à elles seules en moyenne un tiers des parcelles en France, avec une forte augmentation depuis 2017. Elles sont suivies par les cultures de **blé tendre, prairies temporaires et maïs**, consituant au total plus de 50% des parcelles agricoles. On peut noter néanmoins une décroissance continue des cultures de **blé tendre et prairies temporaires**, avec une baisse respective de 6% et 4% des parcelles agricoles occupées. 
 
 Par ailleurs, on observe que **les estives et landes et l'orge**, qui suivent les cultures ci-dessus en terme de surface, sont devancés notamment par les cultures **Divers, les vignes ou encore les surfaces gelées sans production**. En particulier, **les vignes** représentent en moyenne 1,9% de la surface agricole totale, alors qu'elles occupent en moyenne 4,6% des parcelles. 
@@ -251,6 +269,8 @@ Par ailleurs, on observe que **les estives et landes et l'orge**, qui suivent le
 ## Evolution dynamique du mix cultural en Bretagne
 
 Cette section présente des analyses statistiques visant à identifier des cultures en développement et en déclin en France. 
+
+
 
 ```{r surf-group-year, include=FALSE}
 
@@ -324,6 +344,8 @@ p <- ggplot(share_cultures_groupes_year, aes(
 ggplotly(p, tooltip = "text")
 
 ```
+
+
 On observe une croissance de la part des surfaces agricoles allouée aux **prairies permanentes**, passant de 25% à 28% entre 2007 et 2023, avec une très forte hausse entre 2017 et 2018. De la même manière, on observe une forte décroissance de la part des **prairies temporaires**. Cela s'explique par une redéfinition réglementaires des prairies temporaires et permanentes, qui a conduit à des modifications dans la déclaration de ces surfaces. Le **blé tendre** est en diminution lente, mais continue en terme de part de surface occupée, passant de 18,5% à 17% environ. On observe une dynamique similaire pour **le maïs**, passant de 11% à 9% de la part des surfaces agricoles. 
 
 Par la suite, nous présentons les évolutions relatives des surfaces agricoles par culture. Dans un premier temps, nous calculons alors le taux de croissance inter-annuel des surfaces agricoles utilisés par la culture, de la manière suivante $g_{kt} = \dfrac{y_{kt} - y_{kt-1}}{y_{kt-1}}$, où $g_{kt}$ est le taux de croissance de la culture $k$ à l'année $t$, et $y_{kt}$ est la surface agricole utilisée par la culture $k$ à l'année $t$. Cette analyse permet de comprendre la variabilité entre année des surfaces utilisés par la culture.
@@ -333,6 +355,8 @@ Dans un second temps, nous calculons la croissance de la surface associé à la 
 ### Analyse des taux de croissance inter-annuels des surfaces agricoles
 
 Le tableau ci-dessous présente le nombre d'années de données ou chaque culture apparaît dans notre échantillon, ainsi que le taux de croissance annuel moyen des surfaces agricoles utilisées par culture sur la période 2007-2023.
+
+
 
 ```{r mean-growth-rate,  echo=FALSE, results='asis'}
 
@@ -383,13 +407,17 @@ share_cultures_groupes_year %>%
   theme(legend.position = "none")
 ```
 
-On observe une forte expansion des cultures de **fourrage, autres oléagineux et légumineuses à grain**, respectivement de `r round(mean_growthrates$mean_growthrate[1], 1)`%, `r round(mean_growthrates$mean_growthrate[2], 1)`% et `r round(mean_growthrates$mean_growthrate[3], 1)`%. Il est intéressant de le noter, car nous n'avons pas observé d'hausse particulière pour ces cultures en terme de part de surface agricole occupée dans l'analyse précédente. Les cultures en déclin rejoignent au contraire les analyses précédentes avec **le blé tendre et le maïs**, avec une baisse respective moyenne de -0,39% et -0,75%. Le plus grand déclin reste **les prairies temporaires**, pour les raisons citées ci-dessus, ainsi que **le riz** (-2,55% en moyenne).
+
+
+On observe une forte expansion des cultures de **fourrage, autres oléagineux et légumineuses à grain**, respectivement de 34%, 18% et 15%. Il est intéressant de le noter, car nous n'avons pas observé d'hausse particulière pour ces cultures en terme de part de surface agricole occupée dans l'analyse précédente. Les cultures en déclin rejoignent au contraire les analyses précédentes avec **le blé tendre et le maïs**, avec une baisse respective moyenne de -0,39% et -0,75%. Le plus grand déclin reste **les prairies temporaires**, pour les raisons citées ci-dessus, ainsi que **le riz** (-2,55% en moyenne).
 
 En comparant entre les taux de croissance moyen en terme de surface agricole et de nombre de parcelles alloué à une culture, on observe une similarité relativement forte. Seules **les cultures diverses** modifient significativement le classement, en prenant la deuxième place en terme d'expansion en nombre de parcelles, avec une moyenne de 30% de taux de croissance.
 
 Le **canne à sucre** est un cas particulier, car il n'a été cultivé que sur une seule année (2011), ce qui explique un fort taux de décroissance.  
 
 La représentation graphique ci-dessous montre l'évolution des taux de croissances annuels à partir d'une échelle en couleur.
+
+
 
 ```{r heatmap, echo=FALSE, results='asis'}
 heatmap_data <- share_cultures_groupes_year 
@@ -409,6 +437,8 @@ ggplot(heatmap_data, aes(x = year, y = LIBELLE_GROUPE_CULTURE, fill = log(1 + as
     na.value = "white"
   )
 ```
+
+
 Cette représentation permet d'identifier les cultures les plus instables sur la période d'intérêt : **les protéagineux, les légumineuses à grain et autres oléagineux**, ainsi que **le fourrage** présentent une relativement forte variabilité sur la période.
 
 ### Analyse de croissance des surfaces agricoles utilisés selon les groupes de cultures à partir de leur année d'implantation (année de référence)
@@ -420,6 +450,8 @@ D'autre part, une analyse à partir d'une année de référence permet de visual
 
 
 ### Analyse ciblée : les 10 groupes de culture qui la croissance moyenne la plus élevé (en termes de surfaces cultivées)
+
+
 
 
 ```{r top-growth, echo=FALSE, message=FALSE, warning=FALSE}
@@ -469,12 +501,16 @@ interactive_plot3
 
 ```
 
+
+
 On observe une dynamique particulièrement marquée pour **les légumineuses à grains**, dont la surface a presque triplé entre 2015 et 2018, passant de 100 à 280, avant de légèrement reculer tout en restant bien au-dessus de son niveau initial autour de 230. Cette trajectoire reflète directement les effets incitatifs de la réforme de la PAC de 2015, notamment à travers le verdissement et la valorisation des cultures fixant l’azote ( [`PAC 2015`](https://www.touteleurope.eu/agriculture-et-peche/la-pac-2014-2020/). 
 
 Le **fourrage** connaissent également une progression continue, avec un indice passant de 100 en 2015 à près de 170 en 2023, tout comme **les autres oléagineux**, qui atteignent 150 à 160 sur la période. **Les protéagineux**, bien que moins spectaculaires, atteignent un indice de 140 en 2023, contre 100 au point de départ. 
 À l’inverse, **les vignes** restent quasiment stables, oscillant autour de l’indice 100–110 sur l’ensemble de la période, tandis que **les fruits à coque et les légumes ou fleurs** progressent lentement, atteignant des indices compris entre 120 et 140. 
 
 ### Analyse ciblée : les 10 groupes de culture qui ont la croissance moyenne la plus faible (en termes de surfaces cultivées)
+
+
 
 ```{r small-growth, echo=FALSE, message=FALSE, warning=FALSE}
 
@@ -523,6 +559,8 @@ interactive_plot4 <- ggplotly(base_plot4, tooltip = "text")
 
 interactive_plot4
 ```
+
+
 Plusieurs cultures montrent une tendance à la stagnation : c’est notamment le cas du **blé tendre** et du **maïs**, dont les indices oscillent autour de 100 à 110 sur toute la période, traduisant une stabilité des surfaces cultivées. 
 **Le colza** connaît une évolution plus irrégulière : après un recul net en 2018 (indice à 85), il remonte progressivement pour se stabiliser autour de 100 à 110 en 2023. 
 **Le riz** reste également stable, avec des variations limitées entre 90 et 110. 
@@ -532,6 +570,8 @@ En revanche, certaines cultures présentent une baisse marquée : **les prairies
 Le cas des **autres céréales** est plus hétérogène, mais tend à rester sous l’indice 110. 
 
 ### Analyse de l'hétérogénéité de la croissance des surfaces de culture de 2019 à 2023
+
+
 
 ```{r}
 
@@ -558,6 +598,8 @@ ggplot(density_commune, aes(x = as.numeric(surf_code_group_perc),  color = as.fa
 ggsave(here(dir$output, "densite_culture.pdf"), width = 16, height = 10)
 
 ```
+
+
 Ce graphique illustre la distribution de la part de la surface agricole totale consacrée à quatre cultures, dont deux émergentes - fourrages et légumineuses à grains - et deux en déclin - riz et colza - dans les communes françaises, pour les années 2008, 2018 et 2023.
 
 Pour le colza, la distribution reste globalement stable sur les trois années, concentrée entre 5 % et 15 % de la surface agricole communale. La faible dispersion et l’absence de déplacement significatif de la courbe indiquent que la culture du colza est restée relativement constante dans son implantation territoriale et dans son importance relative au sein des systèmes agricoles communaux.
@@ -573,6 +615,8 @@ Enfin, le riz présente une dynamique plus complexe. En 2008, la courbe est plus
 
 ### Evolution moyenne du nombre de culture différentes
 
+
+
 ```{r}
 
 RPG_R53 %>%
@@ -584,9 +628,13 @@ RPG_R53 %>%
   geom_col(colour = "lightgrey") +
   labs(title = "Évolution moyenne du nombre de cultures différentes", y = "Nombre moyen de cultures distinctes par communes")
 ```
+
+
 On observe au niveau de la France, une hausse de la diversité culturale, passant de 9,3 à 11,7 cultures distinctes par commune en moyenne, entre 2007 et 2023. On observe une forte hausse en 2015, probablement suite à l'incitation à la diversification mise en place par la réglementation PAC en 2015 en France.
 
 ### Indice de Shannon par commune et par année
+
+
 
 ```{r}
 
