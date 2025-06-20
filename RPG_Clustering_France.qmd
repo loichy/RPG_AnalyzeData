@@ -16,7 +16,7 @@ gc()
 
 # Load package
 if (!require("pacman")) install.packages("pacman")
-pacman::p_load(cluster, factoextra, dplyr, here, tidyr, tibble, FactoMineR)
+pacman::p_load(cluster, factoextra, dplyr, here, tidyr, tibble, FactoMineR, ggpubr, sf)
 
 # List directories 
 dir <- list()
@@ -31,7 +31,6 @@ dir$output <- here(dir$root, "output")
 # Create non existing directories
 lapply(dir, function(i) dir.create(i, recursive = T, showWarnings = F))
 ```
-
 
 # Analyse des résultats de clustering au niveau régional en France
 
@@ -134,63 +133,59 @@ noms_regions <- c(
 )
 ```
 
+R11 (Île de France) :
 
-R11 (Île de France) : 
+G11, **Gel, surfaces sans production** et G1, **Blé tendre** se partagent les deux premières places dans chacun des deux clusters. Vu que G11 n'est pas considéré comme une culture, on peut se focaliser plutôt sur **le blé tendre** et la troisième culture des clusters, respectivement G18, **les prairies permanentes** et G3, **l'orge**.
 
-G11, **Gel, surfaces sans production** et G1, **Blé tendre** se partagent les deux premières places dans chacun des deux clusters. Vu que G11 n'est pas considéré comme une culture, on peut se focaliser plutôt sur **le blé tendre** et la troisième culture des clusters, respectivement G18, **les prairies permanentes** et G3, **l'orge**. 
+La carte indique une plus forte concentration du cluster 2 dans le sud de la région, et plus précisément le long de la couronne extérieure, où la culture du **blé tendre** et de **l'orge** domine.
 
-La carte indique une plus forte concentration du cluster 2 dans le sud de la région, et plus précisément le long de la couronne extérieure, où la culture du **blé tendre** et de **l'orge** domine. 
+R24 (Centre Val de Loire) :
 
-R24 (Centre Val de Loire) : 
+La région Centre Val de Loire est composée de 8 clusters, c'est-à-dire que notre méthode de clustering a identifié 8 profils agricoles distincts au sein de la région.
 
-La région Centre Val de Loire est composée de 8 clusters, c'est-à-dire que notre méthode de clustering a identifié 8 profils agricoles distincts au sein de la région. 
-
-Plusieurs clusters sont fortement marqués par le groupe G11, **Gel, surfaces sans production** présent dans 7 des 9 clusters, que nous n'analyserons pas par la suite. **Le blé tendre**, G1 est également très fréquent, notamment dans les clusters 1, 3, 4 et 8. Le groupe G18, **les prairies permanentes** se démarque nettement dans les clusters 2 et 6, où il représente plus de 37 % des surfaces, indiquant des territoires spécialisés. D'autres clusters révèlent des profils plus spécifiques : le cluster 5 est dominé par G21 (près de 45 %), correspondant à la culture **des vignes**, tandis que le cluster 7 fait apparaître une part significative de G20, **les vergers**, montrant une diversification locale. 
+Plusieurs clusters sont fortement marqués par le groupe G11, **Gel, surfaces sans production** présent dans 7 des 9 clusters, que nous n'analyserons pas par la suite. **Le blé tendre**, G1 est également très fréquent, notamment dans les clusters 1, 3, 4 et 8. Le groupe G18, **les prairies permanentes** se démarque nettement dans les clusters 2 et 6, où il représente plus de 37 % des surfaces, indiquant des territoires spécialisés. D'autres clusters révèlent des profils plus spécifiques : le cluster 5 est dominé par G21 (près de 45 %), correspondant à la culture **des vignes**, tandis que le cluster 7 fait apparaître une part significative de G20, **les vergers**, montrant une diversification locale.
 
 On trouve une corrélation géographique plutôt logique par rapport à ces résultats : le cluster 5 se retrouve sur la route des vignobles du Val de Loire, le cluster 2 dominé par **les prairies permanentes** se concentre particulièrement dans le sud. Le cluster 8, où la culture de **l'orge** émerge, se situe au nord de la région, touchant notamment les zones de la région Île de France où on a précédemment identifié une culture de l'orge également.
 
 R27 (Bourgogne Franche Comté) :
 
-Les deux clusters de la région sont dominés par **les prairies permanentes**, notamment pour le cluster 2 où elles atteignent 63% de représentativité. On retrouve aussi la culture du **blé tendre**, à hauteur de 17% pour le cluster 1 et 4% pour le cluster 2. A noter que **les vignes** ne figurent pas parmis les top 3 des cultures dominantes pour aucun des deux clusters. 
+Les deux clusters de la région sont dominés par **les prairies permanentes**, notamment pour le cluster 2 où elles atteignent 63% de représentativité. On retrouve aussi la culture du **blé tendre**, à hauteur de 17% pour le cluster 1 et 4% pour le cluster 2. A noter que **les vignes** ne figurent pas parmis les top 3 des cultures dominantes pour aucun des deux clusters.
 
-La carte géographique montre une concentration du cluster dans le sud-ouest et l'est de la région, tandis que le cluster 1 où la culture du **blé tendre** est plus présente se situe plutôt au nord-ouest et centre de la région. 
+La carte géographique montre une concentration du cluster dans le sud-ouest et l'est de la région, tandis que le cluster 1 où la culture du **blé tendre** est plus présente se situe plutôt au nord-ouest et centre de la région.
 
 R28 (Normandie) :
 
-Cette région montre à nouveau une forte diversité en terme de profiles agricoles, avec 9 clusters. 
+Cette région montre à nouveau une forte diversité en terme de profiles agricoles, avec 9 clusters.
 
-Une caractéristique forte de la région est la très forte prédominance **des prairies permanentes** (pâturages), qui apparaît en tête dans 8 clusters sur 10, atteignant parfois des proportions très élevées (jusqu’à 69,7 % dans le cluster 1 et 62,9 % dans le cluster 2). Le **blé tendre** (G1) est également très présent, souvent en seconde position, voire en première (cluster 6 avec 24,9 %). Le groupe G2, **le maïs**, apparaît plus ponctuellement, notamment dans les clusters 4, 5 et 8, contribuant à la diversification. Le cluster 8 se distingue par une forte concentration du groupe G25 (41 %), **les légumes et fleurs**, ce qui suggère une zone agricole très spécifique à cette culture.
-Enfin, le cluster 9 est marqué par un équilibre entre **les prairies permanentes** (25 %) et **le blé tendre** (23 %), ainsi qu’une part notable des **plantes à fibre**, traduisant une diversité croissante. 
+Une caractéristique forte de la région est la très forte prédominance **des prairies permanentes** (pâturages), qui apparaît en tête dans 8 clusters sur 10, atteignant parfois des proportions très élevées (jusqu’à 69,7 % dans le cluster 1 et 62,9 % dans le cluster 2). Le **blé tendre** (G1) est également très présent, souvent en seconde position, voire en première (cluster 6 avec 24,9 %). Le groupe G2, **le maïs**, apparaît plus ponctuellement, notamment dans les clusters 4, 5 et 8, contribuant à la diversification. Le cluster 8 se distingue par une forte concentration du groupe G25 (41 %), **les légumes et fleurs**, ce qui suggère une zone agricole très spécifique à cette culture. Enfin, le cluster 9 est marqué par un équilibre entre **les prairies permanentes** (25 %) et **le blé tendre** (23 %), ainsi qu’une part notable des **plantes à fibre**, traduisant une diversité croissante.
 
 Ce cluster est surtout localisé dans le nord-est de la région. La carte géographique montre cependant une plus forte hétérogénéité en terme de concentration des clusters, qui sont d'ailleurs souvent dominés par les mêmes types de culture.
 
 R32 (Hauts de France) :
 
-La région de Hauts de France est à nouveau largement dominé par la culture de **blé tendre** et **les prairies permanentes**, au total 30% à 37% par clusters. On retrouve au sein du cluster 1 la culture de **maïs** en troisième position, le cluster se concentrant particulièrement dans les communes au nord de la région. 
+La région de Hauts de France est à nouveau largement dominé par la culture de **blé tendre** et **les prairies permanentes**, au total 30% à 37% par clusters. On retrouve au sein du cluster 1 la culture de **maïs** en troisième position, le cluster se concentrant particulièrement dans les communes au nord de la région.
 
 R44 (Grand Est) :
 
-Les clusters 1 et 3 de la région présente comme premières cultures dominantes **les prairies permanentes** et **le blé tendre**. 
-Le cluster 2 est marqué par la présence des cultures **d'orge** (G3) et **d'autres cultures industrielles** (G24, une première en France), respectivement de 19% et 10%. Ce cluster se concentre particulièrement dans les départements du Marne et d'Ardennes. Les deux autres clusters se départagent le reste de la région en suivant les frontières départementales. 
+Les clusters 1 et 3 de la région présente comme premières cultures dominantes **les prairies permanentes** et **le blé tendre**. Le cluster 2 est marqué par la présence des cultures **d'orge** (G3) et **d'autres cultures industrielles** (G24, une première en France), respectivement de 19% et 10%. Ce cluster se concentre particulièrement dans les départements du Marne et d'Ardennes. Les deux autres clusters se départagent le reste de la région en suivant les frontières départementales.
 
-R52 (Pays de la Loire) : 
-  
+R52 (Pays de la Loire) :
+
 Dans chacun des trois clusters, **les prairies permanentes** dominent nettement, avec des proportions comprises entre 28,7 % et 42,9 %, ce qui suggère une spécialisation régionale marquée autour du pâturage.
 
 Le cluster 1 présente des contributions secondaires plus des groupes G19, **prairies temporaires** (11,3 %) et **du maïs** (11 %), tandis que le cluster 2 possède des parts plus équilibrées des cultures de **blé tendre** (12,1 %) et de **maïs** (10,1 %) par rapport aux **prairies permanentes** (28,7%).
 
-Le cluster 3 montre une situation particulière, car il n'est présent que sur 3 communes de la région, et possède une part importante de surfaces gelées à 10,6 %. D'une manière générale, la carte n'indique pas une forte spécialisation des profiles identifiées dans la région, néanmoins le cluster 1 se concentre plus dans le nord, ainsi que le sud-ouest de la région. 
+Le cluster 3 montre une situation particulière, car il n'est présent que sur 3 communes de la région, et possède une part importante de surfaces gelées à 10,6 %. D'une manière générale, la carte n'indique pas une forte spécialisation des profiles identifiées dans la région, néanmoins le cluster 1 se concentre plus dans le nord, ainsi que le sud-ouest de la région.
 
-R53 (Bretagne) -> voir `RPG_Clustering_R53.Rmd`
+R53 (Bretagne) -\> voir `RPG_Clustering_R53.Rmd`
 
 R75 (Nouvelle Aquitaine) :
 
-En Nouvelle-Aquitaine, le clustering révèle une forte hétérogénéité des profils culturaux selon les zones. Certains clusters (notamment le 1, 3 et 6) sont dominés par **les prairies permanentes**, souvent à plus de 50%, associée au **blé tendre** et **maïs**, traduisant des zones de monoculture intensive. Le cluster 1 est entièrement situé à l'est de la région, ainsi que plus marginalement dans le département Deux-Sèvres.
-Quelques clusters spécifiques se distinguent, comme le 4 dominé par **les vignes** (G21). Ce dernier se concentre notamment dans les départements de la Dordogne et de la Charente.
+En Nouvelle-Aquitaine, le clustering révèle une forte hétérogénéité des profils culturaux selon les zones. Certains clusters (notamment le 1, 3 et 6) sont dominés par **les prairies permanentes**, souvent à plus de 50%, associée au **blé tendre** et **maïs**, traduisant des zones de monoculture intensive. Le cluster 1 est entièrement situé à l'est de la région, ainsi que plus marginalement dans le département Deux-Sèvres. Quelques clusters spécifiques se distinguent, comme le 4 dominé par **les vignes** (G21). Ce dernier se concentre notamment dans les départements de la Dordogne et de la Charente.
 
 Le cluster 7, concentré au sud de la région, est entièrement consacré aux **prairies permanentes, temporaires et les estives et landes**.
 
-R76 (Occitanie) : 
+R76 (Occitanie) :
 
 Les deux clusters de l'Occitanie sont également dominés par **les prairies permanentes**, mais le premier se distingue avec une forte représentation des **vignes** (11,7%). Le deuxième cluster est plutôt spécialisé dans la culture du **blé tendre** (9,1%).
 
@@ -198,25 +193,18 @@ En terme de structure géographique, le cluster 2 se concentre à l'ouest de la 
 
 R84 (Auvergne Rhône Alpes) :
 
-Ici, les deux clusters montrent une surdomination des cultures destinées au pâturage. Néanmoins, alors que le cluster 1 possède une présence forte de la culture du **blé tendre** (7,2%) au côté des **prairies permanentes** (37,7%), le cluster 2 est entièrement constitué de  **prairies permanentes, temporaires et les estives et landes**, le premier à hauteur de 72,8%.
+Ici, les deux clusters montrent une surdomination des cultures destinées au pâturage. Néanmoins, alors que le cluster 1 possède une présence forte de la culture du **blé tendre** (7,2%) au côté des **prairies permanentes** (37,7%), le cluster 2 est entièrement constitué de **prairies permanentes, temporaires et les estives et landes**, le premier à hauteur de 72,8%.
 
 La localisation des clusters est plus dispersée. On peut distinguer néanmoins la présence du cluster 1 dans le nord-est et le centre de la région, notamment dans le Rhône et la Loire.
 
 R93 (Provence Alpes Côte d'Azur) :
 
-En Provence-Alpes-Côte d’Azur, plusieurs clusters présentent une forte dominance du groupe G17, **les estives et landes**, notamment les clusters 1 (17,3%), 2 (41,7%), 3 (13,7%), 4 (16,9%), 5 (10%), 6 (4,8%) et 7 (81,2%), ce dernier montrant une extrême spécialisation. 
-**Les prairies permanentes** sont également fréquentes dans les clusters 1 (17%), 2 (41,9%), 3 (8,4%), 4 (21,9%) et 7 (6,2%). Les clusters 4 et 9 incluent **le fourrage** autour de 17–18%, et est aussi présent à 11,9% dans le cluster 1. Le cluster 6 se distingue par une forte part de **vignes** (60,5%), et le cluster 8 par **les oliviers** (34,9%) et **autres cultures industrielles** (29,5%). 
+En Provence-Alpes-Côte d’Azur, plusieurs clusters présentent une forte dominance du groupe G17, **les estives et landes**, notamment les clusters 1 (17,3%), 2 (41,7%), 3 (13,7%), 4 (16,9%), 5 (10%), 6 (4,8%) et 7 (81,2%), ce dernier montrant une extrême spécialisation. **Les prairies permanentes** sont également fréquentes dans les clusters 1 (17%), 2 (41,9%), 3 (8,4%), 4 (21,9%) et 7 (6,2%). Les clusters 4 et 9 incluent **le fourrage** autour de 17–18%, et est aussi présent à 11,9% dans le cluster 1. Le cluster 6 se distingue par une forte part de **vignes** (60,5%), et le cluster 8 par **les oliviers** (34,9%) et **autres cultures industrielles** (29,5%).
 
-Les clusters à forte dominance de prairies couvrent le nord et le centre de la région.
-Le cluster 7 dominé par **les estives et landes** couvre la quasi totalité des Alpes Maritimes. Le cluster 6 se localise dans les départements de Vaucluse et le Var littoral, tandis que le cluster 8 se concentre au sud du département des Alpes Maritimes, ainsi que du côté ouest du littoral méditerranéen. 
+Les clusters à forte dominance de prairies couvrent le nord et le centre de la région. Le cluster 7 dominé par **les estives et landes** couvre la quasi totalité des Alpes Maritimes. Le cluster 6 se localise dans les départements de Vaucluse et le Var littoral, tandis que le cluster 8 se concentre au sud du département des Alpes Maritimes, ainsi que du côté ouest du littoral méditerranéen.
 
-R94 (Corse) : 
+R94 (Corse) :
 
 A l'exception de la commune autour d'Aléria, où **les vignes** correspondent à la culture dominante de l'île, toutes les autres communes appartiennent au cluster 1. Celui-ci est dominé à plus de 60% cumulé par **les estives et landes et les prairies permanentes**, avec une petite présence de culture de **fruits à coqs** (4%). Le cluster 2 est consacré à 25% aux **vignes**, ainsi qu'à 14% aux **vergers**.
 
-
-
-
 ## Analyse cartographique des clusters régionaux
-
-
