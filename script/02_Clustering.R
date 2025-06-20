@@ -13,7 +13,7 @@ gc()
 
 # Load package
 if (!require("pacman")) install.packages("pacman")
-pacman::p_load(cluster, factoextra, dplyr, here, tidyr, tibble, FactoMineR)
+pacman::p_load(cluster, factoextra, dplyr, here, tidyr, tibble, FactoMineR, sf, ggplot2, viridis)
 
 # List directories 
 dir <- list()
@@ -95,17 +95,81 @@ fviz_cluster(clustering,
 
 ## Cluster by regions
 
+# Load dataframe for France
+RPG_Aggregated_ALL_wide <- readRDS("data/raw/RPG_Aggregated_ALL_wide.rds")
+
+columns_to_select <- paste0("parcel_cult_code_group_perc_G", 1:25)
 RegionCode_vector <- unique(RPG_Aggregated_ALL_wide$region_code)
 
-ClusterRegion <- lapply(RegionCode_vector, function(region_code) {
-  RPG_wide_region <- RPG_Aggregated_ALL_wide %>% 
-    filter(region_code == region_code) %>%
-    select(all_of(columns_to_select)) %>%
+TopCultures_by_Region <- lapply(RegionCode_vector, function(region_code) {
+  # Filter data for region of interest
+  RPG_region <- RPG_Aggregated_ALL_wide %>%
+    filter(region_code == !!region_code, year == 2023) %>%
+    select(insee, all_of(columns_to_select)) %>%
     na.omit()
   
-  # ggsave()
+  # Delete columns with constant variance
+  constant_cols <- which(apply(RPG_region[, columns_to_select], 2, function(x) var(x, na.rm = TRUE) == 0))
+  variable_columns <- setdiff(columns_to_select, names(constant_cols))
   
-  return(top_cultures_by_cluster)
+  # Standardisation
+  commune_scaled <- RPG_region %>%
+    select(all_of(variable_columns)) %>%
+    scale()
   
-}
+  # Optimal number of clusters
+  sil_data <- fviz_nbclust(commune_scaled, clara, method = "silhouette", correct.d = TRUE)
+  optimal_k <- which.max(sil_data$data$y)
+  
+  # Clustering CLARA
+  set.seed(123)
+  clustering <- clara(commune_scaled, k = optimal_k, samples = 50, pamLike = TRUE, correct.d = TRUE)
+  
+  # Add clusters to the dataframe
+  RPG_region_clustered <- RPG_region %>%
+    mutate(cluster = clustering$clustering)
+  
+  # Computing mean values across clusters
+  cluster_profiles <- RPG_region_clustered %>%
+    select(cluster, all_of(columns_to_select)) %>%
+    group_by(cluster) %>%
+    summarise(across(everything(), mean, na.rm = TRUE), .groups = "drop")
+  
+  cluster_profiles_long <- cluster_profiles %>%
+    pivot_longer(-cluster, names_to = "groupe_culture", values_to = "moyenne")
+  
+  # Computing top 3 dominating cultures in each cluster
+  top_cultures <- cluster_profiles_long %>%
+    group_by(cluster) %>%
+    arrange(desc(moyenne), .by_group = TRUE) %>%
+    slice_head(n = 3) %>%
+    mutate(region = region_code)
+  
+  # Join with shapefile
+  communes_sf <- st_read("data/shapefiles/communes-20220101.shp", quiet = TRUE) %>%
+    mutate(insee = as.character(insee))
+  
+  map_data <- communes_sf %>%
+    left_join(RPG_region_clustered, by = "insee") %>%
+    filter(!is.na(cluster))
+  
+  # Generate map of clusters
+  p <- ggplot(map_data) +
+    geom_sf(aes(fill = as.factor(cluster)), color = "white", size = 0.1) +
+    scale_fill_viridis_d(name = "Cluster") +
+    theme_minimal() +
+    labs(title = paste0("Clustering des communes – Région ", region_code, " (2023)"),
+         caption = "Source : RPG 2023 – Traitement personnel")
+  
+  ggsave(
+    filename = here(dir$output, paste0("cluster_region_", region_code, ".pdf")),
+    plot = p,
+    width = 12, height = 8
+  )
+  
+  # Return list of top cultures
+  return(top_cultures)
+})
 
+# Create dataframe with the list of top cultures in clusters in each region
+TopCultures_all_regions <- bind_rows(TopCultures_by_Region)
