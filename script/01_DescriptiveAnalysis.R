@@ -1,5 +1,5 @@
 #===============================================================================
-# Description: Scrip to run some descriptive statistics and graph of the RPG data
+# Description: Script to run some descriptive statistics and graph of the RPG data
 # for years 2007-2023 at the commune level
 #===============================================================================
 

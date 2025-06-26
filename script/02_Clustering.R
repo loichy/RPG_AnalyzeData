@@ -1,6 +1,6 @@
 #===============================================================================
-# Description: Mise en oeuvre de la méthode de clusterisation "k-means" - Typologie des spécialisations
-# author:Aziliz 
+# Description: Script to run clustering at a communal level in a given year
+# by regions of France
 #===============================================================================
 
 #===============================================================================
@@ -171,5 +171,4 @@ TopCultures_by_Region <- lapply(RegionCode_vector, function(region_code) {
   return(top_cultures)
 })
 
-# Create dataframe with the list of top cultures in clusters in each region
-TopCultures_all_regions <- bind_rows(TopCultures_by_Region)
+
