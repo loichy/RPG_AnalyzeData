@@ -61,8 +61,6 @@ L'objectif de cette analyse est de visualiser la diversité des cultures pratiqu
 
 Dans une première partie, nous présentons l'usage des sols de manière globale en France sur la période 2007-2023. Dans la deuxième section, nous étudions la dynamique des usages des sols, en étudiant en particulier l'expansion des cultures émergentes et le déclin des cultures en perte de vitesse. Enfin, nous étudions la diversité des cultures à l'échelle des communes et son évolution dans le temps.
 
-
-
 ```{r load-data, include=FALSE}
 # Load data
 RPG_R53 <- readRDS(here(dir$raw, "RPG_Aggregated_All.rds"))
@@ -75,8 +73,6 @@ RPG_R53_wide <- readRDS(here(dir$raw, "RPG_Aggregated_All_wide.rds"))
 ### Evolution de la surface agricole en France
 
 Le graphique ci-dessous montre l'évolution sur la période 2007-2023 de la surface agricole totale en France ainsi que sa distribution entre communes.
-
-
 
 ```{r agri-area, include=FALSE}
 total_agri_per_year <- RPG_R53_wide %>%
@@ -131,8 +127,6 @@ La distribution de la surface agricole totale par commune montre également une 
 #### Surface agricole par culture
 
 La tableau ci-dessous présente les surfaces agricoles utilisés par culture en France sur la période 2007-2023. Il s'agit du total des surfaces par culture sur toutes les parcelles, qui est calculé par année et dont nous présentons ici la moyenne sur la période 2007-2023.
-
-
 
 ```{r desc-stat, include=FALSE}
 # Descriptive statistics
@@ -207,8 +201,6 @@ La culture la plus répandue en France sont **les prairies permanentes**, qui re
 
 La figure ci-dessous représente le pourcentage de parcelles agricoles par type de culture en France pour quatre années (2007, 2012, 2017 et 2023). Il s'agit du nombre de parcelles par culture divisé par le nombre total de parcelles recensés par le RPG en France sur l'année.
 
-
-
 ```{r nb-parcels, include=FALSE}
 
 year_simplified <- c(2007, 2012, 2017, 2023)
@@ -259,8 +251,6 @@ Par ailleurs, on observe que **les estives et landes et l'orge**, qui suivent le
 ## Evolution dynamique du mix cultural en Bretagne
 
 Cette section présente des analyses statistiques visant à identifier des cultures en développement et en déclin en France.
-
-
 
 ```{r surf-group-year, include=FALSE}
 
@@ -345,8 +335,6 @@ Dans un second temps, nous calculons la croissance de la surface associé à la 
 
 Le tableau ci-dessous présente le nombre d'années de données ou chaque culture apparaît dans notre échantillon, ainsi que le taux de croissance annuel moyen des surfaces agricoles utilisées par culture sur la période 2007-2023.
 
-
-
 ```{r mean-growth-rate,  echo=FALSE, results='asis'}
 
 mean_growthrates <- share_cultures_groupes_year %>% 
@@ -400,8 +388,6 @@ share_cultures_groupes_year %>%
   theme(legend.position = "none")
 ```
 
-
-
 On observe une forte expansion des cultures de **fourrage, autres oléagineux et légumineuses à grain**, respectivement de 34%, 18% et 15%. Il est intéressant de le noter, car nous n'avons pas observé d'hausse particulière pour ces cultures en terme de part de surface agricole occupée dans l'analyse précédente. Les cultures en déclin rejoignent au contraire les analyses précédentes avec **le blé tendre et le maïs**, avec une baisse respective moyenne de -0,39% et -0,75%. Le plus grand déclin reste **les prairies temporaires**, pour les raisons citées ci-dessus, ainsi que **le riz** (-2,55% en moyenne).
 
 En comparant entre les taux de croissance moyen en terme de surface agricole et de nombre de parcelles alloué à une culture, on observe une similarité relativement forte. Seules **les cultures diverses** modifient significativement le classement, en prenant la deuxième place en terme d'expansion en nombre de parcelles, avec une moyenne de 30% de taux de croissance.
@@ -409,8 +395,6 @@ En comparant entre les taux de croissance moyen en terme de surface agricole et 
 Le **canne à sucre** est un cas particulier d'une culture qui n'a été déclaré comme cultivé que sur 1 à 3 parcelles entre 2011 et 2014.
 
 La représentation graphique ci-dessous montre l'évolution des taux de croissances annuels à partir d'une échelle en couleur.
-
-
 
 ```{r heatmap, echo=FALSE, results='asis'}
 heatmap_data <- share_cultures_groupes_year 
@@ -431,7 +415,6 @@ ggplot(heatmap_data, aes(x = year, y = LIBELLE_GROUPE_CULTURE, fill = log(1 + as
   )
 ```
 
-
 Cette représentation permet d'identifier les cultures les plus instables sur la période d'intérêt : **les protéagineux, les légumineuses à grain et autres oléagineux**, ainsi que **le fourrage** présentent une relativement forte variabilité sur la période.
 
 Cette représentation permet d'identifier les cultures les plus instables sur la période d'intérêt : **les protéagineux, les légumineuses à grain et autres oléagineux**, ainsi que **le fourrage** présentent une relativement forte variabilité sur la période. Le cas du fourrage présente une singularité: la part de sa surface est multiplié par 4 entre 2014 et 2015, ce qui coincide avec le changement de recensement des données RPG, passant d'une catégorisation par îlots anonymes à une catégorisation par parcelles graphiques. L'importante variation obvservées sur cette année est donc possiblement lié à un biais de recensement, et non à dynamique d'expansion de la culture.
@@ -443,9 +426,6 @@ Nous optons ici pour une division du groupe en deux "échantillons". En effet, l
 Il s'agit alors d'étudier d'un côté la période 2007-2014 et de l'autre celle 2015-2023, le but étant de se détacher du biais créé par la méthode de recensement des données. D'autre part, une analyse à partir d'une année de référence permet de visualiser la tendance des cultures sur le long terme (explosion, disparition ...).
 
 ### Analyse ciblée : les 10 groupes de culture qui la croissance moyenne la plus élevé (en termes de surfaces cultivées)
-
-
-
 
 ```{r top-growth, echo=FALSE, message=FALSE, warning=FALSE}
 
@@ -494,15 +474,11 @@ interactive_plot3
 
 ```
 
-
-
-On observe une dynamique particulièrement marquée pour **les légumineuses à grains**, dont la surface a presque triplé entre 2015 et 2018, passant de 100 à 280, avant de légèrement reculer tout en restant bien au-dessus de son niveau initial autour de 230. Cette trajectoire reflète directement les effets incitatifs de la réforme de la PAC de 2015, notamment à travers le verdissement et la valorisation des cultures fixant l’azote ( [`PAC 2015`](https://www.touteleurope.eu/agriculture-et-peche/la-pac-2014-2020/). 
+On observe une dynamique particulièrement marquée pour **les légumineuses à grains**, dont la surface a presque triplé entre 2015 et 2018, passant de 100 à 280, avant de légèrement reculer tout en restant bien au-dessus de son niveau initial autour de 230. Cette trajectoire reflète directement les effets incitatifs de la réforme de la PAC de 2015, notamment à travers le verdissement et la valorisation des cultures fixant l’azote ( [`PAC 2015`](https://www.touteleurope.eu/agriculture-et-peche/la-pac-2014-2020/).
 
 Le **fourrage** connaissent également une progression continue, avec un indice passant de 100 en 2015 à près de 170 en 2023, tout comme **les autres oléagineux**, qui atteignent 150 à 160 sur la période. **Les protéagineux**, bien que moins spectaculaires, atteignent un indice de 140 en 2023, contre 100 au point de départ. À l’inverse, **les vignes** restent quasiment stables, oscillant autour de l’indice 100–110 sur l’ensemble de la période, tandis que **les fruits à coque et les légumes ou fleurs** progressent lentement, atteignant des indices compris entre 120 et 140.
 
 ### Analyse ciblée : les 10 groupes de culture qui ont la croissance moyenne la plus faible (en termes de surfaces cultivées)
-
-
 
 ```{r small-growth, echo=FALSE, message=FALSE, warning=FALSE}
 
@@ -552,19 +528,13 @@ interactive_plot4 <- ggplotly(base_plot4, tooltip = "text")
 interactive_plot4
 ```
 
-
-Plusieurs cultures montrent une tendance à la stagnation : c’est notamment le cas du **blé tendre** et du **maïs**, dont les indices oscillent autour de 100 à 110 sur toute la période, traduisant une stabilité des surfaces cultivées. 
-**Le colza** connaît une évolution plus irrégulière : après un recul net en 2018 (indice à 85), il remonte progressivement pour se stabiliser autour de 100 à 110 en 2023. 
-**Le riz** reste également stable, avec des variations limitées entre 90 et 110. 
-En revanche, certaines cultures présentent une baisse marquée : **les prairies temporaires** voient leur indice chuter de 100 à environ 60 en 2023, traduisant un fort recul relatif. Cette baisse peut s’expliquer par les requalifications en prairies permanentes dans le contexte réglementaire post-2018.
+Plusieurs cultures montrent une tendance à la stagnation : c’est notamment le cas du **blé tendre** et du **maïs**, dont les indices oscillent autour de 100 à 110 sur toute la période, traduisant une stabilité des surfaces cultivées. **Le colza** connaît une évolution plus irrégulière : après un recul net en 2018 (indice à 85), il remonte progressivement pour se stabiliser autour de 100 à 110 en 2023. **Le riz** reste également stable, avec des variations limitées entre 90 et 110. En revanche, certaines cultures présentent une baisse marquée : **les prairies temporaires** voient leur indice chuter de 100 à environ 60 en 2023, traduisant un fort recul relatif. Cette baisse peut s’expliquer par les requalifications en prairies permanentes dans le contexte réglementaire post-2018.
 
 Plusieurs cultures montrent une tendance à la stagnation : c’est notamment le cas du **blé tendre** et du **maïs**, dont les indices oscillent autour de 100 à 110 sur toute la période, traduisant une stabilité des surfaces cultivées. **Le colza** connaît une évolution plus irrégulière : après un recul net en 2018 (indice à 85), il remonte progressivement pour se stabiliser autour de 100 à 110 en 2023. **Le riz** reste également stable, avec des variations limitées entre 90 et 110. En revanche, certaines cultures présentent une baisse marquée : **les prairies temporaires** voient leur indice chuter de 100 à environ 60 en 2023, traduisant un fort recul relatif. Cette baisse peut s’expliquer par les requalifications en prairies permanentes dans le contexte réglementaire post-2018.
 
 **Les surfaces gelées sans production** affichent également une baisse tendancielle, passant de 100 à environ 70–80, en lien probable avec une raréfaction des surfaces laissées en jachère ou non cultivées. Le cas des **autres céréales** est plus hétérogène, mais tend à rester sous l’indice 110.
 
 ### Analyse de l'hétérogénéité de la croissance des surfaces de culture de 2019 à 2023
-
-
 
 ```{r}
 
@@ -606,8 +576,6 @@ Enfin, le riz présente une dynamique plus complexe. En 2008, la courbe est plus
 
 ### Evolution moyenne du nombre de culture différentes
 
-
-
 ```{r}
 
 RPG_R53 %>%
@@ -627,25 +595,45 @@ On observe au niveau de la France, une hausse de la diversité culturale, passan
 <!-- ```{r} -->
 
 <!-- #|echo: false -->
+
 <!-- #|message: false -->
+
 <!-- #|warning: false -->
 
 <!-- # Calcul de l'indice de Shannon -->
+
 <!-- shannon_index <- RPG_R53 %>% -->
+
 <!--   group_by(year, name, LIBELLE_GROUPE_CULTURE) %>% -->
+
 <!--   summarise(surface_culture = sum(surf_code_group_m2), .groups = "drop") %>% -->
+
 <!--   group_by(year, name) %>% -->
+
 <!--   mutate(total_surface = sum(surface_culture), -->
+
 <!--          proportion = surface_culture / total_surface) %>% -->
+
 <!--   summarise(shannon = -sum(proportion * log(proportion), na.rm = TRUE), .groups = "drop") %>% -->
+
 <!--   group_by(year) %>% -->
+
 <!--   summarise(moyenne_shannon = mean(shannon, na.rm = TRUE), .groups = "drop") -->
+
 <!-- # Graphique de la diversité culturale à partir de l'indice de Shannon moyen -->
+
 <!-- ggplot(shannon_index, aes(x = year, y = moyenne_shannon, group = 1)) + -->
+
 <!--   geom_line(color = "#E31A1C", size = 0.5) + -->
+
 <!--   geom_point(color = "red", size = 2) + -->
+
 <!--   labs(title = "Évolution de la diversité culturale (Indice de Shannon)", -->
+
 <!--        x = "Année", -->
+
 <!--        y = "Indice de Shannon moyen") + -->
+
 <!--   theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 10)) -->
+
 <!-- ``` -->
