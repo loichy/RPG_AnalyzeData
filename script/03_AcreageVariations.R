@@ -29,7 +29,7 @@ dir$output <- here(dir$root, "output")
 lapply(dir, function(i) dir.create(i, recursive = T, showWarnings = F))
 
 #===============================================================================
-# 1). Load and prepare dataset ------
+# 2). Load and prepare dataset ------
 #===============================================================================
 
 # test avec Bretagne car fichier trop lourd
@@ -51,7 +51,7 @@ part_culture_commune <- RPG_53 |>
   ungroup()  
 
 #===============================================================================
-# 1). Calculating acreage variations over the period ------
+# 3). Calculating acreage variations over the period ------
 #===============================================================================
 
 RPG_final <- part_culture_commune |>
