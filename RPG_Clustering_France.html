@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.6.42">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Inès Bézie">
+
+<title>RPG_Clustering_France</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="RPG_Clustering_France_files/libs/clipboard/clipboard.min.js"></script>
+<script src="RPG_Clustering_France_files/libs/quarto-html/quarto.js"></script>
+<script src="RPG_Clustering_France_files/libs/quarto-html/popper.min.js"></script>
+<script src="RPG_Clustering_France_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="RPG_Clustering_France_files/libs/quarto-html/anchor.min.js"></script>
+<link href="RPG_Clustering_France_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="RPG_Clustering_France_files/libs/quarto-html/quarto-syntax-highlighting-2f5df379a58b258e96c21c0638c20c03.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="RPG_Clustering_France_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="RPG_Clustering_France_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="RPG_Clustering_France_files/libs/bootstrap/bootstrap-1bc8a17f135ab3d594c857e9f48e611b.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+
+
+</head>
+
+<body class="fullcontent">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">RPG_Clustering_France</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Inès Bézie </p>
+          </div>
+  </div>
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>          used (Mb) gc trigger (Mb) max used (Mb)
+Ncells  596734 31.9    1360504 72.7   747579 40.0
+Vcells 1092117  8.4    8388608 64.0  1876181 14.4</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Le chargement a nécessité le package : pacman</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>$root
+[1] FALSE
+
+$data
+[1] FALSE
+
+$raw
+[1] FALSE
+
+$derived
+[1] FALSE
+
+$final
+[1] FALSE
+
+$script
+[1] FALSE
+
+$output
+[1] FALSE</code></pre>
+</div>
+</div>
+<section id="analyse-des-résultats-de-clustering-au-niveau-régional-en-france" class="level1">
+<h1>Analyse des résultats de clustering au niveau régional en France</h1>
+<section id="répartition-des-cultures-dominantes-dans-les-clusters-régionaux" class="level2">
+<h2 class="anchored" data-anchor-id="répartition-des-cultures-dominantes-dans-les-clusters-régionaux">Répartition des cultures dominantes dans les clusters régionaux</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Load dataframe for France</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>RPG_Aggregated_ALL_wide <span class="ot">&lt;-</span> <span class="fu">readRDS</span>(<span class="st">"data/raw/RPG_Aggregated_ALL_wide.rds"</span>)</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>columns_to_select <span class="ot">&lt;-</span> <span class="fu">paste0</span>(<span class="st">"parcel_cult_code_group_perc_G"</span>, <span class="dv">1</span><span class="sc">:</span><span class="dv">25</span>)</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>RegionCode_vector <span class="ot">&lt;-</span> <span class="fu">unique</span>(RPG_Aggregated_ALL_wide<span class="sc">$</span>region_code)</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>TopCultures_by_Region <span class="ot">&lt;-</span> <span class="fu">lapply</span>(RegionCode_vector, <span class="cf">function</span>(region_code) {</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Filter data for region of interest</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>  RPG_region <span class="ot">&lt;-</span> RPG_Aggregated_ALL_wide <span class="sc">%&gt;%</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>    <span class="fu">filter</span>(region_code <span class="sc">==</span> <span class="sc">!!</span>region_code, year <span class="sc">==</span> <span class="dv">2023</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>    <span class="fu">select</span>(insee, <span class="fu">all_of</span>(columns_to_select)) <span class="sc">%&gt;%</span></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>    <span class="fu">na.omit</span>()</span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Delete columns with constant variance</span></span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>  constant_cols <span class="ot">&lt;-</span> <span class="fu">which</span>(<span class="fu">apply</span>(RPG_region[, columns_to_select], <span class="dv">2</span>, <span class="cf">function</span>(x) <span class="fu">var</span>(x, <span class="at">na.rm =</span> <span class="cn">TRUE</span>) <span class="sc">==</span> <span class="dv">0</span>))</span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>  variable_columns <span class="ot">&lt;-</span> <span class="fu">setdiff</span>(columns_to_select, <span class="fu">names</span>(constant_cols))</span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Standardisation</span></span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>  commune_scaled <span class="ot">&lt;-</span> RPG_region <span class="sc">%&gt;%</span></span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>    <span class="fu">select</span>(<span class="fu">all_of</span>(variable_columns)) <span class="sc">%&gt;%</span></span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale</span>()</span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Optimal number of clusters</span></span>
+<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a>  sil_data <span class="ot">&lt;-</span> <span class="fu">fviz_nbclust</span>(commune_scaled, clara, <span class="at">method =</span> <span class="st">"silhouette"</span>, <span class="at">correct.d =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a>  optimal_k <span class="ot">&lt;-</span> <span class="fu">which.max</span>(sil_data<span class="sc">$</span>data<span class="sc">$</span>y)</span>
+<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Clustering CLARA</span></span>
+<span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a>  <span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
+<span id="cb4-29"><a href="#cb4-29" aria-hidden="true" tabindex="-1"></a>  clustering <span class="ot">&lt;-</span> <span class="fu">clara</span>(commune_scaled, <span class="at">k =</span> optimal_k, <span class="at">samples =</span> <span class="dv">50</span>, <span class="at">pamLike =</span> <span class="cn">TRUE</span>, <span class="at">correct.d =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb4-30"><a href="#cb4-30" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb4-31"><a href="#cb4-31" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Add clusters to the dataframe</span></span>
+<span id="cb4-32"><a href="#cb4-32" aria-hidden="true" tabindex="-1"></a>  RPG_region_clustered <span class="ot">&lt;-</span> RPG_region <span class="sc">%&gt;%</span></span>
+<span id="cb4-33"><a href="#cb4-33" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">cluster =</span> clustering<span class="sc">$</span>clustering)</span>
+<span id="cb4-34"><a href="#cb4-34" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb4-35"><a href="#cb4-35" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Computing mean values across clusters</span></span>
+<span id="cb4-36"><a href="#cb4-36" aria-hidden="true" tabindex="-1"></a>  cluster_profiles <span class="ot">&lt;-</span> RPG_region_clustered <span class="sc">%&gt;%</span></span>
+<span id="cb4-37"><a href="#cb4-37" aria-hidden="true" tabindex="-1"></a>    <span class="fu">select</span>(cluster, <span class="fu">all_of</span>(columns_to_select)) <span class="sc">%&gt;%</span></span>
+<span id="cb4-38"><a href="#cb4-38" aria-hidden="true" tabindex="-1"></a>    <span class="fu">group_by</span>(cluster) <span class="sc">%&gt;%</span></span>
+<span id="cb4-39"><a href="#cb4-39" aria-hidden="true" tabindex="-1"></a>    <span class="fu">summarise</span>(<span class="fu">across</span>(<span class="fu">everything</span>(), mean, <span class="at">na.rm =</span> <span class="cn">TRUE</span>), <span class="at">.groups =</span> <span class="st">"drop"</span>)</span>
+<span id="cb4-40"><a href="#cb4-40" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb4-41"><a href="#cb4-41" aria-hidden="true" tabindex="-1"></a>  cluster_profiles_long <span class="ot">&lt;-</span> cluster_profiles <span class="sc">%&gt;%</span></span>
+<span id="cb4-42"><a href="#cb4-42" aria-hidden="true" tabindex="-1"></a>    <span class="fu">pivot_longer</span>(<span class="sc">-</span>cluster, <span class="at">names_to =</span> <span class="st">"groupe_culture"</span>, <span class="at">values_to =</span> <span class="st">"moyenne"</span>)</span>
+<span id="cb4-43"><a href="#cb4-43" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb4-44"><a href="#cb4-44" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Computing top 3 dominating cultures in each cluster</span></span>
+<span id="cb4-45"><a href="#cb4-45" aria-hidden="true" tabindex="-1"></a>  top_cultures <span class="ot">&lt;-</span> cluster_profiles_long <span class="sc">%&gt;%</span></span>
+<span id="cb4-46"><a href="#cb4-46" aria-hidden="true" tabindex="-1"></a>    <span class="fu">group_by</span>(cluster) <span class="sc">%&gt;%</span></span>
+<span id="cb4-47"><a href="#cb4-47" aria-hidden="true" tabindex="-1"></a>    <span class="fu">arrange</span>(<span class="fu">desc</span>(moyenne), <span class="at">.by_group =</span> <span class="cn">TRUE</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb4-48"><a href="#cb4-48" aria-hidden="true" tabindex="-1"></a>    <span class="fu">slice_head</span>(<span class="at">n =</span> <span class="dv">3</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb4-49"><a href="#cb4-49" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">region =</span> region_code)</span>
+<span id="cb4-50"><a href="#cb4-50" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb4-51"><a href="#cb4-51" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Join with shapefile</span></span>
+<span id="cb4-52"><a href="#cb4-52" aria-hidden="true" tabindex="-1"></a>  communes_sf <span class="ot">&lt;-</span> <span class="fu">st_read</span>(<span class="st">"data/shapefiles/communes-20220101.shp"</span>, <span class="at">quiet =</span> <span class="cn">TRUE</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb4-53"><a href="#cb4-53" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">insee =</span> <span class="fu">as.character</span>(insee))</span>
+<span id="cb4-54"><a href="#cb4-54" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb4-55"><a href="#cb4-55" aria-hidden="true" tabindex="-1"></a>  map_data <span class="ot">&lt;-</span> communes_sf <span class="sc">%&gt;%</span></span>
+<span id="cb4-56"><a href="#cb4-56" aria-hidden="true" tabindex="-1"></a>    <span class="fu">left_join</span>(RPG_region_clustered, <span class="at">by =</span> <span class="st">"insee"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb4-57"><a href="#cb4-57" aria-hidden="true" tabindex="-1"></a>    <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(cluster))</span>
+<span id="cb4-58"><a href="#cb4-58" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb4-59"><a href="#cb4-59" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Generate map of clusters</span></span>
+<span id="cb4-60"><a href="#cb4-60" aria-hidden="true" tabindex="-1"></a>  p <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(map_data) <span class="sc">+</span></span>
+<span id="cb4-61"><a href="#cb4-61" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_sf</span>(<span class="fu">aes</span>(<span class="at">fill =</span> <span class="fu">as.factor</span>(cluster)), <span class="at">color =</span> <span class="st">"white"</span>, <span class="at">size =</span> <span class="fl">0.1</span>) <span class="sc">+</span></span>
+<span id="cb4-62"><a href="#cb4-62" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_fill_viridis_d</span>(<span class="at">name =</span> <span class="st">"Cluster"</span>) <span class="sc">+</span></span>
+<span id="cb4-63"><a href="#cb4-63" aria-hidden="true" tabindex="-1"></a>    <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
+<span id="cb4-64"><a href="#cb4-64" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">title =</span> <span class="fu">paste0</span>(<span class="st">"Clustering des communes – Région "</span>, region_code, <span class="st">" (2023)"</span>),</span>
+<span id="cb4-65"><a href="#cb4-65" aria-hidden="true" tabindex="-1"></a>         <span class="at">caption =</span> <span class="st">"Source : RPG 2023 – Traitement personnel"</span>)</span>
+<span id="cb4-66"><a href="#cb4-66" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb4-67"><a href="#cb4-67" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggsave</span>(</span>
+<span id="cb4-68"><a href="#cb4-68" aria-hidden="true" tabindex="-1"></a>    <span class="at">filename =</span> <span class="fu">here</span>(dir<span class="sc">$</span>output, <span class="fu">paste0</span>(<span class="st">"cluster_region_"</span>, region_code, <span class="st">".pdf"</span>)),</span>
+<span id="cb4-69"><a href="#cb4-69" aria-hidden="true" tabindex="-1"></a>    <span class="at">plot =</span> p,</span>
+<span id="cb4-70"><a href="#cb4-70" aria-hidden="true" tabindex="-1"></a>    <span class="at">width =</span> <span class="dv">12</span>, <span class="at">height =</span> <span class="dv">8</span></span>
+<span id="cb4-71"><a href="#cb4-71" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb4-72"><a href="#cb4-72" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb4-73"><a href="#cb4-73" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Return list of top cultures</span></span>
+<span id="cb4-74"><a href="#cb4-74" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(top_cultures)</span>
+<span id="cb4-75"><a href="#cb4-75" aria-hidden="true" tabindex="-1"></a>})</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: There was 1 warning in `summarise()`.
+ℹ In argument: `across(everything(), mean, na.rm = TRUE)`.
+ℹ In group 1: `cluster = 1`.
+Caused by warning:
+! The `...` argument of `across()` is deprecated as of dplyr 1.1.0.
+Supply arguments directly to `.fns` through an anonymous function instead.
+
+  # Previously
+  across(a:b, mean, na.rm = TRUE)
+
+  # Now
+  across(a:b, \(x) mean(x, na.rm = TRUE))</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Create dataframe with the list of top cultures in clusters in each region</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>TopCultures_all_regions <span class="ot">&lt;-</span> <span class="fu">bind_rows</span>(TopCultures_by_Region)</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>noms_regions <span class="ot">&lt;-</span> <span class="fu">c</span>(</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">R11 =</span> <span class="st">"Île de France"</span>,</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">R24 =</span> <span class="st">"Centre Val de Loire"</span>,</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">R27 =</span> <span class="st">"Bourgogne Franche Comté"</span>,</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">R28 =</span> <span class="st">"Normandie"</span>,</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">R32 =</span> <span class="st">"Hauts de France"</span>,</span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">R44 =</span> <span class="st">"Grand Est"</span>,</span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">R52 =</span> <span class="st">"Pays de la Loire"</span>,</span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">R53 =</span> <span class="st">"Bretagne"</span>,</span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">R75 =</span> <span class="st">"Nouvelle Aquitaine"</span>,</span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>  <span class="at">R76 =</span> <span class="st">"Occitanie"</span>,</span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>  <span class="at">R84 =</span> <span class="st">"Auvergne Rhône Alpes"</span>,</span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>  <span class="at">R93 =</span> <span class="st">"Provence Alpes Côte d'Azur"</span>,</span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a>  <span class="at">R94 =</span> <span class="st">"Corse"</span></span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>R11 (Île de France) :</p>
+<p>G11, <strong>Gel, surfaces sans production</strong> et G1, <strong>Blé tendre</strong> se partagent les deux premières places dans chacun des deux clusters. Vu que G11 n’est pas considéré comme une culture, on peut se focaliser plutôt sur <strong>le blé tendre</strong> et la troisième culture des clusters, respectivement G18, <strong>les prairies permanentes</strong> et G3, <strong>l’orge</strong>.</p>
+<p>La carte indique une plus forte concentration du cluster 2 dans le sud de la région, et plus précisément le long de la couronne extérieure, où la culture du <strong>blé tendre</strong> et de <strong>l’orge</strong> domine.</p>
+<p>R24 (Centre Val de Loire) :</p>
+<p>La région Centre Val de Loire est composée de 8 clusters, c’est-à-dire que notre méthode de clustering a identifié 8 profils agricoles distincts au sein de la région.</p>
+<p>Plusieurs clusters sont fortement marqués par le groupe G11, <strong>Gel, surfaces sans production</strong> présent dans 7 des 9 clusters, que nous n’analyserons pas par la suite. <strong>Le blé tendre</strong>, G1 est également très fréquent, notamment dans les clusters 1, 3, 4 et 8. Le groupe G18, <strong>les prairies permanentes</strong> se démarque nettement dans les clusters 2 et 6, où il représente plus de 37 % des surfaces, indiquant des territoires spécialisés. D’autres clusters révèlent des profils plus spécifiques : le cluster 5 est dominé par G21 (près de 45 %), correspondant à la culture <strong>des vignes</strong>, tandis que le cluster 7 fait apparaître une part significative de G20, <strong>les vergers</strong>, montrant une diversification locale.</p>
+<p>On trouve une corrélation géographique plutôt logique par rapport à ces résultats : le cluster 5 se retrouve sur la route des vignobles du Val de Loire, le cluster 2 dominé par <strong>les prairies permanentes</strong> se concentre particulièrement dans le sud. Le cluster 8, où la culture de <strong>l’orge</strong> émerge, se situe au nord de la région, touchant notamment les zones de la région Île de France où on a précédemment identifié une culture de l’orge également.</p>
+<p>R27 (Bourgogne Franche Comté) :</p>
+<p>Les deux clusters de la région sont dominés par <strong>les prairies permanentes</strong>, notamment pour le cluster 2 où elles atteignent 63% de représentativité. On retrouve aussi la culture du <strong>blé tendre</strong>, à hauteur de 17% pour le cluster 1 et 4% pour le cluster 2. A noter que <strong>les vignes</strong> ne figurent pas parmis les top 3 des cultures dominantes pour aucun des deux clusters.</p>
+<p>La carte géographique montre une concentration du cluster dans le sud-ouest et l’est de la région, tandis que le cluster 1 où la culture du <strong>blé tendre</strong> est plus présente se situe plutôt au nord-ouest et centre de la région.</p>
+<p>R28 (Normandie) :</p>
+<p>Cette région montre à nouveau une forte diversité en terme de profiles agricoles, avec 9 clusters.</p>
+<p>Une caractéristique forte de la région est la très forte prédominance <strong>des prairies permanentes</strong> (pâturages), qui apparaît en tête dans 8 clusters sur 10, atteignant parfois des proportions très élevées (jusqu’à 69,7 % dans le cluster 1 et 62,9 % dans le cluster 2). Le <strong>blé tendre</strong> (G1) est également très présent, souvent en seconde position, voire en première (cluster 6 avec 24,9 %). Le groupe G2, <strong>le maïs</strong>, apparaît plus ponctuellement, notamment dans les clusters 4, 5 et 8, contribuant à la diversification. Le cluster 8 se distingue par une forte concentration du groupe G25 (41 %), <strong>les légumes et fleurs</strong>, ce qui suggère une zone agricole très spécifique à cette culture. Enfin, le cluster 9 est marqué par un équilibre entre <strong>les prairies permanentes</strong> (25 %) et <strong>le blé tendre</strong> (23 %), ainsi qu’une part notable des <strong>plantes à fibre</strong>, traduisant une diversité croissante.</p>
+<p>Ce cluster est surtout localisé dans le nord-est de la région. La carte géographique montre cependant une plus forte hétérogénéité en terme de concentration des clusters, qui sont d’ailleurs souvent dominés par les mêmes types de culture.</p>
+<p>R32 (Hauts de France) :</p>
+<p>La région de Hauts de France est à nouveau largement dominé par la culture de <strong>blé tendre</strong> et <strong>les prairies permanentes</strong>, au total 30% à 37% par clusters. On retrouve au sein du cluster 1 la culture de <strong>maïs</strong> en troisième position, le cluster se concentrant particulièrement dans les communes au nord de la région.</p>
+<p>R44 (Grand Est) :</p>
+<p>Les clusters 1 et 3 de la région présente comme premières cultures dominantes <strong>les prairies permanentes</strong> et <strong>le blé tendre</strong>. Le cluster 2 est marqué par la présence des cultures <strong>d’orge</strong> (G3) et <strong>d’autres cultures industrielles</strong> (G24, une première en France), respectivement de 19% et 10%. Ce cluster se concentre particulièrement dans les départements du Marne et d’Ardennes. Les deux autres clusters se départagent le reste de la région en suivant les frontières départementales.</p>
+<p>R52 (Pays de la Loire) :</p>
+<p>Dans chacun des trois clusters, <strong>les prairies permanentes</strong> dominent nettement, avec des proportions comprises entre 28,7 % et 42,9 %, ce qui suggère une spécialisation régionale marquée autour du pâturage.</p>
+<p>Le cluster 1 présente des contributions secondaires plus des groupes G19, <strong>prairies temporaires</strong> (11,3 %) et <strong>du maïs</strong> (11 %), tandis que le cluster 2 possède des parts plus équilibrées des cultures de <strong>blé tendre</strong> (12,1 %) et de <strong>maïs</strong> (10,1 %) par rapport aux <strong>prairies permanentes</strong> (28,7%).</p>
+<p>Le cluster 3 montre une situation particulière, car il n’est présent que sur 3 communes de la région, et possède une part importante de surfaces gelées à 10,6 %. D’une manière générale, la carte n’indique pas une forte spécialisation des profiles identifiées dans la région, néanmoins le cluster 1 se concentre plus dans le nord, ainsi que le sud-ouest de la région.</p>
+<p>R53 (Bretagne) -&gt; voir <code>RPG_Clustering_R53.Rmd</code></p>
+<p>R75 (Nouvelle Aquitaine) :</p>
+<p>En Nouvelle-Aquitaine, le clustering révèle une forte hétérogénéité des profils culturaux selon les zones. Certains clusters (notamment le 1, 3 et 6) sont dominés par <strong>les prairies permanentes</strong>, souvent à plus de 50%, associée au <strong>blé tendre</strong> et <strong>maïs</strong>, traduisant des zones de monoculture intensive. Le cluster 1 est entièrement situé à l’est de la région, ainsi que plus marginalement dans le département Deux-Sèvres. Quelques clusters spécifiques se distinguent, comme le 4 dominé par <strong>les vignes</strong> (G21). Ce dernier se concentre notamment dans les départements de la Dordogne et de la Charente.</p>
+<p>Le cluster 7, concentré au sud de la région, est entièrement consacré aux <strong>prairies permanentes, temporaires et les estives et landes</strong>.</p>
+<p>R76 (Occitanie) :</p>
+<p>Les deux clusters de l’Occitanie sont également dominés par <strong>les prairies permanentes</strong>, mais le premier se distingue avec une forte représentation des <strong>vignes</strong> (11,7%). Le deuxième cluster est plutôt spécialisé dans la culture du <strong>blé tendre</strong> (9,1%).</p>
+<p>En terme de structure géographique, le cluster 2 se concentre à l’ouest de la région, dans les départements du Gers, de la Haute-Garonne et des Hautes-Pyrénés, avec également une présence plus faible dans le Gard.</p>
+<p>R84 (Auvergne Rhône Alpes) :</p>
+<p>Ici, les deux clusters montrent une surdomination des cultures destinées au pâturage. Néanmoins, alors que le cluster 1 possède une présence forte de la culture du <strong>blé tendre</strong> (7,2%) au côté des <strong>prairies permanentes</strong> (37,7%), le cluster 2 est entièrement constitué de <strong>prairies permanentes, temporaires et les estives et landes</strong>, le premier à hauteur de 72,8%.</p>
+<p>La localisation des clusters est plus dispersée. On peut distinguer néanmoins la présence du cluster 1 dans le nord-est et le centre de la région, notamment dans le Rhône et la Loire.</p>
+<p>R93 (Provence Alpes Côte d’Azur) :</p>
+<p>En Provence-Alpes-Côte d’Azur, plusieurs clusters présentent une forte dominance du groupe G17, <strong>les estives et landes</strong>, notamment les clusters 1 (17,3%), 2 (41,7%), 3 (13,7%), 4 (16,9%), 5 (10%), 6 (4,8%) et 7 (81,2%), ce dernier montrant une extrême spécialisation. <strong>Les prairies permanentes</strong> sont également fréquentes dans les clusters 1 (17%), 2 (41,9%), 3 (8,4%), 4 (21,9%) et 7 (6,2%). Les clusters 4 et 9 incluent <strong>le fourrage</strong> autour de 17–18%, et est aussi présent à 11,9% dans le cluster 1. Le cluster 6 se distingue par une forte part de <strong>vignes</strong> (60,5%), et le cluster 8 par <strong>les oliviers</strong> (34,9%) et <strong>autres cultures industrielles</strong> (29,5%).</p>
+<p>Les clusters à forte dominance de prairies couvrent le nord et le centre de la région. Le cluster 7 dominé par <strong>les estives et landes</strong> couvre la quasi totalité des Alpes Maritimes. Le cluster 6 se localise dans les départements de Vaucluse et le Var littoral, tandis que le cluster 8 se concentre au sud du département des Alpes Maritimes, ainsi que du côté ouest du littoral méditerranéen.</p>
+<p>R94 (Corse) :</p>
+<p>A l’exception de la commune autour d’Aléria, où <strong>les vignes</strong> correspondent à la culture dominante de l’île, toutes les autres communes appartiennent au cluster 1. Celui-ci est dominé à plus de 60% cumulé par <strong>les estives et landes et les prairies permanentes</strong>, avec une petite présence de culture de <strong>fruits à coqs</strong> (4%). Le cluster 2 est consacré à 25% aux <strong>vignes</strong>, ainsi qu’à 14% aux <strong>vergers</strong>.</p>
+</section>
+<section id="analyse-cartographique-des-clusters-régionaux" class="level2">
+<h2 class="anchored" data-anchor-id="analyse-cartographique-des-clusters-régionaux">Analyse cartographique des clusters régionaux</h2>
+</section>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const onCopySuccess = function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
+  });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
