@@ -33,7 +33,7 @@ lapply(dir, function(i) dir.create(i, recursive = T, showWarnings = F))
 #===============================================================================
 
 # test avec Bretagne car fichier trop lourd
-# RPG_53 <- readRDS(here(dir$raw, "RPG_Aggregated_Brittany.rds"))
+RPG_53 <- readRDS(here(dir$raw, "RPG_Aggregated_Brittany.rds"))
 
 RPG_All <- readRDS(here(dir$raw, "RPG_Aggregated_All.rds"))
 
@@ -41,7 +41,7 @@ cultures_select <- c("Blé tendre", "Maïs grain et ensilage", "Vignes",
                      "Protéagineux", "Légumineuses à grains", "Plantes à fibres")
   
 
-part_culture_commune <- RPG_All |>
+part_culture_commune <- RPG_53 |>
   filter(LIBELLE_GROUPE_CULTURE %in% cultures_select) |>
   group_by(year, insee, LIBELLE_GROUPE_CULTURE) |>
   summarise(surface_culture = sum(surf_agri_geo_unit_m2, na.rm = TRUE), .groups = "drop") |>
