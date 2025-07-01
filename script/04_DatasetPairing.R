@@ -58,11 +58,10 @@ GAEZ_yield_filt <- GAEZ_yield |>
 
 
 df_final <- GAEZ_yield_filt |>
-  left_join(RPG_Variations_filt, by = c("insee", "crop"))
+  left_join(RPG_Variations_filt, by = c("insee", "crop")) 
 
 #===============================================================================
 # 3). Analyzing correlation between potential yield and acreage changes under
 # climate change scenario ------
 #===============================================================================
-
 

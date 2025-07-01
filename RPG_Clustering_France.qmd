@@ -204,4 +204,3 @@ Les clusters à forte dominance de prairies couvrent le nord et le centre de la 
 R94 (Corse) :
 
 A l'exception de la commune autour d'Aléria, où **les vignes** correspondent à la culture dominante de l'île, toutes les autres communes appartiennent au cluster 1. Celui-ci est dominé à plus de 60% cumulé par **les estives et landes et les prairies permanentes**, avec une petite présence de culture de **fruits à coqs** (4%). Le cluster 2 est consacré à 25% aux **vignes**, ainsi qu'à 14% aux **vergers**.
-
