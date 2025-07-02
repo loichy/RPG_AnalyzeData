@@ -98,15 +98,15 @@ df_final <- df_final |>
 
 ## Elasticity of area to potential yield
 
-In general, we use percentage change as our dependent variable, as it is more straightforward to interpret and also controls for scale differences at the communal level. 
+In general, we use percentage change as our dependent variable, as it is more straightforward to interpret and also controls for scale differences at the communal level.
 
 ### Dependent variable : acreage variations between 2023 and 2007
 
 #### Ordinary Least Squares Model
 
-First, we use the percentage change in acreage per crop between 2023 and 2007 as our dependent variable. Our main independent variables are `value`, corresponding to potential yield level under the **rcp8p5** climate change scenario of the **HadGEM2-ES** model, as well as `value_hist`, the historical yield level. To avoid potential multicollinearity problems, we use the log-difference between the two variables which capture the same information with more stable coefficients. 
+First, we use the percentage change in acreage per crop between 2023 and 2007 as our dependent variable. Our main independent variables are `value`, corresponding to potential yield level under the **rcp8p5** climate change scenario of the **HadGEM2-ES** model, as well as `value_hist`, the historical yield level. To avoid potential multicollinearity problems, we use the log-difference between the two variables which capture the same information with more stable coefficients.
 
-We are interested in comparing coefficients between our crops of interest, therefore we run regressions separately for the four of them. 
+We are interested in comparing coefficients between our crops of interest, therefore we run regressions separately for the four of them.
 
 ```{r}
 
@@ -130,7 +130,7 @@ df_final_f <- df_final |>
 
 ```
 
-We construct an OLS specification with regional fixed effects using the `feols()` command that we then compare with a benchmark specification without fixed effects. The following tables show for each specifications the regression results by crop. 
+We construct an OLS specification with regional fixed effects using the `feols()` command that we then compare with a benchmark specification without fixed effects. The following tables show for each specifications the regression results by crop.
 
 ```{r}
 
@@ -160,7 +160,6 @@ reg0_results <-
 print(reg0_results)
 ```
 
-
 ```{r}
 
 # OLS results with regional fixed effects
@@ -185,12 +184,15 @@ reg1_results <-
                "log(value_hist)" = "Historical Yield"),
   output = "markdown"
 )
+
+print(reg1_results)
 ```
-We find that in both specifications, there is a negative relationship between potential yield change and acreage change for **wheat, maize and flax**. On the contrary, an increase in potential yield compared to the historical value of **pea** induces an increase in its acreage. 
 
-Furthermore, the model with fixed effects shows only significance for the coefficient on this latter crop, when in the benchmark model, the coefficients on **wheat and maize** are significant. We observe that adding regional fixed effects reduced considerably the magnitude and the significance of the coefficient on **wheat**. In general, the R2 improved by adding regional fixed effects. 
+We find that in both specifications, there is a negative relationship between potential yield change and acreage change for **wheat, maize and flax**. On the contrary, an increase in potential yield compared to the historical value of **pea** induces an increase in its acreage.
 
-However these results are not satisfactory as they point to contradictory results with theory. Indeed, increased potential yield should urge producers to cultivate those crops on larger surfaces. We will now try to improve our results by using potential yield change in percentage as computed by the **GAEZ database**, still controlling for historical yield values, and including an interaction term as well. 
+Furthermore, the model with fixed effects shows only significance for the coefficient on this latter crop, when in the benchmark model, the coefficients on **wheat and maize** are significant. We observe that adding regional fixed effects reduced considerably the magnitude and the significance of the coefficient on **wheat**. In general, the R2 improved by adding regional fixed effects.
+
+However these results are not satisfactory as they point to contradictory results with theory. Indeed, increased potential yield should urge producers to cultivate those crops on larger surfaces. We will now try to improve our results by using potential yield change in percentage as computed by the **GAEZ database**, still controlling for historical yield values, and including an interaction term as well.
 
 ```{r}
 
@@ -250,16 +252,49 @@ reg3_results <-
 print(reg3_results)
 ```
 
-The results reveal that historical yield is consistently and significantly negatively associated with the percentage change in acreage for **wheat, maize, and flax**. This suggests that crops historically more productive may have seen relatively less acreage expansion. 
-The interaction term between potential yield change and historical yield is also significant for **wheat, maize, and flax**, indicating that the effect of expected yield improvement depends on the initial productivity level. Particularly, the interaction is strongly positive for **flax**, suggesting that potential gains are only realized where historical yields were already high. In contrast, the effect of potential yield change itself is not statistically significant for most crops, except for **flax**, where it shows a large, negative effect (which is weakly significant at the 10% level).
+The results reveal that historical yield is consistently and significantly negatively associated with the percentage change in acreage for **wheat, maize, and flax**. This suggests that crops historically more productive may have seen relatively less acreage expansion. The interaction term between potential yield change and historical yield is also significant for **wheat, maize, and flax**, indicating that the effect of expected yield improvement depends on the initial productivity level. Particularly, the interaction is strongly positive for **flax**, suggesting that potential gains are only realized where historical yields were already high. In contrast, the effect of potential yield change itself is not statistically significant for most crops, except for **flax**, where it shows a large, negative effect (which is weakly significant at the 10% level).
 
-Controlling for regional fixed effects refines the estimation by absorbing unobserved heterogeneity across regions. The historical yield variable remains negatively associated with changes in acreage for maize and flax, both statistically significant. However, for **wheat** and **pea**, historical yield loses statistical significance. 
-The interaction term between historical yield and potential yield change is now statistically significant across all four crops. This suggests that the effect of potential productivity changes on land allocation depends strongly on the initial yield level.
-The direct effect of potential yield change remains non-significant for all crops, even becoming negative for **wheat and flax**, once fixed effects are included.
+Controlling for regional fixed effects refines the estimation by absorbing unobserved heterogeneity across regions. The historical yield variable remains negatively associated with changes in acreage for maize and flax, both statistically significant. However, for **wheat** and **pea**, historical yield loses statistical significance. The interaction term between historical yield and potential yield change is now statistically significant across all four crops. This suggests that the effect of potential productivity changes on land allocation depends strongly on the initial yield level. The direct effect of potential yield change remains non-significant for all crops, even becoming negative for **wheat and flax**, once fixed effects are included.
+
+```{r}
+
+# squared independent variables
+
+reg4_wheat <- feols(diff_2007_2023_perc ~ I(change^2) + change*value_hist | region_code, data = df_final_w)
+
+reg4_maize <- feols(diff_2007_2023_perc ~ I(change^2) + change*value_hist | region_code, data = df_final_m)
+
+reg4_pea <- feols(diff_2007_2023_perc ~ I(change^2) + change*value_hist | region_code, data = df_final_p)
+
+reg4_flax <- feols(diff_2007_2023_perc ~ I(change^2) + change*value_hist | region_code, data = df_final_f)
+
+reg4_results <-
+  modelsummary(
+  list("Wheat" = reg4_wheat, 
+       "Maize" = reg4_maize, 
+       "Pea" = reg4_pea, 
+       "Flax" = reg4_flax), 
+  stars = TRUE,
+  statistic = "std.error",
+  coef_map = c("change" = "Potential Yield Change", 
+               "value_hist" = "Historical Yield",
+              "change:value_hist" = "Interaction",
+              "I(change^2)" = "Squared Potential Yield Change"),
+  output = "markdown"
+)
+
+print(reg4_results)
+
+```
+Squared potential yield change is only significant for crops where potential yield change was already significant, meaning **pea and flax** and takes the inverse sign. The interaction term remains significant for **wheat** and **flax**. 
+
+**Note : In the regression including squared `value_hist`, the said coefficient was null and non-significant for all crops, meaning that `value_hist` has probably only a linear relationship with acreage variations. In the GAM results below, we also find that when significant, Historical Yield has a linear relationship to acreage change (EDF ~ 1).**
 
 #### Generalized Additive Model
 
-GAM models can be more relevant when using the difference between potential yield under climate change and historical yield as our independent variable. Indeed, the response of land use to climate-induced yield gaps may be nonlinear or threshold-dependent. GAMs can be used to model a smooth function of the said gap.
+GAM models can be more relevant when using the difference between potential yield under climate change and historical yield as our independent variable. Indeed, the response of land use to climate-induced yield gaps may be nonlinear or threshold-dependent. GAMs can be used to model a smooth function of the said gap. The model remains additive, meaning the effects of each predictor are estimated separately and then combined.
+
+Note that GAM models estimate smooth effects, not fixed coefficients as a linear model would do. The `summary()` command gives the **EDF**, Estimated Degrees of Freedom, which when !=1 indicates non-linearity in the effect.The F-value and the p-value measure the significance of the smooth effect. The `plot()` command can then visualize the sign of the effect according to the range of the value of the explanatory variable. 
 
 ```{r}
 
@@ -288,53 +323,53 @@ df_gam_f <- df_final_f |>
   filter(!is.nan(change) & !is.infinite(change)) |>
   filter(!is.nan(diff_2007_2023_perc) & !is.infinite(diff_2007_2023_perc))
 
-reg1_gam_w <- gam(diff_2007_2023_perc ~ s(change), data = df_gam_w)
+reg1_gam_w <- gam(diff_2007_2023_perc ~ s(change) + s(value_hist), data = df_gam_w)
 
-reg1_gam_m <- gam(diff_2007_2023_perc ~ s(change), data = df_gam_m)
+reg1_gam_m <- gam(diff_2007_2023_perc ~ s(change) + s(value_hist), data = df_gam_m)
 
-reg1_gam_p <- gam(diff_2007_2023_perc ~ s(change), data = df_gam_p)
+reg1_gam_p <- gam(diff_2007_2023_perc ~ s(change) + s(value_hist), data = df_gam_p)
 
-reg1_gam_f <- gam(diff_2007_2023_perc ~ s(change), data = df_gam_f)
+reg1_gam_f <- gam(diff_2007_2023_perc ~ s(change) + s(value_hist), data = df_gam_f)
 
-sum_gam_w <- summary(reg1_gam_w)$s.table["s(change)", ]
-sum_gam_m <- summary(reg1_gam_m)$s.table["s(change)", ]
-sum_gam_p <- summary(reg1_gam_p)$s.table["s(change)", ]
-sum_gam_f <- summary(reg1_gam_f)$s.table["s(change)", ]
+summary(reg1_gam_w)
+plot(reg1_gam_w)
 
-gam1_results <- data.frame(
-  Term = "Potential Yield Change (s(change))",
-  Wheat = sprintf("%.3f (p=%.3f)", sum_gam_w["edf"], sum_gam_w["p-value"]),
-  Maize = sprintf("%.3f (p=%.3f)", sum_gam_m["edf"], sum_gam_m["p-value"]),
-  Pea = sprintf("%.3f (p=%.3f)", sum_gam_p["edf"], sum_gam_p["p-value"]),
-  Flax = sprintf("%.3f (p=%.3f)", sum_gam_f["edf"], sum_gam_f["p-value"])
-)
+summary(reg1_gam_m)
+plot(reg1_gam_m)
 
-knitr::kable(gam1_results, format = "markdown")
+summary(reg1_gam_p)
+plot(reg1_gam_p)
 
+summary(reg1_gam_f)
+plot(reg1_gam_f)
 ```
+For wheat, both predictors are statistically significant: the effect of potential yield change is nonlinear (edf = 5.6, p < 0.001), while historical yield shows a strong linear association (edf = 1.0, p < 0.001), suggesting that communes with higher past performance tended to expand wheat surfaces. 
+In the case of maize, only historical yield is significant (p = 0.025), though with a weaker effect, and there is no meaningful relationship with the change in potential yield (p = 0.12). 
+For pea, neither variable reaches statistical significance. 
+Finally, for flax, the change in potential yield has a highly significant and nonlinear effect (p < 0.001, edf = 7.3), while historical yield is only marginally significant (p ≈ 0.095). 
 
 ### Dependent variable : mean acreage variations between 2023 and 2007
 
-We compute the mean variations over four years at the beginning and at the end of the period of interest (between 2007 and 2011, between 2019 and 2023). Then we take the percentage change in acreage between those two means, which will consist in our dependent variable. 
+We compute the mean variations over four years at the beginning and at the end of the period of interest (between 2007 and 2011, between 2019 and 2023). Then we take the percentage change in acreage between those two means, which will consist in our dependent variable.
 
 ```{r}
 
 # OLS results with potential yield change as main explanatory variable
 
-reg4_wheat <- feols(diff_final_debut_perc ~ change*value_hist | region_code, data = df_final_w)
+reg5_wheat <- feols(diff_final_debut_perc ~ change*value_hist | region_code, data = df_final_w)
 
-reg4_maize <- feols(diff_final_debut_perc ~ change*value_hist | region_code, data = df_final_m)
+reg5_maize <- feols(diff_final_debut_perc ~ change*value_hist | region_code, data = df_final_m)
 
-reg4_pea <- feols(diff_final_debut_perc ~ change*value_hist | region_code, data = df_final_p)
+reg5_pea <- feols(diff_final_debut_perc ~ change*value_hist | region_code, data = df_final_p)
 
-reg4_flax <- feols(diff_final_debut_perc ~ change*value_hist | region_code, data = df_final_f)
+reg5_flax <- feols(diff_final_debut_perc ~ change*value_hist | region_code, data = df_final_f)
 
-reg4_results <-
+reg5_results <-
   modelsummary(
-  list("Wheat" = reg4_wheat, 
-       "Maize" = reg4_maize, 
-       "Pea" = reg4_pea, 
-       "Flax" = reg4_flax), 
+  list("Wheat" = reg5_wheat, 
+       "Maize" = reg5_maize, 
+       "Pea" = reg5_pea, 
+       "Flax" = reg5_flax), 
   stars = TRUE,
   statistic = "std.error",
   coef_map = c("change" = "Potential Yield Change", 
@@ -343,17 +378,11 @@ reg4_results <-
   output = "markdown"
 )
 
-print(reg4_results)
+print(reg5_results)
 ```
 
+Compared to the previous specification, the current results yield similar but more stable estimates in terms of sign and significance. Most importantly, the interaction term between potential yield change and historical yield remains statistically significant for **wheat, maize, and pea**. However, the magnitude of the coefficients, especially for the potential yield change, tends to be smaller in this specification. For **wheat** and **maize**, where the effects are now insignificant and negative. For **pea** and **flax**, large coefficients on the potential yield change persist, but they remain imprecisely estimated. The historical yield variable maintains its negative and sometimes significant association (see **maize and flax**).
 
-Compared to the previous specification, the current results yield similar but more stable estimates in terms of sign and significance. Most importantly, the interaction term between potential yield change and historical yield remains statistically significant for **wheat, maize, and pea**.
-However, the magnitude of the coefficients, especially for the potential yield change, tends to be smaller in this specification. For **wheat** and **maize**, where the effects are now insignificant and negative. For **pea** and **flax**, large coefficients on the potential yield change persist, but they remain imprecisely estimated. The historical yield variable maintains its negative and sometimes significant association (see **maize and flax**).
+## Land-share models
 
-
-## Land-share models 
-
-In the literature, we can find land-share models using fractional logit. The outcome variable is the land allocated to the production of a given crop over the total cultivated area. 
-
-
-
+In the literature, we can find land-share models using fractional logit. The outcome variable is the land allocated to the production of a given crop over the total cultivated area.
