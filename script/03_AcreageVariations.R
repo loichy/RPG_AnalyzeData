@@ -51,7 +51,7 @@ df <- RPG_All %>%
 # Difference between year 2007 and 2023
 diff_years <- df %>%
   filter(year %in% c(2007, 2023)) %>%
-  select(insee, CODE_GROUP, LIBELLE_GROUPE_CULTURE, year, surf_code_group_perc) %>%
+  select(insee, region_code, surf_tot_geo_unit_m2, surf_agri_geo_unit_m2, CODE_GROUP, LIBELLE_GROUPE_CULTURE, year, surf_code_group_perc) %>%
   pivot_wider(names_from = year, values_from = surf_code_group_perc, names_prefix = "year_", values_fill = 0) %>%
   mutate(diff_2007_2023_abs = year_2023 - year_2007,
          diff_2007_2023_perc = ((year_2023 - year_2007) / year_2007) * 100)
@@ -59,7 +59,7 @@ diff_years <- df %>%
 # 2. Difference between mean of 2007–2010 and 2020–2023
 diff_means <- df %>%
   filter(year %in% c(2007:2010, 2020:2023)) %>%
-  select(insee, CODE_GROUP, LIBELLE_GROUPE_CULTURE, year, surf_code_group_perc) %>%
+  select(insee, region_code, surf_tot_geo_unit_m2, surf_agri_geo_unit_m2, CODE_GROUP, LIBELLE_GROUPE_CULTURE, year, surf_code_group_perc) %>%
   mutate(period = case_when(
     year %in% 2007:2010 ~ "debut",
     year %in% 2020:2023 ~ "fin"
@@ -74,18 +74,6 @@ diff_means <- df %>%
 final_result <- full_join(diff_years, diff_means, 
                           by = c("insee", "CODE_GROUP", "LIBELLE_GROUPE_CULTURE")) %>% 
   arrange(insee, as.numeric(CODE_GROUP))
-
-
-# Example of linear model estimated with OLS:
-
-RPG_cult1 <- final_result %>% 
-  filter(LIBELLE_GROUPE_CULTURE == "Blé tendre") %>% 
-  filter(!is.na(year_2007) & !is.na(year_2023))
-
-reg1 <- lm(as.numeric(year_2023) ~ as.numeric(year_2007), data = final_result)
-summary(reg1)
-str(reg1)
-res_reg1 <- reg1$residuals
 
 #===============================================================================
 # Save data
