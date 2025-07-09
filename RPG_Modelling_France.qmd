@@ -478,7 +478,7 @@ GAEZ_France_th3_match <- GAEZ_France_th3 |>
 
 RPG_cultures <- readRDS("data/raw/RPG_Aggregated_ALL.rds")
 
-list(unique(RPG_cultures$LIBELLE_GROUPE_CULTURE))
+#list(unique(RPG_cultures$LIBELLE_GROUPE_CULTURE))
 
 RPG_cultures_transf <- RPG_cultures |>
   mutate(LIBELLE_GROUPE_CULTURE = case_when(
@@ -517,6 +517,12 @@ dt_fusion_agg <- merge(fusion_sum, fusion_ids,
 dt_autres <- dt[!(LIBELLE_GROUPE_CULTURE %in% fusion_cultures)]
 
 RPG_final <- rbind(dt_fusion_agg, dt_autres, fill = TRUE)
+
+RPG_final <- RPG_final |>
+  mutate(CODE_GROUP = case_when(
+    CODE_GROUP %in% c("17", "19") ~ "18",
+    CODE_GROUP %in% c("8") ~ "15",
+    TRUE ~ CODE_GROUP))
 
 saveRDS(RPG_final, "data/raw/RPG_NEW_Aggreg_ALL.rds")
 
