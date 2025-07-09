@@ -386,3 +386,139 @@ Compared to the previous specification, the current results yield similar but mo
 ## Land-share models
 
 In the literature, we can find land-share models using fractional logit. The outcome variable is the land allocated to the production of a given crop over the total cultivated area.
+
+To engage in this analysis, we first need to extend our analysis to all crops present in our datasets. For that, we need to append the crops present in the GAEZ dataset with the ones in the RPG dataset. We start by loading the GAEZ dataset filtered for only France. 
+
+```{r}
+GAEZ_France <- readRDS("data/raw/GAEZ_yieldchange_communes_filt(2).rds")
+
+GAEZ_France_th3 <- GAEZ_France |>
+  filter(theme_id == 3)
+
+```
+
+
+```{r}
+
+# cultures du thème 3 : Napier Grass, Grass and Yam only present in theme 3
+
+list(unique(GAEZ_France_th3$crop))
+
+GAEZ_France_th3 <- GAEZ_France_th3 |>
+  filter(!crop %in% c(
+    "Biomass sorghum",
+    "Cassava",
+    "Coconut",
+    "Jatropha",
+    "Oil palm",
+    "Reed canary grass",
+    "Tea"
+  ))
+
+# adding the RPG cultures to the dataframe
+
+library(tibble)
+
+correspondance_gaez_rpg <- tribble(
+  ~culture_gaez,        ~groupe_rpg,
+  "Buckwheat",          "Autres céréales",
+  "Foxtail millet",     "Autres céréales",
+  "Oat",                "Autres céréales",
+  "Pearl millet",       "Autres céréales",
+  "Rye",                "Autres céréales",
+  "Sorghum",            "Autres céréales",
+  "Switchgrass",        "Autres céréales",
+  "Tobacco",            "Autres cultures industrielles",
+  "Groundnut",          "Autres oléagineux",
+  "Soybean",            "Autres oléagineux",
+  "Wheat",              "Blé tendre",
+  "Sugar beet",         "Canne à sucre",
+  "Sugar cane",         "Canne à sucre",
+  "Rapeseed",           "Colza",
+  "Miscanthus",         "Divers",
+  "Alfalfa",            "Fourrage",
+  "Napier grass",       "Fourrage",
+  "Cabbage",            "Légumes ou fleurs",
+  "Carrot",             "Légumes ou fleurs",
+  "Onion",              "Légumes ou fleurs",
+  "Phaseolus bean",     "Légumes ou fleurs",
+  "Sweet potato",       "Légumes ou fleurs",
+  "Tomato",             "Légumes ou fleurs",
+  "White potato",       "Légumes ou fleurs",
+  "Yam",                "Légumes ou fleurs",
+  "Chickpea",           "Légumineuses à grains",
+  "Cowpea",             "Légumineuses à grains",
+  "Dry pea",            "Légumineuses à grains",
+  "Gram",               "Légumineuses à grains",
+  "Pigeonpea",          "Légumineuses à grains",
+  "Maize",              "Maïs grain et ensilage",
+  "Olive",              "Oliviers",
+  "Barley",             "Orge",
+  "Grass",              "Pâturages",
+  "Cotton",             "Plantes à fibres",
+  "Flax",               "Plantes à fibres",
+  "Dryland rice",       "Riz",
+  "Wetland rice",       "Riz",
+  "Sunflower",          "Tournesol",
+  "Banana",             "Vergers",
+  "Citrus",             "Vergers",
+  "Cocoa",              "Vergers",
+  "Coffee",             "Vergers"
+)
+
+GAEZ_France_th3_match <- GAEZ_France_th3 |>
+  left_join(correspondance_gaez_rpg, by = c("crop" = "culture_gaez"))
+
+
+```
+
+```{r}
+
+# cultures RPG à retravailler
+
+RPG_cultures <- readRDS("data/raw/RPG_Aggregated_ALL.rds")
+
+list(unique(RPG_cultures$LIBELLE_GROUPE_CULTURE))
+
+RPG_cultures_transf <- RPG_cultures |>
+  mutate(LIBELLE_GROUPE_CULTURE = case_when(
+    LIBELLE_GROUPE_CULTURE %in% c("Prairies temporaires", "Prairies permanentes", "Estives et landes") ~ "Pâturages",
+    LIBELLE_GROUPE_CULTURE %in% c("Protéagineux", "Légumineuses à grains") ~ "Légumineuses à grains/Protéagineux",
+    TRUE ~ LIBELLE_GROUPE_CULTURE
+  )) |>
+  filter(!LIBELLE_GROUPE_CULTURE %in% c("Vignes", "Fruits à coque", "Gel (surfaces gelées sans production)", NA))
+
+
+# Méthode plus rapide que summarize : convert to data.table
+dt <- as.data.table(RPG_cultures_transf)
+
+# Extract crops to aggregate
+fusion_cultures <- c("Pâturages", "Légumineuses à grains/Protéagineux")
+dt_fusion <- dt[LIBELLE_GROUPE_CULTURE %in% fusion_cultures]
+
+# Separate numerical columns where observations will be added up
+cols_num <- names(dt_fusion)[sapply(dt_fusion, is.numeric)]
+cols_id  <- setdiff(names(dt_fusion), c("name", "year", "LIBELLE_GROUPE_CULTURE", cols_num))
+
+# Aggregate numeric columns
+fusion_sum <- dt_fusion[, lapply(.SD, sum, na.rm = TRUE),
+                        by = .(name, year, LIBELLE_GROUPE_CULTURE),
+                        .SDcols = cols_num]
+
+# Aggregate non numeric columns
+fusion_ids <- dt_fusion[, lapply(.SD, \(x) first(na.omit(x))),
+                        by = .(name, year, LIBELLE_GROUPE_CULTURE),
+                        .SDcols = cols_id]
+
+# Rebind original dataset
+dt_fusion_agg <- merge(fusion_sum, fusion_ids, 
+                       by = c("name", "year", "LIBELLE_GROUPE_CULTURE"))
+
+dt_autres <- dt[!(LIBELLE_GROUPE_CULTURE %in% fusion_cultures)]
+
+RPG_final <- rbind(dt_fusion_agg, dt_autres, fill = TRUE)
+
+saveRDS(RPG_final, "data/raw/RPG_NEW_Aggreg_ALL.rds")
+
+```
+
