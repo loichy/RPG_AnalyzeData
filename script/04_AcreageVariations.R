@@ -75,17 +75,25 @@ final_result <- full_join(diff_years, diff_means,
                           by = c("insee", "CODE_GROUP", "LIBELLE_GROUPE_CULTURE")) %>% 
   arrange(insee, as.numeric(CODE_GROUP))
 
+#===============================================================================
+# 4). Creating categorical variable accounting for the presence of crops ------
+#===============================================================================
 
-# Example of linear model estimated with OLS:
-
-RPG_cult1 <- final_result %>% 
-  filter(LIBELLE_GROUPE_CULTURE == "Blé tendre") %>% 
-  filter(!is.na(year_2007) & !is.na(year_2023))
-
-reg1 <- lm(as.numeric(year_2023) ~ as.numeric(year_2007), data = final_result)
-summary(reg1)
-str(reg1)
-res_reg1 <- reg1$residuals
+final_result <- final_result |>
+  mutate(
+    etat = case_when(
+      year_2007 == 0 & year_2023 == 0                       ~ 4,  # jamais cultivé
+      year_2007 > 0  & year_2023 > 0                        ~ 1,  # maintenu
+      year_2007 == 0 & year_2023 > 0                        ~ 2,  # apparition
+      year_2007 > 0  & year_2023 == 0                       ~ 3   # disparition
+    ),
+    etat_libelle = case_when(
+      etat == 1 ~ "maintenu",
+      etat == 2 ~ "apparition",
+      etat == 3 ~ "disparition",
+      etat == 4 ~ "jamais cultivé"
+    )
+  )
 
 #===============================================================================
 # Save data
