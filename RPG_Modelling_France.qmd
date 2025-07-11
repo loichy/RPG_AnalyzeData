@@ -390,19 +390,10 @@ In the literature, we can find land-share models using fractional logit. The out
 To engage in this analysis, we first need to extend our analysis to all crops present in our datasets. For that, we need to append the crops present in the GAEZ dataset with the ones in the RPG dataset. We start by loading the GAEZ dataset filtered for only France. 
 
 ```{r}
-GAEZ_France <- readRDS("data/raw/GAEZ_yieldchange_communes_filt(2).rds")
+GAEZ_France <- readRDS(here(dir$raw, "GAEZ_yieldchange_communes_filt(2).rds"))
 
 GAEZ_France_th3 <- GAEZ_France |>
   filter(theme_id == 3)
-
-```
-
-
-```{r}
-
-# cultures du thème 3 : Napier Grass, Grass and Yam only present in theme 3
-
-list(unique(GAEZ_France_th3$crop))
 
 GAEZ_France_th3 <- GAEZ_France_th3 |>
   filter(!crop %in% c(
@@ -468,6 +459,30 @@ correspondance_gaez_rpg <- tribble(
 
 GAEZ_France_th3_match <- GAEZ_France_th3 |>
   left_join(correspondance_gaez_rpg, by = c("crop" = "culture_gaez"))
+
+# create weights associated to each GAEZ crop
+GAEZ_France_th3_weight <- GAEZ_France_th3_match |>
+  group_by(insee, groupe_rpg) |>
+  mutate(
+    sum_value_hist_group = sum(value_hist, na.rm = TRUE),
+    weight = if_else(sum_value_hist_group > 0,
+                     value_hist / sum_value_hist_group,
+                     0)
+  ) |>
+  ungroup()
+
+GAEZ_Legumineuses <- GAEZ_France_th3_weight |>
+  filter(groupe_rpg == "Légumineuses à grains")
+# aggregate at RPG level while taking into account the weights associated to each GAEZ crops
+
+rpg_level <- GAEZ_France_th3_weight |>
+  group_by(insee,groupe_rpg) |>
+  summarise(
+    value_hist_rpg = sum(value_hist * weight, na.rm = TRUE),
+    value_futur_rpg = sum(value * weight, na.rm = TRUE),
+    .groups = "drop"
+  )
+
 
 
 ```
