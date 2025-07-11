@@ -32,10 +32,8 @@ lapply(dir, function(i) dir.create(i, recursive = T, showWarnings = F))
 # 2). Load and prepare dataset ------
 #===============================================================================
 
-# test avec Bretagne car fichier trop lourd
-RPG_53 <- readRDS(here(dir$raw, "RPG_Aggregated_Brittany.rds"))
 
-RPG_All <- readRDS(here(dir$raw, "RPG_Aggregated_All.rds")) %>% 
+RPG_All <- readRDS(here(dir$raw, "RPG_NEW_Aggreg_All.rds")) %>% 
   arrange(insee, LIBELLE_GROUPE_CULTURE, year)
 
 
