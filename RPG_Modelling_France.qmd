@@ -1,0 +1,545 @@
+---
+title: "RPG_Modelling"
+format: html
+editor: visual
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+
+# Prepare environment
+
+# Clean memory 
+rm(list=ls())
+gc()
+
+# Load package
+if (!require("pacman")) install.packages("pacman")
+pacman::p_load(tidyverse, data.table, here, sf, tmap, units, dplyr, modelsummary, fixest)
+
+# List directories 
+dir <- list()
+dir$root <- here()
+dir$data <- here(dir$root, "data")
+dir$raw <- here(dir$data, "raw")
+dir$derived <- here(dir$data, "derived")
+dir$final <- here(dir$data, "final")
+dir$script <- here(dir$root, "script")
+dir$output <- here(dir$root, "output")
+
+# Create non existing directories
+lapply(dir, function(i) dir.create(i, recursive = T, showWarnings = F))
+```
+
+```{r}
+
+# Prepare datasets
+
+cultures_select <- c("Blé tendre", "Maïs grain et ensilage", 
+                     "Protéagineux", "Légumineuses à grains", "Plantes à fibres")
+trad_cultures <- tibble::tibble(
+  crop = c("Dry pea", "Flax", "Maize", "Wheat"),
+  culture_fr = c("Légumineuses à grains", "Plantes à fibres", "Maïs grain et ensilage", "Blé tendre")
+)
+
+RPG_Variations <- readRDS(here(dir$raw, "LongPeriod_AcreageVariations.rds"))
+GAEZ_yield <- readRDS(here(dir$raw, "GAEZ_yieldchange_communes_filt.rds"))
+
+RPG_Variations_filt <- RPG_Variations |>
+  filter(LIBELLE_GROUPE_CULTURE %in% cultures_select) |>
+  rename(crop = LIBELLE_GROUPE_CULTURE)
+
+GAEZ_yield_filt <- GAEZ_yield |>
+  filter(variable == "ylHr") |>
+  filter(crop != "Gram" & crop != "Chickpea") |>
+  mutate(crop = recode(crop, 
+                       "Dry pea" = "Légumineuses à grains",
+                       "Flax" = "Plantes à fibres",
+                       "Maize" = "Maïs grain et ensilage", 
+                       "Wheat" = "Blé tendre"))
+
+
+df_final <- GAEZ_yield_filt |>
+  left_join(RPG_Variations_filt, by = c("insee", "crop")) 
+```
+
+```{r}
+
+# Add back to the dataset the region_code column
+
+df_final <- df_final |>
+  mutate(dept_code = str_sub(as.character(insee), 1, 2),
+         dept_code = ifelse(dept_code %in% c("2A", "2B"), "20", dept_code))
+
+dept_to_region <- c(
+  "01"="84", "02"="32", "03"="84", "04"="93", "05"="93", "06"="93", "07"="84",
+  "08"="44", "09"="76", "10"="44", "11"="76", "12"="76", "13"="93", "14"="28",
+  "15"="84", "16"="75", "17"="75", "18"="24", "19"="75", "20"="94", "21"="27",
+  "22"="53", "23"="75", "24"="75", "25"="27", "26"="84", "27"="28", "28"="24",
+  "29"="53", "30"="76", "31"="76", "32"="76", "33"="75", "34"="76", "35"="53",
+  "36"="24", "37"="24", "38"="84", "39"="27", "40"="75", "41"="24", "42"="84",
+  "43"="84", "44"="52", "45"="24", "46"="76", "47"="75", "48"="76", "49"="52",
+  "50"="28", "51"="44", "52"="44", "53"="52", "54"="44", "55"="44", "56"="53",
+  "57"="44", "58"="27", "59"="32", "60"="32", "61"="28", "62"="32", "63"="84",
+  "64"="75", "65"="76", "66"="76", "67"="44", "68"="44", "69"="84", "70"="27",
+  "71"="27", "72"="52", "73"="84", "74"="84", "75"="11", "76"="28", "77"="11",
+  "78"="11", "79"="75", "80"="32", "81"="76", "82"="76", "83"="93", "84"="93",
+  "85"="52", "86"="75", "87"="75", "88"="44", "89"="27", "90"="27", "91"="11",
+  "92"="11", "93"="11", "94"="11", "95"="11", "971"="01", "972"="02", "973"="03",
+  "974"="04", "976"="06"
+)
+
+df_final <- df_final |>
+  mutate(region_code = dept_to_region[dept_code])
+```
+
+## Elasticity of area to potential yield
+
+In general, we use percentage change as our dependent variable, as it is more straightforward to interpret and also controls for scale differences at the communal level.
+
+### Dependent variable : acreage variations between 2023 and 2007
+
+#### Ordinary Least Squares Model
+
+First, we use the percentage change in acreage per crop between 2023 and 2007 as our dependent variable. Our main independent variables are `value`, corresponding to potential yield level under the **rcp8p5** climate change scenario of the **HadGEM2-ES** model, as well as `value_hist`, the historical yield level. To avoid potential multicollinearity problems, we use the log-difference between the two variables which capture the same information with more stable coefficients.
+
+We are interested in comparing coefficients between our crops of interest, therefore we run regressions separately for the four of them.
+
+```{r}
+
+# Creating separate datasets for each culture we want to analyze
+
+# Wheat
+df_final_w <- df_final |>
+  filter(crop == "Blé tendre") 
+
+# Maize
+df_final_m <- df_final |>
+  filter(crop == "Maïs grain et ensilage")
+
+# Pea
+df_final_p <- df_final |>
+  filter(crop == "Légumineuses à grains")
+
+# Flax
+df_final_f <- df_final |>
+  filter(crop == "Plantes à fibres")
+
+```
+
+We construct an OLS specification with regional fixed effects using the `feols()` command that we then compare with a benchmark specification without fixed effects. The following tables show for each specifications the regression results by crop.
+
+```{r}
+
+# Standard OLS regression without fixed effects using feols command to deal with Inf/NaN observations
+
+reg0_wheat <- feols(diff_2007_2023_perc ~ log(value) - log(value_hist), data = df_final_w)
+
+reg0_maize <- feols(diff_2007_2023_perc ~ log(value) - log(value_hist), data = df_final_m)
+
+reg0_pea <- feols(diff_2007_2023_perc ~ log(value) - log(value_hist), data = df_final_p)
+
+reg0_flax <- feols(diff_2007_2023_perc ~ log(value) - log(value_hist), data = df_final_f)
+
+reg0_results <- 
+  modelsummary(
+  list("Wheat" = reg0_wheat, 
+       "Maize" = reg0_maize, 
+       "Pea" = reg0_pea, 
+       "Flax" = reg0_flax), 
+  stars = TRUE,
+  statistic = "std.error",
+  coef_map = c("log(value)" =  "Potential Yield", 
+               "log(value_hist)" = "Historical Yield"),
+  output = "markdown"
+)
+
+print(reg0_results)
+```
+
+```{r}
+
+# OLS results with regional fixed effects
+
+reg1_wheat <- feols(diff_2007_2023_perc ~ log(value) - log(value_hist) | region_code, data = df_final_w)
+
+reg1_maize <- feols(diff_2007_2023_perc ~ log(value) - log(value_hist) | region_code, data = df_final_m)
+
+reg1_pea <- feols(diff_2007_2023_perc ~ log(value) - log(value_hist) | region_code, data = df_final_p)
+
+reg1_flax <- feols(diff_2007_2023_perc ~ log(value) - log(value_hist) | region_code, data = df_final_f)
+
+reg1_results <-
+  modelsummary(
+  list("Wheat" = reg1_wheat, 
+       "Maize" = reg1_maize, 
+       "Pea" = reg1_pea, 
+       "Flax" = reg1_flax), 
+  stars = TRUE,
+  statistic = "std.error",
+  coef_map = c("log(value)" =  "Potential Yield", 
+               "log(value_hist)" = "Historical Yield"),
+  output = "markdown"
+)
+
+print(reg1_results)
+```
+
+We find that in both specifications, there is a negative relationship between potential yield change and acreage change for **wheat, maize and flax**. On the contrary, an increase in potential yield compared to the historical value of **pea** induces an increase in its acreage.
+
+Furthermore, the model with fixed effects shows only significance for the coefficient on this latter crop, when in the benchmark model, the coefficients on **wheat and maize** are significant. We observe that adding regional fixed effects reduced considerably the magnitude and the significance of the coefficient on **wheat**. In general, the R2 improved by adding regional fixed effects.
+
+However these results are not satisfactory as they point to contradictory results with theory. Indeed, increased potential yield should urge producers to cultivate those crops on larger surfaces. We will now try to improve our results by using potential yield change in percentage as computed by the **GAEZ database**, still controlling for historical yield values, and including an interaction term as well.
+
+```{r}
+
+# OLS results with potential yield change as main explanatory variable
+
+reg2_wheat <- feols(diff_2007_2023_perc ~ change*value_hist, data = df_final_w)
+
+reg2_maize <- feols(diff_2007_2023_perc ~ change*value_hist, data = df_final_m)
+
+reg2_pea <- feols(diff_2007_2023_perc ~ change*value_hist, data = df_final_p)
+
+reg2_flax <- feols(diff_2007_2023_perc ~ change*value_hist, data = df_final_f)
+
+reg2_results <-
+  modelsummary(
+  list("Wheat" = reg2_wheat, 
+       "Maize" = reg2_maize, 
+       "Pea" = reg2_pea, 
+       "Flax" = reg2_flax), 
+  stars = TRUE,
+  statistic = "std.error",
+  coef_map = c("change" = "Potential Yield Change", 
+               "value_hist" = "Historical Yield",
+              "change:value_hist" = "Interaction"),
+  output = "markdown"
+)
+
+print(reg2_results)
+```
+
+```{r}
+
+# OLS results with potential yield change as main explanatory variable
+
+reg3_wheat <- feols(diff_2007_2023_perc ~ change*value_hist | region_code, data = df_final_w)
+
+reg3_maize <- feols(diff_2007_2023_perc ~ change*value_hist | region_code, data = df_final_m)
+
+reg3_pea <- feols(diff_2007_2023_perc ~ change*value_hist | region_code, data = df_final_p)
+
+reg3_flax <- feols(diff_2007_2023_perc ~ change*value_hist | region_code, data = df_final_f)
+
+reg3_results <-
+  modelsummary(
+  list("Wheat" = reg3_wheat, 
+       "Maize" = reg3_maize, 
+       "Pea" = reg3_pea, 
+       "Flax" = reg3_flax), 
+  stars = TRUE,
+  statistic = "std.error",
+  coef_map = c("change" = "Potential Yield Change", 
+               "value_hist" = "Historical Yield",
+              "change:value_hist" = "Interaction"),
+  output = "markdown"
+)
+
+print(reg3_results)
+```
+
+The results reveal that historical yield is consistently and significantly negatively associated with the percentage change in acreage for **wheat, maize, and flax**. This suggests that crops historically more productive may have seen relatively less acreage expansion. The interaction term between potential yield change and historical yield is also significant for **wheat, maize, and flax**, indicating that the effect of expected yield improvement depends on the initial productivity level. Particularly, the interaction is strongly positive for **flax**, suggesting that potential gains are only realized where historical yields were already high. In contrast, the effect of potential yield change itself is not statistically significant for most crops, except for **flax**, where it shows a large, negative effect (which is weakly significant at the 10% level).
+
+Controlling for regional fixed effects refines the estimation by absorbing unobserved heterogeneity across regions. The historical yield variable remains negatively associated with changes in acreage for maize and flax, both statistically significant. However, for **wheat** and **pea**, historical yield loses statistical significance. The interaction term between historical yield and potential yield change is now statistically significant across all four crops. This suggests that the effect of potential productivity changes on land allocation depends strongly on the initial yield level. The direct effect of potential yield change remains non-significant for all crops, even becoming negative for **wheat and flax**, once fixed effects are included.
+
+```{r}
+
+# squared independent variables
+
+reg4_wheat <- feols(diff_2007_2023_perc ~ I(change^2) + change*value_hist | region_code, data = df_final_w)
+
+reg4_maize <- feols(diff_2007_2023_perc ~ I(change^2) + change*value_hist | region_code, data = df_final_m)
+
+reg4_pea <- feols(diff_2007_2023_perc ~ I(change^2) + change*value_hist | region_code, data = df_final_p)
+
+reg4_flax <- feols(diff_2007_2023_perc ~ I(change^2) + change*value_hist | region_code, data = df_final_f)
+
+reg4_results <-
+  modelsummary(
+  list("Wheat" = reg4_wheat, 
+       "Maize" = reg4_maize, 
+       "Pea" = reg4_pea, 
+       "Flax" = reg4_flax), 
+  stars = TRUE,
+  statistic = "std.error",
+  coef_map = c("change" = "Potential Yield Change", 
+               "value_hist" = "Historical Yield",
+              "change:value_hist" = "Interaction",
+              "I(change^2)" = "Squared Potential Yield Change"),
+  output = "markdown"
+)
+
+print(reg4_results)
+
+```
+Squared potential yield change is only significant for crops where potential yield change was already significant, meaning **pea and flax** and takes the inverse sign. The interaction term remains significant for **wheat** and **flax**. 
+
+**Note : In the regression including squared `value_hist`, the said coefficient was null and non-significant for all crops, meaning that `value_hist` has probably only a linear relationship with acreage variations. In the GAM results below, we also find that when significant, Historical Yield has a linear relationship to acreage change (EDF ~ 1).**
+
+#### Generalized Additive Model
+
+GAM models can be more relevant when using the difference between potential yield under climate change and historical yield as our independent variable. Indeed, the response of land use to climate-induced yield gaps may be nonlinear or threshold-dependent. GAMs can be used to model a smooth function of the said gap. The model remains additive, meaning the effects of each predictor are estimated separately and then combined.
+
+Note that GAM models estimate smooth effects, not fixed coefficients as a linear model would do. The `summary()` command gives the **EDF**, Estimated Degrees of Freedom, which when !=1 indicates non-linearity in the effect.The F-value and the p-value measure the significance of the smooth effect. The `plot()` command can then visualize the sign of the effect according to the range of the value of the explanatory variable. 
+
+```{r}
+
+# Test du modèle GAM
+library(mgcv)
+
+# Deleting NaN and Inf
+
+# Wheat
+df_gam_w <- df_final_w |>
+  filter(!is.nan(change) & !is.infinite(change)) |>
+  filter(!is.nan(diff_2007_2023_perc) & !is.infinite(diff_2007_2023_perc))
+
+# Maize
+df_gam_m <- df_final_m |>
+  filter(!is.nan(change) & !is.infinite(change)) |>
+  filter(!is.nan(diff_2007_2023_perc) & !is.infinite(diff_2007_2023_perc)) 
+
+# Pea
+df_gam_p <- df_final_p |>
+  filter(!is.nan(change) & !is.infinite(change)) |>
+  filter(!is.nan(diff_2007_2023_perc) & !is.infinite(diff_2007_2023_perc)) 
+
+# Flax
+df_gam_f <- df_final_f |>
+  filter(!is.nan(change) & !is.infinite(change)) |>
+  filter(!is.nan(diff_2007_2023_perc) & !is.infinite(diff_2007_2023_perc))
+
+reg1_gam_w <- gam(diff_2007_2023_perc ~ s(change) + s(value_hist), data = df_gam_w)
+
+reg1_gam_m <- gam(diff_2007_2023_perc ~ s(change) + s(value_hist), data = df_gam_m)
+
+reg1_gam_p <- gam(diff_2007_2023_perc ~ s(change) + s(value_hist), data = df_gam_p)
+
+reg1_gam_f <- gam(diff_2007_2023_perc ~ s(change) + s(value_hist), data = df_gam_f)
+
+summary(reg1_gam_w)
+plot(reg1_gam_w)
+
+summary(reg1_gam_m)
+plot(reg1_gam_m)
+
+summary(reg1_gam_p)
+plot(reg1_gam_p)
+
+summary(reg1_gam_f)
+plot(reg1_gam_f)
+```
+For wheat, both predictors are statistically significant: the effect of potential yield change is nonlinear (edf = 5.6, p < 0.001), while historical yield shows a strong linear association (edf = 1.0, p < 0.001), suggesting that communes with higher past performance tended to expand wheat surfaces. 
+In the case of maize, only historical yield is significant (p = 0.025), though with a weaker effect, and there is no meaningful relationship with the change in potential yield (p = 0.12). 
+For pea, neither variable reaches statistical significance. 
+Finally, for flax, the change in potential yield has a highly significant and nonlinear effect (p < 0.001, edf = 7.3), while historical yield is only marginally significant (p ≈ 0.095). 
+
+### Dependent variable : mean acreage variations between 2023 and 2007
+
+We compute the mean variations over four years at the beginning and at the end of the period of interest (between 2007 and 2011, between 2019 and 2023). Then we take the percentage change in acreage between those two means, which will consist in our dependent variable.
+
+```{r}
+
+# OLS results with potential yield change as main explanatory variable
+
+reg5_wheat <- feols(diff_final_debut_perc ~ change*value_hist | region_code, data = df_final_w)
+
+reg5_maize <- feols(diff_final_debut_perc ~ change*value_hist | region_code, data = df_final_m)
+
+reg5_pea <- feols(diff_final_debut_perc ~ change*value_hist | region_code, data = df_final_p)
+
+reg5_flax <- feols(diff_final_debut_perc ~ change*value_hist | region_code, data = df_final_f)
+
+reg5_results <-
+  modelsummary(
+  list("Wheat" = reg5_wheat, 
+       "Maize" = reg5_maize, 
+       "Pea" = reg5_pea, 
+       "Flax" = reg5_flax), 
+  stars = TRUE,
+  statistic = "std.error",
+  coef_map = c("change" = "Potential Yield Change", 
+               "value_hist" = "Historical Yield",
+              "change:value_hist" = "Interaction"),
+  output = "markdown"
+)
+
+print(reg5_results)
+```
+
+Compared to the previous specification, the current results yield similar but more stable estimates in terms of sign and significance. Most importantly, the interaction term between potential yield change and historical yield remains statistically significant for **wheat, maize, and pea**. However, the magnitude of the coefficients, especially for the potential yield change, tends to be smaller in this specification. For **wheat** and **maize**, where the effects are now insignificant and negative. For **pea** and **flax**, large coefficients on the potential yield change persist, but they remain imprecisely estimated. The historical yield variable maintains its negative and sometimes significant association (see **maize and flax**).
+
+## Land-share models
+
+In the literature, we can find land-share models using fractional logit. The outcome variable is the land allocated to the production of a given crop over the total cultivated area.
+
+To engage in this analysis, we first need to extend our analysis to all crops present in our datasets. For that, we need to append the crops present in the GAEZ dataset with the ones in the RPG dataset. We start by loading the GAEZ dataset filtered for only France. 
+
+```{r}
+GAEZ_France <- readRDS(here(dir$raw, "GAEZ_yieldchange_communes_filt(2).rds"))
+
+GAEZ_France_th3 <- GAEZ_France |>
+  filter(theme_id == 3)
+
+GAEZ_France_th3 <- GAEZ_France_th3 |>
+  filter(!crop %in% c(
+    "Biomass sorghum",
+    "Cassava",
+    "Coconut",
+    "Jatropha",
+    "Oil palm",
+    "Reed canary grass",
+    "Tea"
+  ))
+
+# adding the RPG cultures to the dataframe
+
+library(tibble)
+
+correspondance_gaez_rpg <- tribble(
+  ~culture_gaez,        ~groupe_rpg,
+  "Buckwheat",          "Autres céréales",
+  "Foxtail millet",     "Autres céréales",
+  "Oat",                "Autres céréales",
+  "Pearl millet",       "Autres céréales",
+  "Rye",                "Autres céréales",
+  "Sorghum",            "Autres céréales",
+  "Switchgrass",        "Autres céréales",
+  "Tobacco",            "Autres cultures industrielles",
+  "Groundnut",          "Autres oléagineux",
+  "Soybean",            "Autres oléagineux",
+  "Wheat",              "Blé tendre",
+  "Sugar beet",         "Canne à sucre",
+  "Sugar cane",         "Canne à sucre",
+  "Rapeseed",           "Colza",
+  "Miscanthus",         "Divers",
+  "Alfalfa",            "Fourrage",
+  "Napier grass",       "Fourrage",
+  "Cabbage",            "Légumes ou fleurs",
+  "Carrot",             "Légumes ou fleurs",
+  "Onion",              "Légumes ou fleurs",
+  "Phaseolus bean",     "Légumes ou fleurs",
+  "Sweet potato",       "Légumes ou fleurs",
+  "Tomato",             "Légumes ou fleurs",
+  "White potato",       "Légumes ou fleurs",
+  "Yam",                "Légumes ou fleurs",
+  "Chickpea",           "Légumineuses à grains",
+  "Cowpea",             "Légumineuses à grains",
+  "Dry pea",            "Légumineuses à grains",
+  "Gram",               "Légumineuses à grains",
+  "Pigeonpea",          "Légumineuses à grains",
+  "Maize",              "Maïs grain et ensilage",
+  "Olive",              "Oliviers",
+  "Barley",             "Orge",
+  "Grass",              "Pâturages",
+  "Cotton",             "Plantes à fibres",
+  "Flax",               "Plantes à fibres",
+  "Dryland rice",       "Riz",
+  "Wetland rice",       "Riz",
+  "Sunflower",          "Tournesol",
+  "Banana",             "Vergers",
+  "Citrus",             "Vergers",
+  "Cocoa",              "Vergers",
+  "Coffee",             "Vergers"
+)
+
+GAEZ_France_th3_match <- GAEZ_France_th3 |>
+  left_join(correspondance_gaez_rpg, by = c("crop" = "culture_gaez"))
+
+# create weights associated to each GAEZ crop
+GAEZ_France_th3_weight <- GAEZ_France_th3_match |>
+  group_by(insee, groupe_rpg) |>
+  mutate(
+    sum_value_hist_group = sum(value_hist, na.rm = TRUE),
+    weight = if_else(sum_value_hist_group > 0,
+                     value_hist / sum_value_hist_group,
+                     0)
+  ) |>
+  ungroup()
+
+GAEZ_Legumineuses <- GAEZ_France_th3_weight |>
+  filter(groupe_rpg == "Légumineuses à grains")
+# aggregate at RPG level while taking into account the weights associated to each GAEZ crops
+
+rpg_level <- GAEZ_France_th3_weight |>
+  group_by(insee,groupe_rpg) |>
+  summarise(
+    value_hist_rpg = sum(value_hist * weight, na.rm = TRUE),
+    value_futur_rpg = sum(value * weight, na.rm = TRUE),
+    .groups = "drop"
+  )
+
+
+
+```
+
+```{r}
+
+# cultures RPG à retravailler
+
+RPG_cultures <- readRDS("data/raw/RPG_Aggregated_ALL.rds")
+
+#list(unique(RPG_cultures$LIBELLE_GROUPE_CULTURE))
+
+RPG_cultures_transf <- RPG_cultures |>
+  mutate(LIBELLE_GROUPE_CULTURE = case_when(
+    LIBELLE_GROUPE_CULTURE %in% c("Prairies temporaires", "Prairies permanentes", "Estives et landes") ~ "Pâturages",
+    LIBELLE_GROUPE_CULTURE %in% c("Protéagineux", "Légumineuses à grains") ~ "Légumineuses à grains/Protéagineux",
+    TRUE ~ LIBELLE_GROUPE_CULTURE
+  )) |>
+  filter(!LIBELLE_GROUPE_CULTURE %in% c("Vignes", "Fruits à coque", "Gel (surfaces gelées sans production)", NA))
+
+
+# Méthode plus rapide que summarize : convert to data.table
+dt <- as.data.table(RPG_cultures_transf)
+
+# Extract crops to aggregate
+fusion_cultures <- c("Pâturages", "Légumineuses à grains/Protéagineux")
+dt_fusion <- dt[LIBELLE_GROUPE_CULTURE %in% fusion_cultures]
+
+# Separate numerical columns where observations will be added up
+cols_num <- names(dt_fusion)[sapply(dt_fusion, is.numeric)]
+cols_id  <- setdiff(names(dt_fusion), c("name", "year", "LIBELLE_GROUPE_CULTURE", cols_num))
+
+# Aggregate numeric columns
+fusion_sum <- dt_fusion[, lapply(.SD, sum, na.rm = TRUE),
+                        by = .(name, year, LIBELLE_GROUPE_CULTURE),
+                        .SDcols = cols_num]
+
+# Aggregate non numeric columns
+fusion_ids <- dt_fusion[, lapply(.SD, \(x) first(na.omit(x))),
+                        by = .(name, year, LIBELLE_GROUPE_CULTURE),
+                        .SDcols = cols_id]
+
+# Rebind original dataset
+dt_fusion_agg <- merge(fusion_sum, fusion_ids, 
+                       by = c("name", "year", "LIBELLE_GROUPE_CULTURE"))
+
+dt_autres <- dt[!(LIBELLE_GROUPE_CULTURE %in% fusion_cultures)]
+
+RPG_final <- rbind(dt_fusion_agg, dt_autres, fill = TRUE)
+
+RPG_final <- RPG_final |>
+  mutate(CODE_GROUP = case_when(
+    CODE_GROUP %in% c("17", "19") ~ "18",
+    CODE_GROUP %in% c("8") ~ "15",
+    TRUE ~ CODE_GROUP))
+
+saveRDS(RPG_final, "data/raw/RPG_NEW_Aggreg_ALL.rds")
+
+```
+
