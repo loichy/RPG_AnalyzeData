@@ -45,7 +45,7 @@ trad_cultures <- tibble::tibble(
   culture_fr = c("Légumineuses à grains", "Plantes à fibres", "Maïs grain et ensilage", "Blé tendre")
 )
 
-RPG_Variations <- readRDS(here(dir$raw, "LongPeriod_AcreageVariations.rds"))
+RPG_Variations <- readRDS(here(dir$final, "LongPeriod_AcreageVariations.rds"))
 GAEZ_yield <- readRDS(here(dir$raw, "GAEZ_yieldchange_communes_filt.rds"))
 
 RPG_Variations_filt <- RPG_Variations |>
@@ -286,15 +286,16 @@ reg4_results <-
 print(reg4_results)
 
 ```
-Squared potential yield change is only significant for crops where potential yield change was already significant, meaning **pea and flax** and takes the inverse sign. The interaction term remains significant for **wheat** and **flax**. 
 
-**Note : In the regression including squared `value_hist`, the said coefficient was null and non-significant for all crops, meaning that `value_hist` has probably only a linear relationship with acreage variations. In the GAM results below, we also find that when significant, Historical Yield has a linear relationship to acreage change (EDF ~ 1).**
+Squared potential yield change is only significant for crops where potential yield change was already significant, meaning **pea and flax** and takes the inverse sign. The interaction term remains significant for **wheat** and **flax**.
+
+**Note : In the regression including squared `value_hist`, the said coefficient was null and non-significant for all crops, meaning that `value_hist` has probably only a linear relationship with acreage variations. In the GAM results below, we also find that when significant, Historical Yield has a linear relationship to acreage change (EDF \~ 1).**
 
 #### Generalized Additive Model
 
 GAM models can be more relevant when using the difference between potential yield under climate change and historical yield as our independent variable. Indeed, the response of land use to climate-induced yield gaps may be nonlinear or threshold-dependent. GAMs can be used to model a smooth function of the said gap. The model remains additive, meaning the effects of each predictor are estimated separately and then combined.
 
-Note that GAM models estimate smooth effects, not fixed coefficients as a linear model would do. The `summary()` command gives the **EDF**, Estimated Degrees of Freedom, which when !=1 indicates non-linearity in the effect.The F-value and the p-value measure the significance of the smooth effect. The `plot()` command can then visualize the sign of the effect according to the range of the value of the explanatory variable. 
+Note that GAM models estimate smooth effects, not fixed coefficients as a linear model would do. The `summary()` command gives the **EDF**, Estimated Degrees of Freedom, which when !=1 indicates non-linearity in the effect.The F-value and the p-value measure the significance of the smooth effect. The `plot()` command can then visualize the sign of the effect according to the range of the value of the explanatory variable.
 
 ```{r}
 
@@ -343,10 +344,8 @@ plot(reg1_gam_p)
 summary(reg1_gam_f)
 plot(reg1_gam_f)
 ```
-For wheat, both predictors are statistically significant: the effect of potential yield change is nonlinear (edf = 5.6, p < 0.001), while historical yield shows a strong linear association (edf = 1.0, p < 0.001), suggesting that communes with higher past performance tended to expand wheat surfaces. 
-In the case of maize, only historical yield is significant (p = 0.025), though with a weaker effect, and there is no meaningful relationship with the change in potential yield (p = 0.12). 
-For pea, neither variable reaches statistical significance. 
-Finally, for flax, the change in potential yield has a highly significant and nonlinear effect (p < 0.001, edf = 7.3), while historical yield is only marginally significant (p ≈ 0.095). 
+
+For wheat, both predictors are statistically significant: the effect of potential yield change is nonlinear (edf = 5.6, p \< 0.001), while historical yield shows a strong linear association (edf = 1.0, p \< 0.001), suggesting that communes with higher past performance tended to expand wheat surfaces. In the case of maize, only historical yield is significant (p = 0.025), though with a weaker effect, and there is no meaningful relationship with the change in potential yield (p = 0.12). For pea, neither variable reaches statistical significance. Finally, for flax, the change in potential yield has a highly significant and nonlinear effect (p \< 0.001, edf = 7.3), while historical yield is only marginally significant (p ≈ 0.095).
 
 ### Dependent variable : mean acreage variations between 2023 and 2007
 
@@ -387,15 +386,16 @@ Compared to the previous specification, the current results yield similar but mo
 
 In the literature, we can find land-share models using fractional logit. The outcome variable is the land allocated to the production of a given crop over the total cultivated area.
 
-To engage in this analysis, we first need to extend our analysis to all crops present in our datasets. For that, we need to append the crops present in the GAEZ dataset with the ones in the RPG dataset. We start by loading the GAEZ dataset filtered for only France. 
+To engage in this analysis, we first need to extend our analysis to all crops present in our datasets. For that, we need to append the crops present in the GAEZ dataset with the ones in the RPG dataset. We start by loading the GAEZ dataset filtered for only France.
 
 ```{r}
-GAEZ_France <- readRDS(here(dir$raw, "GAEZ_yieldchange_communes_filt(2).rds"))
+GAEZ_France <- readRDS(here(dir$raw, "GAEZ_yieldchange_communes_filt.rds"))
 
-GAEZ_France_th3 <- GAEZ_France |>
-  filter(theme_id == 3)
+GAEZ_France_Grass <- GAEZ_France |>
+  filter(theme_id == 3) %>% 
+  filter(crop == "Grass")
 
-GAEZ_France_th3 <- GAEZ_France_th3 |>
+GAEZ_France_th4 <- GAEZ_France |>
   filter(!crop %in% c(
     "Biomass sorghum",
     "Cassava",
@@ -404,7 +404,11 @@ GAEZ_France_th3 <- GAEZ_France_th3 |>
     "Oil palm",
     "Reed canary grass",
     "Tea"
-  ))
+  )) %>% 
+  filter(theme_id == 4, variable == "ylHr") 
+
+GAEZ_France_select <- GAEZ_France_th4 |>
+  bind_rows(GAEZ_France_Grass)
 
 # adding the RPG cultures to the dataframe
 
@@ -457,25 +461,25 @@ correspondance_gaez_rpg <- tribble(
   "Coffee",             "Vergers"
 )
 
-GAEZ_France_th3_match <- GAEZ_France_th3 |>
+GAEZ_France_match <- GAEZ_France_select |>
   left_join(correspondance_gaez_rpg, by = c("crop" = "culture_gaez"))
 
 # create weights associated to each GAEZ crop
-GAEZ_France_th3_weight <- GAEZ_France_th3_match |>
+GAEZ_France_weight <- GAEZ_France_match |>
   group_by(insee, groupe_rpg) |>
   mutate(
-    sum_value_hist_group = sum(value_hist, na.rm = TRUE),
+    sum_value_hist_group = sum(value_hist, na.rm = TRUE), # Compute for each RPG category to the total cumulated yields from each communes
     weight = if_else(sum_value_hist_group > 0,
-                     value_hist / sum_value_hist_group,
+                     value_hist / sum_value_hist_group, # Weight corresponds to the proportion of each GAEZ crop yield in the total yield of the RPG category
                      0)
   ) |>
   ungroup()
 
-GAEZ_Legumineuses <- GAEZ_France_th3_weight |>
+GAEZ_Legumineuses <- GAEZ_France_weight |>
   filter(groupe_rpg == "Légumineuses à grains")
 # aggregate at RPG level while taking into account the weights associated to each GAEZ crops
 
-rpg_level <- GAEZ_France_th3_weight |>
+rpg_level <- GAEZ_France_weight |>
   group_by(insee,groupe_rpg) |>
   summarise(
     value_hist_rpg = sum(value_hist * weight, na.rm = TRUE),
@@ -542,4 +546,3 @@ RPG_final <- RPG_final |>
 saveRDS(RPG_final, "data/raw/RPG_NEW_Aggreg_ALL.rds")
 
 ```
-
