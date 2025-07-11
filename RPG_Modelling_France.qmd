@@ -471,8 +471,7 @@ GAEZ_France_th3_weight <- GAEZ_France_th3_match |>
   ) |>
   ungroup()
 
-GAEZ_Legumineuses <- GAEZ_France_th3_weight |>
-  filter(groupe_rpg == "Légumineuses à grains")
+
 # aggregate at RPG level while taking into account the weights associated to each GAEZ crops
 
 rpg_level <- GAEZ_France_th3_weight |>
@@ -482,7 +481,6 @@ rpg_level <- GAEZ_France_th3_weight |>
     value_futur_rpg = sum(value * weight, na.rm = TRUE),
     .groups = "drop"
   )
-
 
 
 ```
