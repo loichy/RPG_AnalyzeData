@@ -32,10 +32,8 @@ lapply(dir, function(i) dir.create(i, recursive = T, showWarnings = F))
 # 2). Load and prepare dataset ------
 #===============================================================================
 
-# test avec Bretagne car fichier trop lourd
-RPG_53 <- readRDS(here(dir$raw, "RPG_Aggregated_Brittany.rds"))
 
-RPG_All <- readRDS(here(dir$raw, "RPG_Aggregated_All.rds")) %>% 
+RPG_All <- readRDS(here(dir$raw, "RPG_NEW_Aggreg_All.rds")) %>% 
   arrange(insee, LIBELLE_GROUPE_CULTURE, year)
 
 
@@ -74,6 +72,26 @@ diff_means <- df %>%
 final_result <- full_join(diff_years, diff_means, 
                           by = c("insee", "CODE_GROUP", "LIBELLE_GROUPE_CULTURE")) %>% 
   arrange(insee, as.numeric(CODE_GROUP))
+
+#===============================================================================
+# 4). Creating categorical variable accounting for the presence of crops ------
+#===============================================================================
+
+final_result <- final_result |>
+  mutate(
+    etat = case_when(
+      year_2007 == 0 & year_2023 == 0                       ~ 4,  # jamais cultivé
+      year_2007 > 0  & year_2023 > 0                        ~ 1,  # maintenu
+      year_2007 == 0 & year_2023 > 0                        ~ 2,  # apparition
+      year_2007 > 0  & year_2023 == 0                       ~ 3   # disparition
+    ),
+    etat_libelle = case_when(
+      etat == 1 ~ "maintenu",
+      etat == 2 ~ "apparition",
+      etat == 3 ~ "disparition",
+      etat == 4 ~ "jamais cultivé"
+    )
+  )
 
 #===============================================================================
 # Save data
