@@ -488,7 +488,6 @@ rpg_level <- GAEZ_France_weight |>
   )
 
 
-
 ```
 
 ```{r}
