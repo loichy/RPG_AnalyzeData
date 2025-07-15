@@ -128,7 +128,7 @@ rpg_level <- GAEZ_France_weight |>
 # 2). Load and prepare RPG dataset (which will be used in script 04) ------
 #===============================================================================
 
-RPG_cultures <- readRDS("data/raw/RPG_Aggregated_ALL.rds")
+RPG_cultures <- readRDS(here(dir$raw, "RPG_Aggregated_ALL.rds"))
 
 RPG_cultures_transf <- RPG_cultures |>
   mutate(LIBELLE_GROUPE_CULTURE_AGG = case_when(
@@ -143,42 +143,45 @@ dt <- as.data.table(RPG_cultures_transf)
 
 # Extract crops to aggregate
 fusion_cultures <- c("Pâturages", "Légumineuses à grains/Protéagineux", "Divers")
-dt_fusion <- dt[LIBELLE_GROUPE_CULTURE %in% fusion_cultures]
+dt_fusion <- dt[LIBELLE_GROUPE_CULTURE_AGG %in% fusion_cultures]
 
 # Separate numerical columns where observations will be added up
-cols_num <- names(dt_fusion)[sapply(dt_fusion, is.numeric)]
-cols_id  <- setdiff(names(dt_fusion), c("name", "year", "LIBELLE_GROUPE_CULTURE", cols_num))
+cols_sum <- c("parcel_cult_code_group_n",       
+              "parcel_cult_code_group_perc",     
+              "surf_code_group_m2",
+              "surf_code_group_perc")
+cols_id  <- setdiff(names(dt_fusion), c(cols_sum, "name", "year", "LIBELLE_GROUPE_CULTURE_AGG"))
 
-# Aggregate numeric columns
+# Sum on the columns of parcels and surface
 fusion_sum <- dt_fusion[, lapply(.SD, sum, na.rm = TRUE),
-                        by = .(name, year, LIBELLE_GROUPE_CULTURE),
-                        .SDcols = cols_num]
+                        by = .(name, year, LIBELLE_GROUPE_CULTURE_AGG),
+                        .SDcols = cols_sum]
 
 # Aggregate non numeric columns
 fusion_ids <- dt_fusion[, lapply(.SD, \(x) first(na.omit(x))),
-                        by = .(name, year, LIBELLE_GROUPE_CULTURE),
+                        by = .(name, year, LIBELLE_GROUPE_CULTURE_AGG),
                         .SDcols = cols_id]
 
 # Rebind original dataset
 dt_fusion_agg <- merge(fusion_sum, fusion_ids, 
-                       by = c("name", "year", "LIBELLE_GROUPE_CULTURE"))
-dt_autres <- dt[!(LIBELLE_GROUPE_CULTURE %in% fusion_cultures)]
+                       by = c("name", "year", "LIBELLE_GROUPE_CULTURE_AGG"),)
+dt_autres <- dt[!(LIBELLE_GROUPE_CULTURE_AGG %in% fusion_cultures)]
 RPG_final <- rbind(dt_fusion_agg, dt_autres, fill = TRUE)
 
-# Updating crop group codes to match the new group names
-RPG_final <- RPG_final |>
-  mutate(CODE_GROUP = case_when(
-    CODE_GROUP %in% c("17", "19") ~ "18",
-    CODE_GROUP %in% c("8") ~ "15",
-    TRUE ~ CODE_GROUP))
+# Reorganize RPG dataset, and keep relevant columns
+RPG_REAGG <- RPG_final %>%
+  as_tibble() %>% 
+  arrange(year, insee, LIBELLE_GROUPE_CULTURE_AGG) %>%
+  select(insee, name, year, region_code, surf_tot_geo_unit_m2, surf_agri_geo_unit_m2, N_Parcels,
+         LIBELLE_GROUPE_CULTURE_AGG, 
+         parcel_cult_code_group_n, parcel_cult_code_group_perc,
+         surf_code_group_m2, surf_code_group_perc)
 
-check <- RPG_final %>% 
-  group_by(name, year) %>% 
-  summarise(surf_agri = first(surf_agri_geo_unit_m2),
-            totals = sum(surf_code_group_m2, na.rm = TRUE),
-            totals_perc = sum(surf_code_group_perc, na.rm = TRUE))
+#===============================================================================
+# 3). Save datasets that will be then paired in script 4
+#===============================================================================
 
-saveRDS(RPG_final, "data/raw/RPG_NEW_Aggreg_ALL.rds")
-
+saveRDS(RPG_REAGG, here(dir$final, "RPG_ReAggregated_ALL.rds"))
+saveRDS(rpg_level, here(dir$final, "GAEZ_Yieldchange_ReAggregated.rds"))
 
 
