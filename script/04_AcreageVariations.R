@@ -55,6 +55,56 @@ GAEZ_yield <- readRDS(here(dir$final, "GAEZ_Yieldchange_ReAggregated.rds"))%>%
 #     parcels=sum(parcel_cult_code_group_perc),
 #     surf =sum(surf_code_group_perc))
 
+# 1.) Convert the dataset into data.table
+dt <- as.data.table(RPG_All)  
+
+# 2.) Extract unique values of commune, year and crop
+communes <- unique(dt$insee)
+#nom_communes <- unique(dt$name)
+annees   <- unique(dt$year)
+cultures <- unique(dt$LIBELLE_GROUPE_CULTURE)
+#code_cultures <- unique(dt$CODE_GROUP)
+#region <- unique(dt$region_code)
+
+# 3.) Create a reference table with data.table::CJ()
+ref <- CJ(insee = communes, year = annees, LIBELLE_GROUPE_CULTURE = cultures)
+
+# 4.) Merge with the original dataset
+dt_complet <- merge(ref, dt, by = c("insee", "year", "LIBELLE_GROUPE_CULTURE"), all.x = TRUE)
+
+# 4a. Pour name et region_code
+commune_info <- unique(dt[, .(insee, name, region_code)])
+
+anyDuplicated(commune_info$insee)
+commune_info <- commune_info[!duplicated(insee)]
+
+
+dt_complet <- merge(dt_complet, commune_info, by = "insee", all.x = TRUE)
+
+# 4b. Pour CODE_GROUP
+culture_info <- unique(dt[, .(LIBELLE_GROUPE_CULTURE, CODE_GROUP)])
+
+
+dt_complet <- merge(dt_complet, culture_info, by = "LIBELLE_GROUPE_CULTURE", all.x = TRUE)
+
+# 5. Remplace numeric columns' missing values with 0
+num_cols <- names(dt)[sapply(dt, is.numeric) & !(names(dt) %in% c("year"))]
+
+for (col in num_cols) {
+  set(dt_complet, which(is.na(dt_complet[[col]])), col, 0)
+}
+
+RPG_All_final <- as.data.frame(dt_complet)
+RPG_All_final <- RPG_All_final |>
+  select(!name.x & !CODE_GROUP.x & !region_code.x & !data_type) 
+
+RPG_All_final <- RPG_All_final |>
+  rename(name = name.y, 
+         CODE_GROUP = CODE_GROUP.y,
+         region_code = region_code.y)
+
+saveRDS(RPG_All_final, "data/derived/RPG_COMPLETE_Aggreg_ALL.rds")
+
 #===============================================================================
 # 3). Create panel data ------
 #===============================================================================
