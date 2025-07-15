@@ -1,6 +1,7 @@
 #===============================================================================
 # Description: Script to create a dataframe containing acreage change over the 
-# period for a subset of cultures
+# period and, then pair it with the potential yield change from GAEZ
+# This dataset will then be used in econometric estimations
 #===============================================================================
 
 #===============================================================================
@@ -29,13 +30,51 @@ dir$output <- here(dir$root, "output")
 lapply(dir, function(i) dir.create(i, recursive = T, showWarnings = F))
 
 #===============================================================================
-# 2). Load and prepare dataset ------
+# 2). Load and prepare the datasets ------
 #===============================================================================
 
+RPG_Variations <- readRDS(here(dir$final, "RPG_ReAggregated_ALL.rds")) %>% 
+  arrange(year, insee, LIBELLE_GROUPE_CULTURE_AGG)
 
-RPG_All <- readRDS(here(dir$raw, "RPG_NEW_Aggreg_All.rds")) %>% 
-  arrange(insee, LIBELLE_GROUPE_CULTURE, year)
+GAEZ_yield <- readRDS(here(dir$final, "GAEZ_Yieldchange_ReAggregated.rds"))%>% 
+  mutate(
+    LIBELLE_GROUPE_CULTURE_AGG = groupe_rpg
+  ) %>% 
+  select(-groupe_rpg)
 
+# check_2018 <- RPG_Variations %>% 
+#   filter(year == 2018) %>% 
+#   group_by(insee) %>% 
+#   summarize(
+#     parcels=sum(parcel_cult_code_group_perc),
+#     surf =sum(surf_code_group_perc))
+# check_2008 <- RPG_Variations %>% 
+#   filter(year == 2008) %>% 
+#   group_by(insee) %>% 
+#   summarize(
+#     parcels=sum(parcel_cult_code_group_perc),
+#     surf =sum(surf_code_group_perc))
+
+#===============================================================================
+# 3). Create panel data ------
+#===============================================================================
+
+# For tomorrow: fill with 0s, and then create the long acreage vaeriables + dynamic
+
+# Get the list of all crops
+all_crops <- unique(RPG_Variations$LIBELLE_GROUPE_CULTURE_AGG)
+
+# Fill using complete()
+df_complete <- RPG_Variations %>%
+  tidyr::complete(
+    insee, name, year, LIBELLE_GROUPE_CULTURE_AGG = all_crops,
+    fill = list(
+      parcel_cult_code_group_n = 0,
+      parcel_cult_code_group_perc = 0,
+      surf_code_group_m2 = 0,
+      surf_code_group_perc = 0
+    )
+  )
 
 #===============================================================================
 # 3). Calculating acreage variations over the period ------
@@ -92,6 +131,20 @@ final_result <- final_result |>
       etat == 4 ~ "jamais cultivé"
     )
   )
+
+#===============================================================================
+# 3). Join them ------
+#===============================================================================
+RPG_yearly_GAEZ <- RPG_Variations %>%
+  left_join(GAEZ_yield, by = c("insee", "LIBELLE_GROUPE_CULTURE_AGG")) %>% 
+  select(
+    insee, name, region_code, year, LIBELLE_GROUPE_CULTURE_AGG, surf_tot_geo_unit_m2, surf_agri_geo_unit_m2, N_Parcels,
+    surf_code_group_m2, surf_code_group_perc, parcel_cult_code_group_n, parcel_cult_code_group_perc,
+    value_hist_rpg, value_futur_rpg
+  ) %>% 
+  arrange(year, insee, LIBELLE_GROUPE_CULTURE_AGG)
+
+
 
 #===============================================================================
 # Save data
