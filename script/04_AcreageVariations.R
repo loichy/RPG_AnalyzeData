@@ -77,7 +77,7 @@ df_complete <- RPG_Variations %>%
   )
 
 #===============================================================================
-# 3). Calculating acreage variations over the period ------
+# 4). Calculating acreage variations over the period ------
 #===============================================================================
 
 # Make sure year is numeric
@@ -113,14 +113,14 @@ final_result <- full_join(diff_years, diff_means,
   arrange(insee, as.numeric(CODE_GROUP))
 
 #===============================================================================
-# 4). Creating categorical variable accounting for the presence of crops ------
+# 5). Creating categorical variable accounting for the presence of crops ------
 #===============================================================================
 
 final_result <- final_result |>
   mutate(
     etat = case_when(
-      year_2007 == 0 & year_2023 == 0                       ~ 4,  # jamais cultivé
-      year_2007 > 0  & year_2023 > 0                        ~ 1,  # maintenu
+      mean_debut < 0.001 & mean_fin < 0.001                 ~ 4,  # jamais cultivé
+      mean_debut >= 0.001  & mean_fin >= 0.001              ~ 1,  # maintenu
       year_2007 == 0 & year_2023 > 0                        ~ 2,  # apparition
       year_2007 > 0  & year_2023 == 0                       ~ 3   # disparition
     ),
@@ -133,7 +133,7 @@ final_result <- final_result |>
   )
 
 #===============================================================================
-# 3). Join them ------
+# 6). Join/pair them ------
 #===============================================================================
 RPG_yearly_GAEZ <- RPG_Variations %>%
   left_join(GAEZ_yield, by = c("insee", "LIBELLE_GROUPE_CULTURE_AGG")) %>% 
