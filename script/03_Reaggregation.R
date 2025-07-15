@@ -32,7 +32,7 @@ lapply(dir, function(i) dir.create(i, recursive = T, showWarnings = F))
 # 2). Load and prepare GAEZ dataset ------
 #===============================================================================
 
-GAEZ_France <- readRDS(here(dir$raw, "GAEZ_yieldchange_communes_filt(2).rds"))
+GAEZ_France <- readRDS(here(dir$raw, "GAEZ_yieldchange_communes_filt.rds"))
 
 # Extracting Grass culture which is only present in theme 3
 GAEZ_France_Grass <- GAEZ_France |>
@@ -141,8 +141,11 @@ RPG_cultures_transf <- RPG_cultures |>
 # Méthode plus rapide que summarize : convert to data.table
 dt <- as.data.table(RPG_cultures_transf)
 
+# Replace NA in LIBELLE_GROUPE_CULTURE_AGG with "Manquante"
+dt[is.na(LIBELLE_GROUPE_CULTURE_AGG), LIBELLE_GROUPE_CULTURE_AGG := "Manquante"]
+
 # Extract crops to aggregate
-fusion_cultures <- c("Pâturages", "Légumineuses à grains/Protéagineux", "Divers")
+fusion_cultures <- c("Pâturages", "Légumineuses à grains/Protéagineux", "Divers", "Manquante")
 dt_fusion <- dt[LIBELLE_GROUPE_CULTURE_AGG %in% fusion_cultures]
 
 # Separate numerical columns where observations will be added up
