@@ -74,16 +74,23 @@ ref <- CJ(insee = communes, year = annees, LIBELLE_GROUPE_CULTURE_AGG = cultures
 # 4.) Merge with the original dataset
 dt_complet <- merge(ref, dt, by = c("insee", "year", "LIBELLE_GROUPE_CULTURE_AGG"), all.x = TRUE)
 
-# 4a. Pour name et region_code
-commune_info <- unique(dt[, .(insee, name, region_code)])
+# complete with columns depending on communes
+commune_info <- unique(dt[, .(insee, name, region_code, surf_tot_geo_unit_m2)])
 
-anyDuplicated(commune_info$insee)
-commune_info <- commune_info[!duplicated(insee)]
+## verifying duplicates
+anyDuplicated(commune_info)
+dt_complet <- merge(dt_complet, commune_info, by = "insee", all.x = TRUE, allow.cartesian = TRUE)
 
-dt_complet <- merge(dt_complet, commune_info, by = "insee", all.x = TRUE)
+## verifying again after merge
+dt_complet[, .N, by = insee][N > 1] # ok
 
-# 5. Remplace numeric columns' missing values with 0
-num_cols <- names(dt)[sapply(dt, is.numeric) & !(names(dt) %in% c("year"))]
+# complete with columns depending on communes AND year
+commune_year_info <- unique(dt[, .(insee, year, surf_agri_geo_unit_m2, N_Parcels)])
+
+dt_complet <- merge(dt_complet, commune_year_info, by = c("insee", "year"), all.x = TRUE)
+
+# 5.) Replace NAs of numeric columns with 0
+num_cols <- names(dt)[sapply(dt, is.numeric) & !(names(dt) %in% c("surf_tot_geo_unit_m2", "surf_agri_geo_unit_m2", "N_Parcels"))]
 
 for (col in num_cols) {
   set(dt_complet, which(is.na(dt_complet[[col]])), col, 0)
@@ -91,11 +98,15 @@ for (col in num_cols) {
 
 RPG_All_final <- as.data.frame(dt_complet)
 RPG_All_final <- RPG_All_final |>
-  select(!name.x & !region_code.x) 
+  select(!name.x & !region_code.x & !surf_tot_geo_unit_m2.x & !surf_agri_geo_unit_m2.x & !N_Parcels.x) 
+
 
 RPG_All_final <- RPG_All_final |>
   rename(name = name.y,
-         region_code = region_code.y)
+         region_code = region_code.y,
+         surf_tot_geo_unit_m2 = surf_tot_geo_unit_m2.y,
+         surf_agri_geo_unit_m2 = surf_agri_geo_unit_m2.y,
+         N_Parcels = N_Parcels.y)
 
 saveRDS(RPG_All_final, "data/final/RPG_COMPLETE_Aggreg_ALL.rds")
 
@@ -109,11 +120,26 @@ df <- RPG_All_final %>%
   mutate(year = as.numeric(year),
          surf_code_group_perc = as.numeric(surf_code_group_perc))
 
+# verify duplicates
+df %>%
+  filter(year %in% c(2007, 2023)) %>%
+  count(insee, year, LIBELLE_GROUPE_CULTURE_AGG) %>%
+  filter(n > 1)
+
+
 # Difference between year 2007 and 2023
 diff_years <- df %>%
   filter(year %in% c(2007, 2023)) %>%
   select(insee, name, region_code, surf_tot_geo_unit_m2, surf_agri_geo_unit_m2, LIBELLE_GROUPE_CULTURE_AGG, year, surf_code_group_perc) %>%
-  pivot_wider(names_from = year, values_from = surf_code_group_perc, names_prefix = "year_", values_fill = 0) %>%
+  pivot_wider(
+    id_cols = c(insee, name, region_code, surf_tot_geo_unit_m2, surf_agri_geo_unit_m2, LIBELLE_GROUPE_CULTURE_AGG),
+    names_from = year,
+    values_from = c(
+      surf_code_group_perc
+    ),
+    names_prefix = "year_",
+    values_fill = list(0)  # Use NA for cultures not cultivated in that commune-year
+  ) %>%
   mutate(diff_2007_2023_abs = year_2023 - year_2007,
          diff_2007_2023_perc = ((year_2023 - year_2007) / year_2007) * 100)
 
@@ -156,7 +182,24 @@ final_result <- final_result |>
     )
   )
 
+# Statistiques descriptives : pourcentage de commune dans chaque état par culture
 
+table_etat <- final_result %>%
+  group_by(LIBELLE_GROUPE_CULTURE, etat_libelle) %>%
+  summarise(nb_communes = n_distinct(insee), .groups = "drop")
+
+table_etat <- table_etat %>%
+  group_by(LIBELLE_GROUPE_CULTURE) %>%
+  mutate(
+    total_communes = sum(nb_communes),
+    pourcentage = round(100 * nb_communes / total_communes, 1)
+  ) %>%
+  ungroup()
+
+table_pourcentages <- table_etat %>%
+  select(LIBELLE_GROUPE_CULTURE, etat_libelle, pourcentage) %>%
+  pivot_wider(names_from = etat_libelle, values_from = pourcentage, values_fill = 0) %>%
+  arrange(LIBELLE_GROUPE_CULTURE)
 
 #===============================================================================
 # 6). Join/pair them ------
