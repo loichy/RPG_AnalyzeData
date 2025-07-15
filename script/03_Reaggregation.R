@@ -32,7 +32,7 @@ lapply(dir, function(i) dir.create(i, recursive = T, showWarnings = F))
 # 2). Load and prepare GAEZ dataset ------
 #===============================================================================
 
-GAEZ_France <- readRDS(here(dir$raw, "GAEZ_yieldchange_communes_filt.rds"))
+GAEZ_France <- readRDS(here(dir$raw, "GAEZ_yieldchange_communes_filt(2).rds"))
 
 # Extracting Grass culture which is only present in theme 3
 GAEZ_France_Grass <- GAEZ_France |>
