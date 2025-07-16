@@ -36,12 +36,6 @@ lapply(dir, function(i) dir.create(i, recursive = T, showWarnings = F))
 RPG_Variations <- readRDS(here(dir$final, "RPG_ReAggregated_ALL.rds")) %>% 
   arrange(year, insee, LIBELLE_GROUPE_CULTURE_AGG)
 
-GAEZ_yield <- readRDS(here(dir$final, "GAEZ_Yieldchange_ReAggregated.rds"))%>% 
-  mutate(
-    LIBELLE_GROUPE_CULTURE_AGG = groupe_rpg
-  ) %>% 
-  select(-groupe_rpg)
-
 # check_2018 <- RPG_Variations %>% 
 #   filter(year == 2018) %>% 
 #   group_by(insee) %>% 
@@ -248,10 +242,10 @@ final_result <- full_join(diff_years, diff_mean_years,
 final_result <- final_result |>
   mutate(
     etat = case_when(
-      mean_debut < 0.001 & mean_fin < 0.001                 ~ 4,  # jamais cultivé
-      mean_debut >= 0.001  & mean_fin >= 0.001              ~ 1,  # maintenu
-      mean_debut < 0.001 & mean_fin >= 0.001                ~ 2,  # apparition
-      mean_debut >= 0.001  & mean_fin < 0.001               ~ 3   # disparition
+      mean_share_debut < 0.001 & mean_share_fin < 0.001                 ~ 4,  # jamais cultivé
+      mean_share_debut >= 0.001  & mean_share_fin >= 0.001              ~ 1,  # maintenu
+      mean_share_debut < 0.001 & mean_share_fin >= 0.001                ~ 2,  # apparition
+      mean_share_debut >= 0.001  & mean_share_fin < 0.001               ~ 3   # disparition
     ),
     etat_libelle = case_when(
       etat == 1 ~ "maintenu",
@@ -260,39 +254,6 @@ final_result <- final_result |>
       etat == 4 ~ "jamais cultivé"
     )
   )
-
-# Statistiques descriptives : pourcentage de commune dans chaque état par culture
-
-table_etat <- final_result %>%
-  group_by(LIBELLE_GROUPE_CULTURE, etat_libelle) %>%
-  summarise(nb_communes = n_distinct(insee), .groups = "drop")
-
-table_etat <- table_etat %>%
-  group_by(LIBELLE_GROUPE_CULTURE) %>%
-  mutate(
-    total_communes = sum(nb_communes),
-    pourcentage = round(100 * nb_communes / total_communes, 1)
-  ) %>%
-  ungroup()
-
-table_pourcentages <- table_etat %>%
-  select(LIBELLE_GROUPE_CULTURE, etat_libelle, pourcentage) %>%
-  pivot_wider(names_from = etat_libelle, values_from = pourcentage, values_fill = 0) %>%
-  arrange(LIBELLE_GROUPE_CULTURE)
-
-#===============================================================================
-# 6). Join/pair them ------
-#===============================================================================
-RPG_yearly_GAEZ <- RPG_Variations %>%
-  left_join(GAEZ_yield, by = c("insee", "LIBELLE_GROUPE_CULTURE_AGG")) %>% 
-  select(
-    insee, name, region_code, year, LIBELLE_GROUPE_CULTURE_AGG, surf_tot_geo_unit_m2, surf_agri_geo_unit_m2, N_Parcels,
-    surf_code_group_m2, surf_code_group_perc, parcel_cult_code_group_n, parcel_cult_code_group_perc,
-    value_hist_rpg, value_futur_rpg
-  ) %>% 
-  arrange(year, insee, LIBELLE_GROUPE_CULTURE_AGG)
-
-
 
 #===============================================================================
 # Save data

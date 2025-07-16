@@ -382,174 +382,91 @@ print(reg5_results)
 
 Compared to the previous specification, the current results yield similar but more stable estimates in terms of sign and significance. Most importantly, the interaction term between potential yield change and historical yield remains statistically significant for **wheat, maize, and pea**. However, the magnitude of the coefficients, especially for the potential yield change, tends to be smaller in this specification. For **wheat** and **maize**, where the effects are now insignificant and negative. For **pea** and **flax**, large coefficients on the potential yield change persist, but they remain imprecisely estimated. The historical yield variable maintains its negative and sometimes significant association (see **maize and flax**).
 
-## Land-share models
+## Land-use models
 
-In the literature, we can find land-share models using fractional logit. The outcome variable is the land allocated to the production of a given crop over the total cultivated area.
+In the literature, we can find land-share models using multinomial logit, where the producer chooses between different crops while maximising its expected profit. The outcome variable is the land allocated to the production of a given crop over the total cultivated area.
 
-To engage in this analysis, we first need to extend our analysis to all crops present in our datasets. For that, we need to append the crops present in the GAEZ dataset with the ones in the RPG dataset. We start by loading the GAEZ dataset filtered for only France.
+In our analysis, the dependent variable is `etat`, a categorical variable going from 1 to 4, which measures if the acreage destined to a crop in a commune has increased, decreased, been maintained or has never existed during our period of interest. We will try to explain this variable first with data on historical potential yields from the **GAEZ dataset**, as well as potential yield change, computed as the difference between the future potential yield under the RCP 8.5 climate change scenario of the HadGEM2-ES model and the historical values of potentiel yield.
 
 ```{r}
-GAEZ_France <- readRDS(here(dir$raw, "GAEZ_yieldchange_communes_filt.rds"))
 
-GAEZ_France_Grass <- GAEZ_France |>
-  filter(theme_id == 3) %>% 
-  filter(crop == "Grass")
+# Load dataset
+df_final <- readRDS(here(dir$final, "Joined_GAEZ_RPG.rds"))
 
-GAEZ_France_th4 <- GAEZ_France |>
-  filter(!crop %in% c(
-    "Biomass sorghum",
-    "Cassava",
-    "Coconut",
-    "Jatropha",
-    "Oil palm",
-    "Reed canary grass",
-    "Tea"
-  )) %>% 
-  filter(theme_id == 4, variable == "ylHr") 
+# compute potential yield change variable
 
-GAEZ_France_select <- GAEZ_France_th4 |>
-  bind_rows(GAEZ_France_Grass)
+df_final <- df_final |>
+  mutate(change = (value_futur_rpg - value_hist_rpg)/value_hist_rpg)
 
-# adding the RPG cultures to the dataframe
+```
 
-library(tibble)
+### Descriptive Statistics
 
-correspondance_gaez_rpg <- tribble(
-  ~culture_gaez,        ~groupe_rpg,
-  "Buckwheat",          "Autres céréales",
-  "Foxtail millet",     "Autres céréales",
-  "Oat",                "Autres céréales",
-  "Pearl millet",       "Autres céréales",
-  "Rye",                "Autres céréales",
-  "Sorghum",            "Autres céréales",
-  "Switchgrass",        "Autres céréales",
-  "Tobacco",            "Autres cultures industrielles",
-  "Groundnut",          "Autres oléagineux",
-  "Soybean",            "Autres oléagineux",
-  "Wheat",              "Blé tendre",
-  "Sugar beet",         "Canne à sucre",
-  "Sugar cane",         "Canne à sucre",
-  "Rapeseed",           "Colza",
-  "Miscanthus",         "Divers",
-  "Alfalfa",            "Fourrage",
-  "Napier grass",       "Fourrage",
-  "Cabbage",            "Légumes ou fleurs",
-  "Carrot",             "Légumes ou fleurs",
-  "Onion",              "Légumes ou fleurs",
-  "Phaseolus bean",     "Légumes ou fleurs",
-  "Sweet potato",       "Légumes ou fleurs",
-  "Tomato",             "Légumes ou fleurs",
-  "White potato",       "Légumes ou fleurs",
-  "Yam",                "Légumes ou fleurs",
-  "Chickpea",           "Légumineuses à grains",
-  "Cowpea",             "Légumineuses à grains",
-  "Dry pea",            "Légumineuses à grains",
-  "Gram",               "Légumineuses à grains",
-  "Pigeonpea",          "Légumineuses à grains",
-  "Maize",              "Maïs grain et ensilage",
-  "Olive",              "Oliviers",
-  "Barley",             "Orge",
-  "Grass",              "Pâturages",
-  "Cotton",             "Plantes à fibres",
-  "Flax",               "Plantes à fibres",
-  "Dryland rice",       "Riz",
-  "Wetland rice",       "Riz",
-  "Sunflower",          "Tournesol",
-  "Banana",             "Vergers",
-  "Citrus",             "Vergers",
-  "Cocoa",              "Vergers",
-  "Coffee",             "Vergers"
-)
+```{r}
 
-GAEZ_France_match <- GAEZ_France_select |>
-  left_join(correspondance_gaez_rpg, by = c("crop" = "culture_gaez"))
+# % of communes in each category of our dependent variable by crop
 
-# create weights associated to each GAEZ crop
-GAEZ_France_weight <- GAEZ_France_match |>
-  group_by(insee, groupe_rpg) |>
+table_etat <- df_final %>%
+  group_by(LIBELLE_GROUPE_CULTURE_AGG, etat_libelle) %>%
+  summarise(nb_communes = n_distinct(insee), .groups = "drop")
+
+table_etat <- table_etat %>%
+  group_by(LIBELLE_GROUPE_CULTURE_AGG) %>%
   mutate(
-    sum_value_hist_group = sum(value_hist, na.rm = TRUE), # Compute for each RPG category to the total cumulated yields from each communes
-    weight = if_else(sum_value_hist_group > 0,
-                     value_hist / sum_value_hist_group, # Weight corresponds to the proportion of each GAEZ crop yield in the total yield of the RPG category
-                     0)
-  ) |>
+    total_communes = sum(nb_communes),
+    pourcentage = round(100 * nb_communes / total_communes, 1)
+  ) %>%
   ungroup()
 
-GAEZ_Legumineuses <- GAEZ_France_weight |>
-  filter(groupe_rpg == "Légumineuses à grains")
-# aggregate at RPG level while taking into account the weights associated to each GAEZ crops
+table_pourcentages <- table_etat %>%
+  select(LIBELLE_GROUPE_CULTURE_AGG, etat_libelle, pourcentage) %>%
+  pivot_wider(names_from = etat_libelle, values_from = pourcentage, values_fill = 0) %>%
+  arrange(LIBELLE_GROUPE_CULTURE_AGG)
 
-rpg_level <- GAEZ_France_weight |>
-  group_by(insee,groupe_rpg) |>
-  summarise(
-    value_hist_rpg = sum(value_hist * weight, na.rm = TRUE),
-    value_futur_rpg = sum(value * weight, na.rm = TRUE),
-    .groups = "drop"
-  )
-
-
+print(table_pourcentages)
 ```
+
+### Multinomial logit
 
 ```{r}
+library(nnet)
 
-# cultures RPG à retravailler
+# making sure the dependent variable is a factor
+df_final$etat <- as.factor(df_final$etat)
 
-RPG_cultures <- readRDS("data/raw/RPG_Aggregated_ALL.rds")
+# set the baseline category 
+#df_final$etat <- relevel(df_final$etat, ref = "1") 
 
-#list(unique(RPG_cultures$LIBELLE_GROUPE_CULTURE))
+# compute 
 
-RPG_cultures_transf <- RPG_cultures |>
-  mutate(LIBELLE_GROUPE_CULTURE_AGG = case_when(
-    LIBELLE_GROUPE_CULTURE %in% c("Prairies temporaires", "Prairies permanentes", "Estives et landes") ~ "Pâturages",
-    LIBELLE_GROUPE_CULTURE %in% c("Protéagineux", "Légumineuses à grains") ~ "Légumineuses à grains/Protéagineux",
-    LIBELLE_GROUPE_CULTURE %in% c("Vignes", "Fruits à coque", "Gel (surfaces gelées sans production)") ~ "Divers",
-    TRUE ~ LIBELLE_GROUPE_CULTURE
-  )) 
+logit_1 <- multinom(etat ~ value_futur_rpg + change, data = df_final)
 
+z <- summary(logit_1)$coefficients / summary(logit_1)$standard.errors
+p_values <- 2 * (1 - pnorm(abs(z)))
 
+print(z)
+print(p_values)
 
-# Méthode plus rapide que summarize : convert to data.table
-dt <- as.data.table(RPG_cultures_transf)
+## Relative risk ratios
+exp(coef(logit_1))
 
-# Extract crops to aggregate
-fusion_cultures <- c("Pâturages", "Légumineuses à grains/Protéagineux", "Divers")
-dt_fusion <- dt[LIBELLE_GROUPE_CULTURE %in% fusion_cultures]
-
-# Separate numerical columns where observations will be added up
-cols_num <- names(dt_fusion)[sapply(dt_fusion, is.numeric)]
-cols_id  <- setdiff(names(dt_fusion), c("name", "year", "LIBELLE_GROUPE_CULTURE", cols_num))
-
-# Aggregate numeric columns
-fusion_sum <- dt_fusion[, lapply(.SD, sum, na.rm = TRUE),
-                        by = .(name, year, LIBELLE_GROUPE_CULTURE),
-                        .SDcols = cols_num]
-
-# Aggregate non numeric columns
-fusion_ids <- dt_fusion[, lapply(.SD, \(x) first(na.omit(x))),
-                        by = .(name, year, LIBELLE_GROUPE_CULTURE),
-                        .SDcols = cols_id]
-
-# Rebind original dataset
-dt_fusion_agg <- merge(fusion_sum, fusion_ids, 
-                       by = c("name", "year", "LIBELLE_GROUPE_CULTURE"))
-
-dt_autres <- dt[!(LIBELLE_GROUPE_CULTURE %in% fusion_cultures)]
-
-RPG_final <- rbind(dt_fusion_agg, dt_autres, fill = TRUE)
-
-RPG_final <- RPG_final |>
-  mutate(CODE_GROUP = case_when(
-    CODE_GROUP %in% c("17", "19") ~ "18",
-    CODE_GROUP %in% c("8") ~ "15",
-    TRUE ~ CODE_GROUP))
-
-check <- RPG_final %>% 
-  group_by(name, year) %>% 
-  summarise(surf_agri = first(surf_agri_geo_unit_m2),
-            totals = sum(surf_code_group_m2, na.rm = TRUE),
-            totals_perc = sum(surf_code_group_perc, na.rm = TRUE))
-
-
-saveRDS(RPG_final, "data/raw/RPG_NEW_Aggreg_ALL.rds")
+## Predictions 
+### Predicted category for each observation
+predicted_class <- predict(logit_1, type = "class")
+print(predicted_class)
+predicted_probs <- predict(logit_1, type = "probs")
+print(predicted_probs)
 
 ```
+
+The p-values associated with the coefficients for `change` and `value_futur_rpg` are all statistically significant (p < 0.01), indicating that both variables are meaningful predictors of category membership. In particular, the variable `change` is highly significant across all three comparisons (especially for category 3, p ≈ 0), with large negative z-scores (e.g., −46.68), suggesting strong downward influence on the odds of these outcomes.
+
+In terms of interpretation, the relative risk ratios show how a one-unit increase in a predictor changes the odds of being in a given category relative to the baseline "maintenu":
+
+- For category 4 ("jamais cultivé"), a one-unit increase in `change` reduces the odds by about 0.56% (exp(−3.02) ≈ 0.994), and `value_futur_rpg` has almost no effect (OR ≈ 1).
+
+- For category 2 ("apparition"), the odds decrease by 1.5% per increase in unit of `change`, again with `value_futur_rpg` being effectively neutral.
+
+- Most dramatically, for category 3 ("disparition"), the odds decrease by more than 1% per increase in unit of `change`.
+
+Overall, the model shows that potential yield change has a statistically significant effect on land-use dynamics. While `value_futur_rpg` has statistically significant coefficients, its odds ratios are extremely close to 1, suggesting that although its effect is consistent, it is very small in reality. 
