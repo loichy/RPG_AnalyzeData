@@ -398,6 +398,12 @@ df_final <- readRDS(here(dir$final, "Joined_GAEZ_RPG.rds"))
 df_final <- df_final |>
   mutate(change = (value_futur_rpg - value_hist_rpg)/value_hist_rpg)
 
+df_final_etat_NA <- df_final |>
+  filter(!is.na(etat)) 
+
+
+duplicated_rows <- df_final_etat_NA %>% count(insee, LIBELLE_GROUPE_CULTURE_AGG) %>% filter(n > 1) ## donne 0, donc a priori plus de duplicatas
+
 ```
 
 ### Descriptive Statistics
@@ -406,7 +412,7 @@ df_final <- df_final |>
 
 # % of communes in each category of our dependent variable by crop
 
-table_etat <- df_final %>%
+table_etat <- df_final_etat_NA %>%
   group_by(LIBELLE_GROUPE_CULTURE_AGG, etat_libelle) %>%
   summarise(nb_communes = n_distinct(insee), .groups = "drop")
 
@@ -424,6 +430,8 @@ table_pourcentages <- table_etat %>%
   arrange(LIBELLE_GROUPE_CULTURE_AGG)
 
 print(table_pourcentages)
+
+
 ```
 
 ### Multinomial logit
@@ -470,3 +478,93 @@ In terms of interpretation, the relative risk ratios show how a one-unit increas
 - Most dramatically, for category 3 ("disparition"), the odds decrease by more than 1% per increase in unit of `change`.
 
 Overall, the model shows that potential yield change has a statistically significant effect on land-use dynamics. While `value_futur_rpg` has statistically significant coefficients, its odds ratios are extremely close to 1, suggesting that although its effect is consistent, it is very small in reality. 
+
+### Adding control variables 
+
+We compute a variable ressembling to a **Comparative Advantage Index**.
+
+```{r}
+
+# Computing comparative advantage index for historical potential yield
+
+## Numerator = communal potential yield per crop / sum of all communal potential yield
+numerator_hist <- df_final_etat_NA |>
+  group_by(insee) |>
+  mutate(part_commune = value_hist_rpg / sum(value_hist_rpg, na.rm = TRUE)) |>
+  ungroup()
+
+## Denominator = average potential yield at a national level per crop / sum of APY
+denom_hist <- df_final_etat_NA |>
+  group_by(LIBELLE_GROUPE_CULTURE_AGG) |>
+  summarise(mean_crop = mean(value_hist_rpg, na.rm = TRUE), .groups = "drop")
+  
+total_mean_crop <- sum(denom_hist$mean_crop, na.rm = TRUE)
+
+denom_hist <- denom_hist |>
+  mutate(part_nationale = mean_crop / total_mean_crop)
+
+## Comparative Advantage Index
+df_final_etat_NA <- numerator_hist |>
+  left_join(denom_hist |>
+              select(LIBELLE_GROUPE_CULTURE_AGG, part_nationale), by = "LIBELLE_GROUPE_CULTURE_AGG") |>
+  mutate(AC_hist = part_commune / part_nationale) |>
+  select(!part_commune & !part_nationale)
+
+# Computing comparative advantage index for future potential yield
+
+numerator_futur <- df_final_etat_NA |>
+  group_by(insee) |>
+  mutate(part_commune = value_futur_rpg / sum(value_futur_rpg, na.rm = TRUE)) |>
+  ungroup()
+
+denom_futur <- df_final_etat_NA |>
+  group_by(LIBELLE_GROUPE_CULTURE_AGG) |>
+  summarise(mean_crop = mean(value_hist_rpg, na.rm = TRUE), .groups = "drop")
+  
+total_mean_crop <- sum(denom_futur$mean_crop, na.rm = TRUE)
+
+denom_futur <- denom_futur |>
+  mutate(part_nationale = mean_crop / total_mean_crop)
+
+df_final_etat_NA <- numerator_futur |>
+  left_join(denom_futur |>
+              select(LIBELLE_GROUPE_CULTURE_AGG, part_nationale), by = "LIBELLE_GROUPE_CULTURE_AGG") |>
+  mutate(AC_futur = part_commune / part_nationale) |>
+  select(!part_commune & !part_nationale)
+
+# Difference between AC futur and AC historical
+df_final_etat_NA <- df_final_etat_NA |>
+  mutate(AC_diff = (AC_futur - AC_hist)/AC_hist)
+
+# Adding the variable to the multinomial logit regression
+
+logit_2 <- multinom(etat ~ value_futur_rpg + change + AC_hist + AC_futur, data = df_final_etat_NA)
+
+z <- summary(logit_2)$coefficients / summary(logit_2)$standard.errors
+p_values <- 2 * (1 - pnorm(abs(z)))
+
+print(z)
+print(p_values)
+
+## Relative risk ratios
+exp(coef(logit_2))
+```
+Crops with higher historical AC are less likely to appear or disappear, which does not follow our expectations. In contrast, a higher future AC increases the likelihood of crop appearance and reduces the chance of disappearance, highlighting the anticipatory adaptation of communes to future agronomic potential. The change in crop share over time (change) also plays a role, with significant negative effects on both appearance and the “never cultivated” category, indicating that crops with strong shifts in area are more likely to be maintained. Although the coefficients on future potential yield (value_futur_rpg) are small, they are highly significant, and consistently associated with reduced odds of all categories compared to being maintained.
+
+Keeping `AC_futur` as explanatory variable as well as communal fixed effects, we find the following results.
+
+```{r}
+
+library(fixest)
+
+logit_fe1 <- femlm(etat ~ value_futur_rpg + change + AC_futur | insee, data = df_final_etat_NA)
+summary(logit_fe1)
+
+logit_fe2 <- femlm(etat ~ value_futur_rpg + change + AC_futur | LIBELLE_GROUPE_CULTURE_AGG, data = df_final_etat_NA)
+summary(logit_fe2)
+
+```
+
+
+
+
