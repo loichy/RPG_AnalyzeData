@@ -40,7 +40,28 @@ GAEZ_yield <- readRDS(here(dir$final, "GAEZ_Yieldchange_ReAggregated.rds"))%>%
 RPG_Variations_final <- readRDS(here(dir$final, "LongPeriod_AcreageVariations.rds"))
 
 #===============================================================================
-# 3). Join/pair them ------
+# 3). Load and prepare climate variables datasets ------
+#===============================================================================
+
+Climate_yearly <- readRDS(here(dir$raw, "era5_weather_communes_yearly_2006_2023_reference_1971_2000.rds"))
+
+Climate_yearly <- Climate_yearly |>
+  group_by(insee) |>
+  summarise(moyenne_temp_period = mean(mean, na.rm = TRUE),
+            moyenne_temp_ref = mean(reference_mean, na.rm = TRUE))
+
+Climate_quarterly <- readRDS(here(dir$raw, "era5_weather_communes_quarterly_2006_2023_reference_1971_2000.rds"))
+
+Climate_quarterly <- Climate_quarterly |>
+  group_by(insee, quarter) |>
+  summarise(moyenne_temp_period = mean(mean, na.rm = TRUE),
+         moyenne_temp_ref = mean(reference_mean, na.rm = TRUE))
+
+Climate_quarterly_wide <- Climate_quarterly |>
+  pivot_wider(id_cols = insee, names_from = quarter, values_from = c("moyenne_temp_period", "moyenne_temp_ref"))
+
+#===============================================================================
+# 4). Join/pair them ------
 #===============================================================================
 RPG_yearly_GAEZ <- RPG_Variations_final %>%
   left_join(GAEZ_yield, by = c("insee", "LIBELLE_GROUPE_CULTURE_AGG")) %>% 
@@ -49,6 +70,12 @@ RPG_yearly_GAEZ <- RPG_Variations_final %>%
     value_hist_rpg, value_futur_rpg
   ) %>% 
   arrange(insee, LIBELLE_GROUPE_CULTURE_AGG)
+
+RPG_yearly_GAEZ <- RPG_yearly_GAEZ |>
+  left_join(Climate_quarterly_wide, by = "insee")
+
+RPG_yearly_GAEZ <- RPG_yearly_GAEZ |>
+  left_join(Climate_yearly, by = "insee")
 
 #===============================================================================
 # Save data
