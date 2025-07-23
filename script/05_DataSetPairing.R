@@ -1,5 +1,6 @@
 #===============================================================================
-# Description: Script to pair both datasets
+# Description: Script to pair cross-section datasets that will be used to 
+# implement a multinomial logit
 #===============================================================================
 
 #===============================================================================
@@ -12,7 +13,7 @@ gc()
 
 # Load package
 if (!require("pacman")) install.packages("pacman")
-pacman::p_load(tidyverse, data.table, here, sf, tmap, units, dplyr)
+pacman::p_load(tidyverse, data.table, here, sf, tmap, units, dplyr, InterpolateR)
 
 # List directories 
 dir <- list()
@@ -23,6 +24,7 @@ dir$derived <- here(dir$data, "derived")
 dir$final <- here(dir$data, "final")
 dir$script <- here(dir$root, "script")
 dir$output <- here(dir$root, "output")
+dir$shapefiles <- here(dir$data, "shapefiles")
 
 # Create non existing directories
 lapply(dir, function(i) dir.create(i, recursive = T, showWarnings = F))
@@ -43,22 +45,33 @@ RPG_Variations_final <- readRDS(here(dir$final, "LongPeriod_AcreageVariations.rd
 # 3). Load and prepare climate variables datasets ------
 #===============================================================================
 
-Climate_yearly <- readRDS(here(dir$raw, "era5_weather_communes_yearly_2006_2023_reference_1971_2000.rds"))
+# Yearly mean daily mean temperature dataset
+Temp_yearly <- readRDS(here(dir$raw, "era5_weather_communes_yearly_2006_2023_reference_1971_2000.rds"))
 
-Climate_yearly <- Climate_yearly |>
+Temp_yearly <- Temp_yearly |>
   group_by(insee) |>
   summarise(moyenne_temp_period = mean(mean, na.rm = TRUE),
             moyenne_temp_ref = mean(reference_mean, na.rm = TRUE))
 
-Climate_quarterly <- readRDS(here(dir$raw, "era5_weather_communes_quarterly_2006_2023_reference_1971_2000.rds"))
+# Quarterly mean daily mean temperature dataset
+Temp_quarterly <- readRDS(here(dir$raw, "era5_weather_communes_quarterly_2006_2023_reference_1971_2000.rds"))
 
-Climate_quarterly <- Climate_quarterly |>
+Temp_quarterly <- Temp_quarterly |>
   group_by(insee, quarter) |>
   summarise(moyenne_temp_period = mean(mean, na.rm = TRUE),
          moyenne_temp_ref = mean(reference_mean, na.rm = TRUE))
 
-Climate_quarterly_wide <- Climate_quarterly |>
+## Pivoting the dataset to get quarterly mean values in columns
+Temp_quarterly_wide <- Temp_quarterly |>
   pivot_wider(id_cols = insee, names_from = quarter, values_from = c("moyenne_temp_period", "moyenne_temp_ref"))
+
+# Monthly sum precipitation dataset
+Precip_yearly <- readRDS(here(dir$raw, "era5_total_precipitation_daily_sum_communes_yearly_2006_2023_reference_1971_2000.rds"))
+
+Precip_yearly <- Precip_yearly |>
+  group_by(insee) |>
+  summarise(moyenne_precip_period = mean(total_precip_wet_days, na.rm = TRUE),
+            moyenne_precip_ref = mean(reference_avg_total_precip_wet_days, na.rm = TRUE))
 
 #===============================================================================
 # 4). Join/pair them ------
@@ -72,10 +85,13 @@ RPG_yearly_GAEZ <- RPG_Variations_final %>%
   arrange(insee, LIBELLE_GROUPE_CULTURE_AGG)
 
 RPG_yearly_GAEZ <- RPG_yearly_GAEZ |>
-  left_join(Climate_quarterly_wide, by = "insee")
+  left_join(Temp_quarterly_wide, by = "insee")
 
 RPG_yearly_GAEZ <- RPG_yearly_GAEZ |>
-  left_join(Climate_yearly, by = "insee")
+  left_join(Temp_yearly, by = "insee")
+
+RPG_yearly_GAEZ <- RPG_yearly_GAEZ |>
+  left_join(Precip_yearly, by = "insee")
 
 #===============================================================================
 # Save data

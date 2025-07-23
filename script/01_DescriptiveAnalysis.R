@@ -24,6 +24,7 @@ dir$derived <- here(dir$data, "derived")
 dir$final <- here(dir$data, "final")
 dir$script <- here(dir$root, "script")
 dir$output <- here(dir$root, "output")
+dir$shapefiles <- here(dir$data, "shapefiles")
 
 # Create non existing directories
 lapply(dir, function(i) dir.create(i, recursive = T, showWarnings = F))

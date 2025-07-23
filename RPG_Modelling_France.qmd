@@ -2,6 +2,10 @@
 title: "RPG_Modelling"
 format: html
 editor: visual
+execute: 
+  echo: false
+  warning: false
+  message: false
 ---
 
 ```{r setup, include=FALSE}
@@ -9,6 +13,11 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 ```{r}
+
+#|echo: false
+#|warning: false
+#|message: false
+
 
 # Prepare environment
 
@@ -18,7 +27,7 @@ gc()
 
 # Load package
 if (!require("pacman")) install.packages("pacman")
-pacman::p_load(tidyverse, data.table, here, sf, tmap, units, dplyr, modelsummary, fixest)
+pacman::p_load(tidyverse, broom, nnet, data.table, glue, gtsummary, here, sf, tmap, units, dplyr, modelsummary, fixest)
 
 # List directories 
 dir <- list()
@@ -34,354 +43,6 @@ dir$output <- here(dir$root, "output")
 lapply(dir, function(i) dir.create(i, recursive = T, showWarnings = F))
 ```
 
-```{r}
-
-# # Prepare datasets
-# 
-# cultures_select <- c("Blé tendre", "Maïs grain et ensilage", 
-#                      "Protéagineux", "Légumineuses à grains", "Plantes à fibres")
-# trad_cultures <- tibble::tibble(
-#   crop = c("Dry pea", "Flax", "Maize", "Wheat"),
-#   culture_fr = c("Légumineuses à grains", "Plantes à fibres", "Maïs grain et ensilage", "Blé tendre")
-# )
-# 
-# RPG_Variations <- readRDS(here(dir$final, "LongPeriod_AcreageVariations.rds"))
-# GAEZ_yield <- readRDS(here(dir$raw, "GAEZ_yieldchange_communes_filt.rds"))
-# 
-# RPG_Variations_filt <- RPG_Variations |>
-#   filter(LIBELLE_GROUPE_CULTURE %in% cultures_select) |>
-#   rename(crop = LIBELLE_GROUPE_CULTURE)
-# 
-# GAEZ_yield_filt <- GAEZ_yield |>
-#   filter(variable == "ylHr") |>
-#   filter(crop != "Gram" & crop != "Chickpea") |>
-#   mutate(crop = recode(crop, 
-#                        "Dry pea" = "Légumineuses à grains",
-#                        "Flax" = "Plantes à fibres",
-#                        "Maize" = "Maïs grain et ensilage", 
-#                        "Wheat" = "Blé tendre"))
-# 
-# 
-# df_final <- GAEZ_yield_filt |>
-#   left_join(RPG_Variations_filt, by = c("insee", "crop")) 
-# ```
-# 
-# ```{r}
-# 
-# # Add back to the dataset the region_code column
-# 
-# df_final <- df_final |>
-#   mutate(dept_code = str_sub(as.character(insee), 1, 2),
-#          dept_code = ifelse(dept_code %in% c("2A", "2B"), "20", dept_code))
-# 
-# dept_to_region <- c(
-#   "01"="84", "02"="32", "03"="84", "04"="93", "05"="93", "06"="93", "07"="84",
-#   "08"="44", "09"="76", "10"="44", "11"="76", "12"="76", "13"="93", "14"="28",
-#   "15"="84", "16"="75", "17"="75", "18"="24", "19"="75", "20"="94", "21"="27",
-#   "22"="53", "23"="75", "24"="75", "25"="27", "26"="84", "27"="28", "28"="24",
-#   "29"="53", "30"="76", "31"="76", "32"="76", "33"="75", "34"="76", "35"="53",
-#   "36"="24", "37"="24", "38"="84", "39"="27", "40"="75", "41"="24", "42"="84",
-#   "43"="84", "44"="52", "45"="24", "46"="76", "47"="75", "48"="76", "49"="52",
-#   "50"="28", "51"="44", "52"="44", "53"="52", "54"="44", "55"="44", "56"="53",
-#   "57"="44", "58"="27", "59"="32", "60"="32", "61"="28", "62"="32", "63"="84",
-#   "64"="75", "65"="76", "66"="76", "67"="44", "68"="44", "69"="84", "70"="27",
-#   "71"="27", "72"="52", "73"="84", "74"="84", "75"="11", "76"="28", "77"="11",
-#   "78"="11", "79"="75", "80"="32", "81"="76", "82"="76", "83"="93", "84"="93",
-#   "85"="52", "86"="75", "87"="75", "88"="44", "89"="27", "90"="27", "91"="11",
-#   "92"="11", "93"="11", "94"="11", "95"="11", "971"="01", "972"="02", "973"="03",
-#   "974"="04", "976"="06"
-# )
-# 
-# df_final <- df_final |>
-#   mutate(region_code = dept_to_region[dept_code])
-```
-
-## Elasticity of area to potential yield
-
-In general, we use percentage change as our dependent variable, as it is more straightforward to interpret and also controls for scale differences at the communal level.
-
-### Dependent variable : acreage variations between 2023 and 2007
-
-#### Ordinary Least Squares Model
-
-First, we use the percentage change in acreage per crop between 2023 and 2007 as our dependent variable. Our main independent variables are `value`, corresponding to potential yield level under the **rcp8p5** climate change scenario of the **HadGEM2-ES** model, as well as `value_hist`, the historical yield level. To avoid potential multicollinearity problems, we use the log-difference between the two variables which capture the same information with more stable coefficients.
-
-We are interested in comparing coefficients between our crops of interest, therefore we run regressions separately for the four of them.
-
-```{r}
-
-# # Creating separate datasets for each culture we want to analyze
-# 
-# # Wheat
-# df_final_w <- df_final |>
-#   filter(crop == "Blé tendre") 
-# 
-# # Maize
-# df_final_m <- df_final |>
-#   filter(crop == "Maïs grain et ensilage")
-# 
-# # Pea
-# df_final_p <- df_final |>
-#   filter(crop == "Légumineuses à grains")
-# 
-# # Flax
-# df_final_f <- df_final |>
-#   filter(crop == "Plantes à fibres")
-
-```
-
-We construct an OLS specification with regional fixed effects using the `feols()` command that we then compare with a benchmark specification without fixed effects. The following tables show for each specifications the regression results by crop.
-
-```{r}
-
-# Standard OLS regression without fixed effects using feols command to deal with Inf/NaN observations
-
-# reg0_wheat <- feols(diff_2007_2023_perc ~ log(value) - log(value_hist), data = df_final_w)
-# 
-# reg0_maize <- feols(diff_2007_2023_perc ~ log(value) - log(value_hist), data = df_final_m)
-# 
-# reg0_pea <- feols(diff_2007_2023_perc ~ log(value) - log(value_hist), data = df_final_p)
-# 
-# reg0_flax <- feols(diff_2007_2023_perc ~ log(value) - log(value_hist), data = df_final_f)
-# 
-# reg0_results <- 
-#   modelsummary(
-#   list("Wheat" = reg0_wheat, 
-#        "Maize" = reg0_maize, 
-#        "Pea" = reg0_pea, 
-#        "Flax" = reg0_flax), 
-#   stars = TRUE,
-#   statistic = "std.error",
-#   coef_map = c("log(value)" =  "Potential Yield", 
-#                "log(value_hist)" = "Historical Yield"),
-#   output = "markdown"
-# )
-# 
-# print(reg0_results)
-```
-
-```{r}
-
-# OLS results with regional fixed effects
-
-# reg1_wheat <- feols(diff_2007_2023_perc ~ log(value) - log(value_hist) | region_code, data = df_final_w)
-# 
-# reg1_maize <- feols(diff_2007_2023_perc ~ log(value) - log(value_hist) | region_code, data = df_final_m)
-# 
-# reg1_pea <- feols(diff_2007_2023_perc ~ log(value) - log(value_hist) | region_code, data = df_final_p)
-# 
-# reg1_flax <- feols(diff_2007_2023_perc ~ log(value) - log(value_hist) | region_code, data = df_final_f)
-# 
-# reg1_results <-
-#   modelsummary(
-#   list("Wheat" = reg1_wheat, 
-#        "Maize" = reg1_maize, 
-#        "Pea" = reg1_pea, 
-#        "Flax" = reg1_flax), 
-#   stars = TRUE,
-#   statistic = "std.error",
-#   coef_map = c("log(value)" =  "Potential Yield", 
-#                "log(value_hist)" = "Historical Yield"),
-#   output = "markdown"
-# )
-# 
-# print(reg1_results)
-```
-
-We find that in both specifications, there is a negative relationship between potential yield change and acreage change for **wheat, maize and flax**. On the contrary, an increase in potential yield compared to the historical value of **pea** induces an increase in its acreage.
-
-Furthermore, the model with fixed effects shows only significance for the coefficient on this latter crop, when in the benchmark model, the coefficients on **wheat and maize** are significant. We observe that adding regional fixed effects reduced considerably the magnitude and the significance of the coefficient on **wheat**. In general, the R2 improved by adding regional fixed effects.
-
-However these results are not satisfactory as they point to contradictory results with theory. Indeed, increased potential yield should urge producers to cultivate those crops on larger surfaces. We will now try to improve our results by using potential yield change in percentage as computed by the **GAEZ database**, still controlling for historical yield values, and including an interaction term as well.
-
-```{r}
-# 
-# # OLS results with potential yield change as main explanatory variable
-# 
-# reg2_wheat <- feols(diff_2007_2023_perc ~ change*value_hist, data = df_final_w)
-# 
-# reg2_maize <- feols(diff_2007_2023_perc ~ change*value_hist, data = df_final_m)
-# 
-# reg2_pea <- feols(diff_2007_2023_perc ~ change*value_hist, data = df_final_p)
-# 
-# reg2_flax <- feols(diff_2007_2023_perc ~ change*value_hist, data = df_final_f)
-# 
-# reg2_results <-
-#   modelsummary(
-#   list("Wheat" = reg2_wheat, 
-#        "Maize" = reg2_maize, 
-#        "Pea" = reg2_pea, 
-#        "Flax" = reg2_flax), 
-#   stars = TRUE,
-#   statistic = "std.error",
-#   coef_map = c("change" = "Potential Yield Change", 
-#                "value_hist" = "Historical Yield",
-#               "change:value_hist" = "Interaction"),
-#   output = "markdown"
-# )
-# 
-# print(reg2_results)
-```
-
-```{r}
-
-# OLS results with potential yield change as main explanatory variable
-
-# reg3_wheat <- feols(diff_2007_2023_perc ~ change*value_hist | region_code, data = df_final_w)
-# 
-# reg3_maize <- feols(diff_2007_2023_perc ~ change*value_hist | region_code, data = df_final_m)
-# 
-# reg3_pea <- feols(diff_2007_2023_perc ~ change*value_hist | region_code, data = df_final_p)
-# 
-# reg3_flax <- feols(diff_2007_2023_perc ~ change*value_hist | region_code, data = df_final_f)
-
-# reg3_results <-
-#   modelsummary(
-#   list("Wheat" = reg3_wheat, 
-#        "Maize" = reg3_maize, 
-#        "Pea" = reg3_pea, 
-#        "Flax" = reg3_flax), 
-#   stars = TRUE,
-#   statistic = "std.error",
-#   coef_map = c("change" = "Potential Yield Change", 
-#                "value_hist" = "Historical Yield",
-#               "change:value_hist" = "Interaction"),
-#   output = "markdown"
-# )
-# 
-# print(reg3_results)
-```
-
-The results reveal that historical yield is consistently and significantly negatively associated with the percentage change in acreage for **wheat, maize, and flax**. This suggests that crops historically more productive may have seen relatively less acreage expansion. The interaction term between potential yield change and historical yield is also significant for **wheat, maize, and flax**, indicating that the effect of expected yield improvement depends on the initial productivity level. Particularly, the interaction is strongly positive for **flax**, suggesting that potential gains are only realized where historical yields were already high. In contrast, the effect of potential yield change itself is not statistically significant for most crops, except for **flax**, where it shows a large, negative effect (which is weakly significant at the 10% level).
-
-Controlling for regional fixed effects refines the estimation by absorbing unobserved heterogeneity across regions. The historical yield variable remains negatively associated with changes in acreage for maize and flax, both statistically significant. However, for **wheat** and **pea**, historical yield loses statistical significance. The interaction term between historical yield and potential yield change is now statistically significant across all four crops. This suggests that the effect of potential productivity changes on land allocation depends strongly on the initial yield level. The direct effect of potential yield change remains non-significant for all crops, even becoming negative for **wheat and flax**, once fixed effects are included.
-
-```{r}
-
-# # squared independent variables
-# 
-# reg4_wheat <- feols(diff_2007_2023_perc ~ I(change^2) + change*value_hist | region_code, data = df_final_w)
-# 
-# reg4_maize <- feols(diff_2007_2023_perc ~ I(change^2) + change*value_hist | region_code, data = df_final_m)
-# 
-# reg4_pea <- feols(diff_2007_2023_perc ~ I(change^2) + change*value_hist | region_code, data = df_final_p)
-# 
-# reg4_flax <- feols(diff_2007_2023_perc ~ I(change^2) + change*value_hist | region_code, data = df_final_f)
-# 
-# reg4_results <-
-#   modelsummary(
-#   list("Wheat" = reg4_wheat, 
-#        "Maize" = reg4_maize, 
-#        "Pea" = reg4_pea, 
-#        "Flax" = reg4_flax), 
-#   stars = TRUE,
-#   statistic = "std.error",
-#   coef_map = c("change" = "Potential Yield Change", 
-#                "value_hist" = "Historical Yield",
-#               "change:value_hist" = "Interaction",
-#               "I(change^2)" = "Squared Potential Yield Change"),
-#   output = "markdown"
-# )
-# 
-# print(reg4_results)
-
-```
-
-Squared potential yield change is only significant for crops where potential yield change was already significant, meaning **pea and flax** and takes the inverse sign. The interaction term remains significant for **wheat** and **flax**.
-
-**Note : In the regression including squared `value_hist`, the said coefficient was null and non-significant for all crops, meaning that `value_hist` has probably only a linear relationship with acreage variations. In the GAM results below, we also find that when significant, Historical Yield has a linear relationship to acreage change (EDF \~ 1).**
-
-#### Generalized Additive Model
-
-GAM models can be more relevant when using the difference between potential yield under climate change and historical yield as our independent variable. Indeed, the response of land use to climate-induced yield gaps may be nonlinear or threshold-dependent. GAMs can be used to model a smooth function of the said gap. The model remains additive, meaning the effects of each predictor are estimated separately and then combined.
-
-Note that GAM models estimate smooth effects, not fixed coefficients as a linear model would do. The `summary()` command gives the **EDF**, Estimated Degrees of Freedom, which when !=1 indicates non-linearity in the effect.The F-value and the p-value measure the significance of the smooth effect. The `plot()` command can then visualize the sign of the effect according to the range of the value of the explanatory variable.
-
-```{r}
-
-# # Test du modèle GAM
-# library(mgcv)
-# 
-# # Deleting NaN and Inf
-# 
-# # Wheat
-# df_gam_w <- df_final_w |>
-#   filter(!is.nan(change) & !is.infinite(change)) |>
-#   filter(!is.nan(diff_2007_2023_perc) & !is.infinite(diff_2007_2023_perc))
-# 
-# # Maize
-# df_gam_m <- df_final_m |>
-#   filter(!is.nan(change) & !is.infinite(change)) |>
-#   filter(!is.nan(diff_2007_2023_perc) & !is.infinite(diff_2007_2023_perc)) 
-# 
-# # Pea
-# df_gam_p <- df_final_p |>
-#   filter(!is.nan(change) & !is.infinite(change)) |>
-#   filter(!is.nan(diff_2007_2023_perc) & !is.infinite(diff_2007_2023_perc)) 
-# 
-# # Flax
-# df_gam_f <- df_final_f |>
-#   filter(!is.nan(change) & !is.infinite(change)) |>
-#   filter(!is.nan(diff_2007_2023_perc) & !is.infinite(diff_2007_2023_perc))
-# 
-# reg1_gam_w <- gam(diff_2007_2023_perc ~ s(change) + s(value_hist), data = df_gam_w)
-# 
-# reg1_gam_m <- gam(diff_2007_2023_perc ~ s(change) + s(value_hist), data = df_gam_m)
-# 
-# reg1_gam_p <- gam(diff_2007_2023_perc ~ s(change) + s(value_hist), data = df_gam_p)
-# 
-# reg1_gam_f <- gam(diff_2007_2023_perc ~ s(change) + s(value_hist), data = df_gam_f)
-# 
-# summary(reg1_gam_w)
-# plot(reg1_gam_w)
-# 
-# summary(reg1_gam_m)
-# plot(reg1_gam_m)
-# 
-# summary(reg1_gam_p)
-# plot(reg1_gam_p)
-# 
-# summary(reg1_gam_f)
-# plot(reg1_gam_f)
-```
-
-For wheat, both predictors are statistically significant: the effect of potential yield change is nonlinear (edf = 5.6, p \< 0.001), while historical yield shows a strong linear association (edf = 1.0, p \< 0.001), suggesting that communes with higher past performance tended to expand wheat surfaces. In the case of maize, only historical yield is significant (p = 0.025), though with a weaker effect, and there is no meaningful relationship with the change in potential yield (p = 0.12). For pea, neither variable reaches statistical significance. Finally, for flax, the change in potential yield has a highly significant and nonlinear effect (p \< 0.001, edf = 7.3), while historical yield is only marginally significant (p ≈ 0.095).
-
-### Dependent variable : mean acreage variations between 2023 and 2007
-
-We compute the mean variations over four years at the beginning and at the end of the period of interest (between 2007 and 2011, between 2019 and 2023). Then we take the percentage change in acreage between those two means, which will consist in our dependent variable.
-
-```{r}
-
-# OLS results with potential yield change as main explanatory variable
-
-# reg5_wheat <- feols(diff_final_debut_perc ~ change*value_hist | region_code, data = df_final_w)
-# 
-# reg5_maize <- feols(diff_final_debut_perc ~ change*value_hist | region_code, data = df_final_m)
-# 
-# reg5_pea <- feols(diff_final_debut_perc ~ change*value_hist | region_code, data = df_final_p)
-# 
-# reg5_flax <- feols(diff_final_debut_perc ~ change*value_hist | region_code, data = df_final_f)
-# 
-# reg5_results <-
-#   modelsummary(
-#   list("Wheat" = reg5_wheat, 
-#        "Maize" = reg5_maize, 
-#        "Pea" = reg5_pea, 
-#        "Flax" = reg5_flax), 
-#   stars = TRUE,
-#   statistic = "std.error",
-#   coef_map = c("change" = "Potential Yield Change", 
-#                "value_hist" = "Historical Yield",
-#               "change:value_hist" = "Interaction"),
-#   output = "markdown"
-# )
-# 
-# print(reg5_results)
-```
-
-Compared to the previous specification, the current results yield similar but more stable estimates in terms of sign and significance. Most importantly, the interaction term between potential yield change and historical yield remains statistically significant for **wheat, maize, and pea**. However, the magnitude of the coefficients, especially for the potential yield change, tends to be smaller in this specification. For **wheat** and **maize**, where the effects are now insignificant and negative. For **pea** and **flax**, large coefficients on the potential yield change persist, but they remain imprecisely estimated. The historical yield variable maintains its negative and sometimes significant association (see **maize and flax**).
-
 ## Multinomial logit
 
 In the literature, we can find land-share models using multinomial logit, where the producer chooses between different crops while maximising its expected profit. The outcome variable is the land allocated to the production of a given crop over the total cultivated area.
@@ -389,6 +50,10 @@ In the literature, we can find land-share models using multinomial logit, where 
 In our analysis, the dependent variable is `etat`, a categorical variable going from 1 to 4, which measures if the acreage destined to a crop in a commune has increased, decreased, been maintained or has never existed during our period of interest. We will try to explain this variable first with data on historical potential yields from the **GAEZ dataset**, as well as potential yield change, computed as the difference between the future potential yield under the RCP 8.5 climate change scenario of the HadGEM2-ES model and the historical values of potentiel yield.
 
 ```{r}
+
+#|echo: false
+#|warning: false
+#|message: false
 
 # Load dataset
 df_final <- readRDS(here(dir$final, "Joined_GAEZ_RPG.rds"))
@@ -409,6 +74,10 @@ duplicated_rows <- df_final_etat_NA %>% count(insee, LIBELLE_GROUPE_CULTURE_AGG)
 ### Descriptive Statistics
 
 ```{r}
+
+#|echo: false
+#|warning: false
+#|message: false
 
 # % of communes in each category of our dependent variable by crop
 
@@ -437,20 +106,18 @@ print(table_pourcentages)
 ### Potential yield change
 
 ```{r}
-library(nnet)
+
+#|echo: false
+#|warning: false
+#|message: false
 
 # making sure the dependent variable is a factor
-df_final_etat_NA$etat <- as.factor(df_final_etat_NA$etat)
+df_final_etat_NA$etat_libelle <- as.factor(df_final_etat_NA$etat_libelle)
 
 # set the baseline category 
 #df_final$etat <- relevel(df_final$etat, ref = "1") 
 
-# compute 
-
-logit_1 <- multinom(etat ~ value_hist_rpg + change, data = df_final_etat_NA)
-summary(logit_1)
-## Relative risk ratios
-exp(coef(logit_1))
+logit_1 <- multinom(etat_libelle ~ value_hist_rpg + change, data = df_final_etat_NA)
 
 ```
 **Notes : Coefficients issued from the `summary()` command cannot be interpreted directly, only significance level and sign of the coefficients are relevant. Relative risk ratio can be interpreted as the risk of switching to another category (if RRR > 1, it is more likely that the crop in question in the given community will switch categories).**
@@ -458,6 +125,11 @@ exp(coef(logit_1))
 ### Comparative advantage difference
 
 ```{r}
+
+#|echo: false
+#|warning: false
+#|message: false
+
 
 # Computing comparative advantage index for historical potential yield
 
@@ -513,13 +185,14 @@ df_final_etat_NA <- df_final_etat_NA |>
 ```
 
 ```{r}
+
+#|echo: false
+#|warning: false
+#|message: false
+
 # Adding the variable to the multinomial logit regression
 
-logit_2 <- multinom(etat ~ AC_hist + AC_diff, data = df_final_etat_NA)
-summary(logit_2)
-
-## Relative risk ratios
-exp(coef(logit_2))
+logit_2 <- multinom(etat_libelle ~ AC_hist + AC_diff, data = df_final_etat_NA)
 ```
 
 Crops with higher historical AC are less likely to appear or disappear compared to be maintained. In contrast, a higher future AC increases the likelihood of crop appearance and reduces the chance of disappearance, highlighting the anticipatory adaptation of communes to future agronomic potential. The change in crop share over time (change) also plays a role, with significant negative effects on both appearance and the “never cultivated” category, indicating that crops with strong shifts in area are more likely to be maintained. Although the coefficients on future potential yield (value_futur_rpg) are small, they are highly significant, and consistently associated with reduced odds of all categories compared to being maintained.
@@ -528,14 +201,11 @@ Crops with higher historical AC are less likely to appear or disappear compared 
 
 ```{r}
 
-logit_3 <- multinom(etat ~ AC_hist + change, data = df_final_etat_NA)
-summary(logit_3)
+#|echo: false
+#|warning: false
+#|message: false
 
-
-
-## Relative risk ratios
-exp(coef(logit_3))
-
+logit_3 <- multinom(etat_libelle ~ AC_hist + change, data = df_final_etat_NA)
 ```
 When combining historical comparative advantage index with potentiel yield change as explanatory variables in the same model, we find similar results to **model 2**, where we wanted to explain acreage dynamics with historical comparative advantage index and its potential change. Crops with higher historical CA are more likely to be maintained than to appear or disappear, but are more likely to be never cultivated compared to being maintained. When potential yield change is higher, crop acreage is also less likely to vary compared to be maintained as it is. 
 
@@ -544,13 +214,17 @@ When combining historical comparative advantage index with potentiel yield chang
 
 ```{r}
 
+#|echo: false
+#|warning: false
+#|message: false
+
 # mean temperature control over the whole period 
 
-logit_c1 <- multinom(etat ~ value_hist_rpg + change + moyenne_temp_period + moyenne_temp_ref, data = df_final_etat_NA)
+logit_c1 <- multinom(etat_libelle ~ value_hist_rpg + change + moyenne_temp_period + moyenne_temp_ref, data = df_final_etat_NA)
 
-logit_c2 <- multinom(etat ~ AC_hist + AC_diff + moyenne_temp_period + moyenne_temp_ref, data = df_final_etat_NA)
+logit_c2 <- multinom(etat_libelle ~ AC_hist + AC_diff + moyenne_temp_period + moyenne_temp_ref, data = df_final_etat_NA)
 
-logit_c3 <- multinom(etat ~ AC_hist + change + moyenne_temp_period + moyenne_temp_ref, data = df_final_etat_NA)
+logit_c3 <- multinom(etat_libelle ~ AC_hist + change + moyenne_temp_period + moyenne_temp_ref, data = df_final_etat_NA)
 
 ```
 
@@ -559,20 +233,34 @@ logit_c3 <- multinom(etat ~ AC_hist + change + moyenne_temp_period + moyenne_tem
 
 ```{r}
 
+#|echo: false
+#|warning: false
+#|message: false
+
 # Putting all models in a summary table
 
-library(modelsummary)
-
-models <- list(
-  "1a" = logit_1,
-  "2a" = logit_2,
-  "3a" = logit_3,
-  "1b" = logit_c1,
-  "2b" = logit_c2,
-  "2c" = logit_c3
+tbl_merge(
+  tbls = list(tbl_regression(logit_1, exponentiate = TRUE),
+              tbl_regression(logit_2, exponentiate = TRUE),
+              tbl_regression(logit_3, exponentiate = TRUE),
+              tbl_regression(logit_c1, exponentiate = TRUE),
+              tbl_regression(logit_c2, exponentiate = TRUE),
+              tbl_regression(logit_c3, exponentiate = TRUE)
+  ),
+  tab_spanner = c("**1a**", "**2a**", "**3a**", "**1b**", "**2b**", "**3b**")
+)
+logit_models <- list(
+  "1a" = tbl_regression(logit_1, exponentiate = TRUE),
+  "2a" = tbl_regression(logit_2, exponentiate = TRUE),
+  "3a" = tbl_regression(logit_3, exponentiate = TRUE),
+  "1b" = tbl_regression(logit_c1, exponentiate = TRUE),
+  "2b" = tbl_regression(logit_c2, exponentiate = TRUE),
+  "2c" = tbl_regression(logit_c3, exponentiate = TRUE)
 )
 
-modelsummary(models,
+
+
+modelsummary(logit_models,
              shape = term + response ~ model,
              stars = TRUE,
              statistic = "({std.error})",
@@ -587,6 +275,7 @@ modelsummary(models,
   gof_omit = "AIC|BIC|Log.Lik",
   output = "markdown"
 )
+
 ```
 
 We can see overall, that the most robust baseline model is the one with historical yield and potential yield change as main explanatory variables. All coefficients are highly significant. However, the close to 0 coefficients on historical yield makes it difficult to interpret its real effect. 
@@ -601,96 +290,181 @@ Cui et al. uses a panel model where the author tries to explain acreage change o
 
 ```{r}
 
-# Loading the datasets over our time period
+#|echo: false
+#|warning: false
+#|message: false
 
-RPG_panel <- readRDS(here(dir$final, "RPG_COMPLETE_Aggreg_ALL.rds")) 
-
-GAEZ_panel <- readRDS(here(dir$final, "GAEZ_Yieldchange_ReAggregated.rds"))
-
-Temp_panel <- readRDS(here(dir$raw, "era5_weather_communes_yearly_2006_2023_reference_1971_2000.rds"))
-
-# Join climate variables with RPG panel data
-RPG_panel <- RPG_panel |>
-  mutate(year = as.numeric(year)) |>
-  left_join(Temp_panel, by = c("insee", "year")) |>
-  select(insee, year, region_code, LIBELLE_GROUPE_CULTURE_AGG, surf_tot_geo_unit_m2, surf_agri_geo_unit_m2, surf_code_group_perc, surf_code_group_m2, mean, reference_mean) |>
-  arrange(insee, year, LIBELLE_GROUPE_CULTURE_AGG)
-
-
-## will add precipitations dataset when downloaded
-
-# Join GAEZ potential yield variables
-GAEZ_panel <- GAEZ_panel |>
-  rename(LIBELLE_GROUPE_CULTURE_AGG = groupe_rpg)
-
-df_panel <- RPG_panel |>
-  left_join(GAEZ_panel, by = c("insee", "LIBELLE_GROUPE_CULTURE_AGG"))
+# Load dataset
+df_panel <- readRDS(here(dir$final, "Joined_GAEZ_RPG_Panel.rds"))
 
 ```
 
-### Baseline model
+### Testing model fit
 
 The first model looks at how climate variables affect crop acreage change. Specifically, we will be looking at **Wheat** and **Maize**, as they are the most cultivated crops in France, as well as showing a tendency of decreasing in agricultural surface occupied over our period of interest. Additionnal to Cui's model, we introduce potential yield change as an explanatory variable to see if there is anticipation effect from crop producers.
 
 ```{r}
 
-# Wheat
+#|echo: false
+#|warning: false
+#|message: false
 
 df_panel_wheat <- df_panel |>
   filter(LIBELLE_GROUPE_CULTURE_AGG == "Blé tendre") |>
-  mutate(log_surf_agri = log(surf_agri_geo_unit_m2),
-         change = (value_futur_rpg - value_hist_rpg) / value_hist_rpg)
+  group_by(insee) |>
+  filter(any(surf_code_group_m2 > 0, na.rm = TRUE)) |> ## keep only communes that cultivated wheat at least once during the whole period
+  ungroup()
 
-baseline_model_w <- lm(drop_units(log_surf_agri) ~ mean + value_hist_rpg + reference_mean, data = df_panel_wheat)
-summary(baseline_model_w)
+## Baseline model
 
-interact_model_w <- lm(drop_units(log_surf_agri) ~ mean*change + value_hist_rpg + reference_mean, data = df_panel_wheat)
-summary(interact_model_w)
+baseline_model_w <- feols(log_surf_agri ~ mean + value_hist_rpg_t_ha + reference_mean + total_precip_wet_days + reference_avg_total_precip_wet_days | year, data = df_panel_wheat, weights = ~surf_agri_geo_unit_m2)
 
-# Maize
+## Adding interaction between temperature mean and potential yield change
 
-df_panel_maize <- df_panel |>
-  filter(LIBELLE_GROUPE_CULTURE_AGG == "Maïs grain et ensilage") |>
-  mutate(log_surf_agri = log(surf_agri_geo_unit_m2),
-         change = (value_futur_rpg - value_hist_rpg) / value_hist_rpg)
+interact_model_w1 <- feols(log_surf_agri ~ mean*change + value_hist_rpg_t_ha + mean*reference_mean + total_precip_wet_days + reference_avg_total_precip_wet_days | year, data = df_panel_wheat, weights = ~surf_agri_geo_unit_m2)
 
-baseline_model_m <- lm(drop_units(log_surf_agri) ~ mean + value_hist_rpg + reference_mean, data = df_panel_maize)
-summary(baseline_model_m)
+## Adding interaction between temperature mean and reference mean, as well as squared temperature for non-linear effect
 
-interact_model_m <- lm(drop_units(log_surf_agri) ~ mean*change + value_hist_rpg + reference_mean, data = df_panel_maize)
-summary(interact_model_m)
+interact_model_w2 <- feols(log_surf_agri ~ mean*change + I(mean^2) + value_hist_rpg_t_ha + mean*reference_mean + total_precip_wet_days + reference_avg_total_precip_wet_days | year, data = df_panel_wheat, weights = ~surf_agri_geo_unit_m2)
 
-models_cui <- list(
-  "Wheat (1)" = baseline_model_w,
-  "Maize (1)" = baseline_model_m,
-  "Wheat (2)" = interact_model_w,
-  "Maize (2)" = interact_model_m
+## Adding lagged temperature to see the effect of the previous year on acreage
+
+df_panel_wheat <- df_panel_wheat |>
+  arrange(insee, year) |>
+  group_by(insee) |>
+  mutate(temp_lag_1 = lag(mean, n = 1)) |>
+  ungroup()
+
+lag_model_w <- feols(log_surf_agri ~ l(mean, 0:1) + change + value_hist_rpg_t_ha + reference_mean + l(total_precip_wet_days, 0:1) + reference_avg_total_precip_wet_days | year, data = df_panel_wheat, panel.id = ~insee+year, weights = ~surf_agri_geo_unit_m2)
+
+## All variables
+
+complete_model_w <- feols(log_surf_agri ~ l(mean, 0:1) + I(mean^2) + mean*change + value_hist_rpg_t_ha + mean*reference_mean + l(total_precip_wet_days, 0:1) + reference_avg_total_precip_wet_days | year, data = df_panel_wheat, panel.id = ~insee+year, weights = ~surf_agri_geo_unit_m2)
+
+models_cui_w <- list(
+  "Wheat (Baseline)" = baseline_model_w,
+  "Wheat (Interaction)" = interact_model_w1,
+  "Wheat (Interactions + Squared)" = interact_model_w2,
+  "Wheat (Lagged)" = lag_model_w,
+  "Wheat (all var)" = complete_model_w
 )
 
-modelsummary(models_cui,
+modelsummary(models_cui_w,
              stars = TRUE,
              statistic = "({std.error})",
              coef_map = c(
-               "value_hist_rpg" = "Historical yield",
-               "change" = "Potential yield change",
+               "value_hist_rpg_t_ha" = "Historical yield (in t/ha)",
                "mean" = "Temperature mean",
                "reference_mean" = "Reference temperature mean",
-               "mean:change" = "Interaction yield change x temperature"
+               "total_precip_wet_days" = "Total precipitation",
+               "reference_avg_total_precip_wet_days" = "Reference total precipitation",
+               "change" = "Potential yield change",
+               "mean:change" = "Interaction yield change x temperature",
+               "mean:reference_mean" = "Interaction temperature x reference temp",
+               "I(mean^2)" = "Squared mean temperature",
+               "l(mean, 1)" = "Lagged temperature mean",
+               "l(total_precip_wet_days, 1)" = "Lagged total precipitation"
   ),
   gof_omit = "AIC|BIC|Log.Lik",
   output = "markdown"
 )
 
 ```
-We first notice that across all models, historical yield has a coefficient close to 0 despite it being highly significant. We can suppose that the significance of this variable is largely driven by sample size, as we cannot interpret any magnitude of effect of the variable on acreage size. 
 
-In the baseline models, we observe that mean temperature has a highly significant and negative correlation with both **Wheat** and **Maize** acreage size. This would mean that an increase in yearly mean temperature leads to a decrease in acreage size. It is interesting to note directly that the inverse effect comes from the reference mean temperature, which corresponds to the mean temperature level in the reference period between 1971 and 2000. 
+Historical yield consistently shows a positive and statistically significant effect on wheat acreage expansion across all models, indicating that communes with historically high yields tend to allocate more surface area to wheat. In contrast, the effect of potential yield change is consistently negative but not statistically significant on its own. However, its interaction with current mean annual temperature is both positive and significant, suggesting that in warmer communes, increases in potential yield have a stronger positive effect on wheat surface expansion.
 
-In the second series of models, we add potential yield change as well as an interaction term between mean temperature level and the former variable. The idea is to show that the effect of potential yield change on the outcome could be influenced by observed temperature, or vice versa. For wheat, we find that potential yield change alone is negatively correlated with wheat surface size, while positively correlated with that of maize. The contrary signs are found on the coefficients of the interaction term. We can however note that the coefficient on the interaction term where the outcome is acreage dedicated to maize is close to 14 times smaller than that on potential yield change, despite it being highly significant. 
+Temperature variables display more nuanced effects. While current mean temperature has an inconsistent impact, historical temperature levels are systematically positive and highly significant, implying that warmer historical climates are associated with greater wheat cultivation. The interaction between current temperature and potential yield change reinforces this positive relationship. When a squared temperature term is introduced, the linear effect becomes non-significant, pointing to a potential non-linear relationship. Moreover, the interaction with reference (historical) temperature yields a significant negative coefficient, suggesting that in already warm communes, further temperature increases may reduce wheat acreage. A lagged effect of current temperature also appears: higher temperatures in the previous year correlate with reduced wheat acreage, significant at the 10% level.
 
-We can note also that the adjusted R² consistently improve when going from the baseline to the second specification. 
+Precipitation levels show a generally positive but mixed influence. Contemporary precipitation tends to be positively associated with wheat surface expansion, especially when lagged values are considered, which are both positive and strongly significant. In contrast, historical precipitation levels exhibit a significant negative relationship with wheat acreage, suggesting that areas with historically high rainfall may be less suited or less used for wheat cultivation.
 
-### Long-difference model
+### Crop-specific analysis
 
+```{r}
+
+#|echo: false
+#|warning: false
+#|message: false
+
+# Executing regressions on our chosen variables : Maize and Oilseeds
+
+df_panel_maize <- df_panel |>
+  filter(LIBELLE_GROUPE_CULTURE_AGG == "Maïs grain et ensilage") |>
+  group_by(insee) |>
+  filter(any(surf_code_group_m2 > 0, na.rm = TRUE)) |>
+  ungroup()
+
+final_model_m <- feols(log_surf_agri ~ mean*change + I(mean^2) + value_hist_rpg_t_ha + mean*reference_mean + total_precip_wet_days + reference_avg_total_precip_wet_days | year, data = df_panel_maize, weights = ~surf_agri_geo_unit_m2)
+
+df_panel_oilseed <- df_panel |>
+  filter(LIBELLE_GROUPE_CULTURE_AGG == "Autres oléagineux") |>
+  group_by(insee) |>
+  filter(any(surf_code_group_m2 > 0, na.rm = TRUE)) |>
+  ungroup()
+
+final_model_o <- feols(log_surf_agri ~ mean*change + I(mean^2) + value_hist_rpg_t_ha + mean*reference_mean + total_precip_wet_days + reference_avg_total_precip_wet_days | year, data = df_panel_oilseed, weights = ~surf_agri_geo_unit_m2)
+
+models_cui <- list(
+  "Wheat" = interact_model_w2,
+  "Maize" = final_model_m,
+  "Oilseeds" = final_model_o
+)
+
+modelsummary(models_cui,
+             stars = TRUE,
+             statistic = "({std.error})",
+             coef_map = c(
+               "value_hist_rpg_t_ha" = "Historical yield (in t/ha)",
+               "mean" = "Temperature mean",
+               "reference_mean" = "Reference temperature mean",
+               "total_precip_wet_days" = "Total precipitation",
+               "reference_avg_total_precip_wet_days" = "Reference total precipitation",
+               "change" = "Potential yield change",
+               "mean:change" = "Interaction yield change x temperature",
+               "mean:reference_mean" = "Interaction temperature x reference temp",
+               "I(mean^2)" = "Squared mean temperature"
+  ),
+  gof_omit = "AIC|BIC|Log.Lik",
+  output = "markdown"
+)
+
+```
+
+### Non-linearity analysis
+
+To further analyse the non-linear effect of temperature on crop acreage of **Wheat**, **Maize** and **Oilseeds**, we implement a binned scatterplot regression to visualize the relationship between the variables, by grouping a variable that measures the number of days in a given temperature level into bins and plotting the average outcome in each bin.
+
+```{r}
+
+#|echo: false
+#|warning: false
+#|message: false
+
+
+binned_regw <- feols(log_surf_agri ~ total_precip_wet_days + days_bin_lower_0 + days_bin_0_3 + days_bin_3_6 + days_bin_6_9 + days_bin_9_12 + days_bin_12_15 + days_bin_15_18 + days_bin_18_21 + days_bin_21_24 + days_bin_24_27 + days_bin_27_30 | year, data = df_panel_wheat, weights = ~surf_agri_geo_unit_m2)
+
+# Get coefficients
+coefs <- tidy(binned_regw, conf.int = TRUE)
+
+# Keep only the bin terms
+coefs_bins <- coefs |>
+  filter(grepl("^days_bin", term)) |>
+  mutate(
+    bin = gsub("days_bin_", "", term),
+    bin = factor(bin, levels = gsub("days_bin_", "", term))  # keep order
+  )
+
+# Plot
+ggplot(coefs_bins, aes(x = bin, y = estimate)) +
+  geom_point() +
+  geom_errorbar(aes(ymin = conf.low, ymax = conf.high), width = 0.2) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "firebrick") +
+  labs(
+    x = "Temperature bin (over 3-day periods)",
+    y = "Effect on log(crop acreage)",
+    title = "Estimated Effect of Temperature Bins on Wheat Acreage"
+  ) +
+  theme_minimal()
+
+```
 
 
