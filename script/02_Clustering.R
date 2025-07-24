@@ -29,31 +29,35 @@ dir$output <- here(dir$root, "output")
 lapply(dir, function(i) dir.create(i, recursive = T, showWarnings = F))
 
 #===============================================================================
-# 2) Load Data ------
+# 2) Load data ------
 #===============================================================================
 
-RPG_R53 <- readRDS(here(dir$raw, "RPG_Aggregated_Brittany_wide.rds"))
-
-#===============================================================================
-# 3) Application of K-Medoids method ------
-#===============================================================================
 RPG_R53_wide <- readRDS(here(dir$rqz, "RPG_Aggregated_Brittany_wide.rds"))
+
+#===============================================================================
+# 3). Application of K-Means method ------
+#===============================================================================
+
+# Select columns that will be used for the clustering
 columns_to_select <- paste0("parcel_cult_code_group_perc_G", 1:25)
+
+# Delete missing values
 RPG_R53_clean <- na.omit(RPG_R53_wide)
+
 
 commune_scaled <- RPG_R53_clean %>%
   select(all_of(columns_to_select)) %>%
   scale()
 
-# Détermination du nombre de cluster optimal
+# Determine optimal number of clusters
 sil_data <- fviz_nbclust(commune_scaled, clara, method = "silhouette", correct.d=TRUE)
 optimal_k <- which.max(sil_data$data$y)
 
-# Clustering final
+# Final clustering
 set.seed(123)
 clustering <- clara(commune_scaled, k = optimal_k, samples = 50, pamLike = TRUE)
 
-# Graphique
+# Plot result
 fviz_cluster(clustering, 
              data = commune_scaled,
              ellipse.type = "t", 
@@ -63,7 +67,7 @@ fviz_cluster(clustering,
 
 
 
-# Analyse des clusters 
+# Analysis 
 
 RPG_R53_clean <- RPG_R53_clean %>%
   mutate(cluster = list(clustering$clustering))

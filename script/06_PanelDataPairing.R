@@ -43,6 +43,10 @@ Temp_panel <- readRDS(here(dir$raw, "era5_weather_communes_yearly_2006_2023_refe
 
 Precip_panel <- readRDS(here(dir$raw, "era5_total_precipitation_daily_sum_communes_yearly_2006_2023_reference_1971_2000.rds"))
 
+#===============================================================================
+# 3). Join datasets ------
+#===============================================================================
+
 # Join climate variables with RPG panel data
 RPG_panel <- RPG_panel |>
   mutate(year = as.numeric(year)) |>
@@ -63,7 +67,10 @@ GAEZ_panel <- GAEZ_panel |>
 df_panel <- RPG_panel |>
   left_join(GAEZ_panel, by = c("insee", "LIBELLE_GROUPE_CULTURE_AGG"))
 
-# Add additional variables
+#===============================================================================
+# 4). Add additional variables for econometric analysis ------
+#===============================================================================
+
 df_panel <- df_panel |>
   mutate(surf_code_group_m2 = drop_units(surf_code_group_m2),
          surf_agri_geo_unit_m2 = drop_units(surf_agri_geo_unit_m2)) |>
