@@ -2,21 +2,12 @@
 title: "RPG_Modelling"
 format: html
 editor: visual
-execute: 
-  echo: false
-  warning: false
-  message: false
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
-
 ```{r}
-
-#|echo: false
-#|warning: false
-#|message: false
+#| echo: false
+#| warning: false
+#| message: false
 
 
 # Prepare environment
@@ -50,10 +41,9 @@ In the literature, we can find land-share models using multinomial logit, where 
 In our analysis, the dependent variable is `etat`, a categorical variable going from 1 to 4, which measures if the acreage destined to a crop in a commune has increased, decreased, been maintained or has never existed during our period of interest. We will try to explain this variable first with data on historical potential yields from the **GAEZ dataset**, as well as potential yield change, computed as the difference between the future potential yield under the RCP 8.5 climate change scenario of the HadGEM2-ES model and the historical values of potentiel yield.
 
 ```{r}
-
-#|echo: false
-#|warning: false
-#|message: false
+#| echo: false
+#| warning: false
+#| message: false
 
 # Load dataset
 df_final <- readRDS(here(dir$final, "Joined_GAEZ_RPG.rds"))
@@ -63,14 +53,13 @@ df_final <- readRDS(here(dir$final, "Joined_GAEZ_RPG.rds"))
 ### Descriptive Statistics
 
 ```{r}
-
-#|echo: false
-#|warning: false
-#|message: false
+#| echo: false
+#| warning: false
+#| message: false
 
 # % of communes in each category of our dependent variable by crop
 
-table_etat <- df_final_etat_NA |>
+table_etat <- df_final |>
   group_by(LIBELLE_GROUPE_CULTURE_AGG, etat_libelle) |>
   summarise(nb_communes = n_distinct(insee), .groups = "drop")
 
@@ -93,10 +82,9 @@ print(table_pourcentages)
 ### Potential yield change
 
 ```{r}
-
-#|echo: false
-#|warning: false
-#|message: false
+#| echo: false
+#| warning: false
+#| message: false
 
 # making sure the dependent variable is a factor
 df_final$etat_libelle <- as.factor(df_final$etat_libelle)
@@ -107,15 +95,15 @@ df_final$etat_libelle <- relevel(df_final$etat_libelle, ref = "maintenu")
 logit_1 <- multinom(etat_libelle ~ value_hist_rpg + change, data = df_final)
 
 ```
-**Notes : Coefficients issued from the `summary()` command cannot be interpreted directly, only significance level and sign of the coefficients are relevant. Relative risk ratio can be interpreted as the risk of switching to another category (if RRR > 1, it is more likely that the crop in question in the given community will switch categories).**
+
+**Notes : Coefficients issued from the `summary()` command cannot be interpreted directly, only significance level and sign of the coefficients are relevant. Relative risk ratio can be interpreted as the risk of switching to another category (if RRR \> 1, it is more likely that the crop in question in the given community will switch categories).**
 
 ### Comparative advantage difference
 
 ```{r}
-
-#|echo: false
-#|warning: false
-#|message: false
+#| echo: false
+#| warning: false
+#| message: false
 
 # Adding the variable to the multinomial logit regression
 
@@ -127,23 +115,21 @@ Crops with higher historical AC are less likely to appear or disappear compared 
 ### Combining CAI and Potential yield change
 
 ```{r}
-
-#|echo: false
-#|warning: false
-#|message: false
+#| echo: false
+#| warning: false
+#| message: false
 
 logit_3 <- multinom(etat_libelle ~ AC_hist + change, data = df_final)
 ```
-When combining historical comparative advantage index with potentiel yield change as explanatory variables in the same model, we find similar results to **model 2**, where we wanted to explain acreage dynamics with historical comparative advantage index and its potential change. Crops with higher historical CA are more likely to be maintained than to appear or disappear, but are more likely to be never cultivated compared to being maintained. When potential yield change is higher, crop acreage is also less likely to vary compared to be maintained as it is. 
 
+When combining historical comparative advantage index with potentiel yield change as explanatory variables in the same model, we find similar results to **model 2**, where we wanted to explain acreage dynamics with historical comparative advantage index and its potential change. Crops with higher historical CA are more likely to be maintained than to appear or disappear, but are more likely to be never cultivated compared to being maintained. When potential yield change is higher, crop acreage is also less likely to vary compared to be maintained as it is.
 
 ### Adding climate controls
 
 ```{r}
-
-#|echo: false
-#|warning: false
-#|message: false
+#| echo: false
+#| warning: false
+#| message: false
 
 # mean temperature control over the whole period 
 
@@ -152,17 +138,6 @@ logit_c1 <- multinom(etat_libelle ~ value_hist_rpg + change + moyenne_temp_perio
 logit_c2 <- multinom(etat_libelle ~ AC_hist + AC_diff + moyenne_temp_period + moyenne_temp_ref + moyenne_precip_period + moyenne_precip_ref, data = df_final)
 
 logit_c3 <- multinom(etat_libelle ~ AC_hist + change + moyenne_temp_period + moyenne_temp_ref + moyenne_precip_period + moyenne_precip_ref, data = df_final)
-
-```
-
-
-
-
-```{r}
-
-#|echo: false
-#|warning: false
-#|message: false
 
 # Putting all models in a summary table
 
@@ -196,17 +171,14 @@ modelsummary(logit_models,
 
 ```
 
+## Reproducing Cui et al.
 
-## Reproducing Cui et al. 
-
-Cui et al. uses a panel model where the author tries to explain acreage change of **corn** and **soybean** with variations in climate normals since the 1950s. 
-
+Cui et al. uses a panel model where the author tries to explain acreage change of **corn** and **soybean** with variations in climate normals since the 1950s.
 
 ```{r}
-
-#|echo: false
-#|warning: false
-#|message: false
+#| echo: false
+#| warning: false
+#| message: false
 
 # Load dataset
 df_panel <- readRDS(here(dir$final, "Joined_GAEZ_RPG_Panel.rds"))
@@ -218,10 +190,9 @@ df_panel <- readRDS(here(dir$final, "Joined_GAEZ_RPG_Panel.rds"))
 The first model looks at how climate variables affect crop acreage change. Specifically, we will be looking at **Wheat** and **Maize**, as they are the most cultivated crops in France, as well as showing a tendency of decreasing in agricultural surface occupied over our period of interest. Additionnal to Cui's model, we introduce potential yield change as an explanatory variable to see if there is anticipation effect from crop producers.
 
 ```{r}
-
-#|echo: false
-#|warning: false
-#|message: false
+#| echo: false
+#| warning: false
+#| message: false
 
 df_panel_wheat <- df_panel |>
   filter(LIBELLE_GROUPE_CULTURE_AGG == "Blé tendre") |>
@@ -294,10 +265,9 @@ Precipitation levels show a generally positive but mixed influence. Contemporary
 ### Crop-specific analysis
 
 ```{r}
-
-#|echo: false
-#|warning: false
-#|message: false
+#| echo: false
+#| warning: false
+#| message: false
 
 # Executing regressions on our chosen variables : Maize and Oilseeds
 
@@ -342,7 +312,8 @@ modelsummary(models_cui,
 )
 
 ```
-Across all three models, historical yield (measured in tons per hectare) shows a consistently positive and statistically significant association with crop acreage, suggesting that communes with higher past yields tend to allocate more land to these crops. The coefficient on potential yield change differs substantially across crops: it is strongly positive for maize, negative for wheat and oilseed, though only significant for maize and oilseed. This implies that an increase in expected future yield would incentivize maize expansion but discourage oilseed and wheat in some contexts. 
+
+Across all three models, historical yield (measured in tons per hectare) shows a consistently positive and statistically significant association with crop acreage, suggesting that communes with higher past yields tend to allocate more land to these crops. The coefficient on potential yield change differs substantially across crops: it is strongly positive for maize, negative for wheat and oilseed, though only significant for maize and oilseed. This implies that an increase in expected future yield would incentivize maize expansion but discourage oilseed and wheat in some contexts.
 
 The interaction between potential yield change and current mean temperature is significant across all models, but with varying signs: positive for wheat and oilseed, negative for maize. This means that the influence of potential yield change on land allocation is modified by temperature, and the effect differs by crop.
 
@@ -350,16 +321,14 @@ Temperature mean itself does not have a significant or consistent effect, and it
 
 Total precipitation and its reference value show more variable patterns. While total precipitation has a marginally significant positive effect on oilseed acreage, the reference precipitation has a strong negative effect for wheat, possibly indicating that areas with historically wetter conditions allocate less land to wheat.
 
-
 ### Non-linearity analysis
 
 To further analyse the non-linear effect of temperature on crop acreage of **Wheat**, **Maize** and **Oilseeds**, we implement a binned scatterplot regression to visualize the relationship between the variables, by grouping a variable that measures the number of days in a given temperature level into bins and plotting the average outcome in each bin.
 
 ```{r}
-
-#|echo: false
-#|warning: false
-#|message: false
+#| echo: false
+#| warning: false
+#| message: false
 
 
 binned_regw <- feols(log_surf_agri ~ total_precip_wet_days + days_bin_lower_0 + days_bin_0_3 + days_bin_3_6 + days_bin_6_9 + days_bin_9_12 + days_bin_12_15 + days_bin_15_18 + days_bin_18_21 + days_bin_21_24 + days_bin_24_27 + days_bin_27_30 | year, data = df_panel_wheat, weights = ~surf_agri_geo_unit_m2)
@@ -388,5 +357,3 @@ ggplot(coefs_bins, aes(x = bin, y = estimate)) +
   theme_minimal()
 
 ```
-
-
