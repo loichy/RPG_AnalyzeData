@@ -53,9 +53,11 @@ com_shp <- read_sf(here(dir$shapefiles, "com_shp/Communes.shp")) %>%
 On va s'intéresser à l'évolution de cultures résistantes au changement climatique et dont les bienfaits sont relayés par les médias. Ainsi, on va s'intéresser aux cultures de chanvre et lin dans un premier temps (catégorie 7 et/ou 9 du RPG) et aux cultures de betteraves dans un second temps (catégorie 24). *Quid des catégories de semences pour le chanvre et lin et gels pour betteraves*.
 
 Groupe 7 : lin non textile, chanvre oléagineux, soja et autres oléagineux
+
 Groupe 9 : chanvre et lin textile
 
 Groupe 24 : à remplir (pas que des betteraves sucrières)
+
 # Le lin et le chanvre
 
 ```{r lin & chanvre, include=FALSE}
@@ -74,7 +76,6 @@ RPG_ch <- RPG %>%
 table(RPG_ch$year_max)
 ```
 
-Je souhaite visualiser l'évolution par commune et par département, on extrait l'information du code insee :
 
 ```{r communes, eval = F}
 
@@ -101,9 +102,6 @@ ggplot(com %>% filter(year == "2023")) +
         panel.grid = element_blank()) 
 ```
 
-Bon, on voit vraiment pas grand chose... On se focalise sur une moyenne par département ?
-Et le département :
-
 ```{r departement}
 
 dep <- RPG_ch %>%
@@ -120,7 +118,6 @@ dep_sf <- st_as_sf(dep)
 
 ```
 
-On peut en faire une carte par année : 
 
 ```{r, eval = F}
   
@@ -144,9 +141,6 @@ ggplot(dep %>% filter(year == "2023")) +
 
 ```
 
-## Test GIF
-
-Evolution des surfaces de chanvre et de lin cultivées :
 
 ```{r GIF (trop gros), eval = F}
 anim <- ggplot(dep) +
@@ -161,9 +155,6 @@ anim <- ggplot(dep) +
 
 #animate(anim, nframes = 20, fps = 2, renderer = gifski_renderer())
 ```
-Ca prend trop longtemps à se générer, regarder pour shinyapps plutôt !
-
-## Test carte interactive
 
 ```{r curseur intéractif, eval = F}
 
@@ -197,9 +188,8 @@ shinyApp(ui, server)
 
 ```
 
-## Analyse en taux de croissance
 
-Identifions les régions où ces cultures ont le plus évolué :
+Identifions les régions où ces cultures ont le plus évolué en s'intéressant au taux de croissance annuel moyen des surfaces totales et en pourcentages :
 
 ```{r Taux de croissance, echo = F, warning = F}
 
@@ -309,7 +299,7 @@ ggplot(ch_lin %>% filter(year == "2023")) +
 
 # La betterave
 
-On fait exactement la même chose qu'avant mais on se concentre maintenant sur la betterave qui fait parti du groupe 24.
+On fait exactement la même chose qu'avant mais on se concentre maintenant sur la betterave qui fait parti du groupe de culture n°24.
 
 ```{r betterave}
 
@@ -374,7 +364,7 @@ taux_surf_24 <- df_dep_bet %>%
 
 head(taux_surf_24, 10)
 ```
-Lozère avec un taux de croissance fulgurant !
+Lozère avec un taux de croissance fulgurant (on verra que ce n'était qu'une illusion administrative)!
 
 sinon Meuse, Haute savoie, Moselle, Vosges, Meurthe-et-Moselle et Creuse :)
 
@@ -409,7 +399,7 @@ On dit que < 2 : faible et > 3 : fort (ie le nombre d'espèces est aussi importa
 
 Si Shannon donne un aperçu de l'uniformité de la diversité sur une parcelle, Simpson met en évidence la présence d'espèces dominantes sur une parcelle.
 
-Plus concrètement, l'indice de Simpson D est la probabilité deux individus choisis au hasard soient de la même espèce : c'est pour cela qu'il prend des valeurs allant de 0 à 1. Ainsi, un $D$ grand signifie qu'une espèce est dominante. C'est pour cette raison que certains auteurs interprètent l'indice $1-D$ : plus il est grand, plus il y a de la diversité.
+Plus concrètement, l'indice de Simpson D est la probabilité deux individus choisis au hasard soient de la même espèce : c'est pour cela qu'il prend des valeurs allant de 0 à 1. Ainsi, un $D$ grand signifie qu'une espèce est dominante. C'est pour cette raison que certains auteurs interprètent l'indice $1-D$ : plus il est grand, plus il y a de la diversité. Le package utilisé ici calcule justement $1-D$.
 
 ## Calcul des indices
 
@@ -517,7 +507,23 @@ simpson_ch %>% plotly::ggplotly()
 
 ```
 
-## Retour sur le betterave
+Attention aux changements de 2015 : sans doute l'effet du changement de nomenclature du RPG !
+
+- *Var* : l'indice de Shannon vaut environ 0,95 en 2007 et 2023 malgré quelques légères variations et l'indice de Simpson décline légèrement passant de 0,45 à 0,43 après de petites variations. Cela suggère que le département n'a pas perdu de diversité en termes de "nombre de cultures" mais les cultures dominantes ont légèrement renforcé leur emprise sur le territoire.
+
+- *Bouches-du-Rhône* : l'indice de Shannon augmente dans le temps passant de 1,33 à 1,42 alors que l'indice de Simpson reste stable et vaut 0,6. L'augmention de Shannon suggère que de nouvelles cultures sont apparues et/ou que des cultures minoritaires ont pris une place importante sans pour autant bousculer les cultures dominantes.
+Même dynamique pour l'*Ardèche* et pour le *Vaucluse* qui se situe tous dans la région Sud-Est.
+
+- *Alpes-de-Haute-Provence* : l'indice de Shannon diminue et passe de 1,21 à 1,15 ainsi que Simpson qui passe de 0,54 à 0,49. La chute des deux indices suggèrent une spécialisation territoriale : certaines cultures secondaires disparaissent ou voient leur part devenir négligeable et les cultures déjà dominantes prennent encore plus de place.
+
+- *Puy-de-Dôme* : l'indice de Shannon augmente légèrement de 1,08 à 1,11 alors l'indice de Simpson diminue de 0,5 à 0,48. Si l'augmentation de l'indice de Shannon montre l'émergence de nouvelles filières sur le territoire, celle-ci est masquée par une spécialisation accrue des cultures dominantes, comme en témoigne le recul de l'indice de Simpson.
+
+- *Haute-Vienne* : l'indice de Shannon augmente et passe de 1,14 à 1,42 tandis que l'indice de Simpson passe de 0,59 à 0,62. Cela suggère que un changement structurel : le territoire rompt avec sa spécialisation historique pour laisser place à une diversité de cultures plus équilibrée. Même dynamique pour la *Manche* et dans une moindre mesure pour le département des *Vosges* qui démarre de plus bas.
+
+- *Corrèze* : l'indice de Shannon baisse de 0,79 à 0,77 et celui de Simpson baisse de 0,42 à 0,33. Ce département représenterait donc un cas de spécialisation productive. Avec les indices les plus bas de l'échantillon et une chute sévère de l'indice de Simpson, le département témoigne d'un paysage agricole ultra-homogène que de nouvelles cultures émergentes comme le lin ou le chanvre n'ont pas pu modifier.
+
+
+## Retour sur la betterave
 
 Pour rappel, on avait identifié cinq département pour qui la betterave s'était développé soit vie le taux de croissance avec la Lozère ou les surfaces cultivées augmentées avec la Meuse, Haute savoie, Moselle, Vosges, Meurthe-et-Moselle et la Creuse :)
 
@@ -563,3 +569,17 @@ simpson_bet %>% plotly::ggplotly()
 
 ```
 
+Attention aux changements de 2015 : sans doute l'effet du changement de nomenclature du RPG !
+
+- *Meuse* : l'indice de Shannon augmente et passe de 1,51 à 1,72 et celui de Simpson de 0,71 à 0,76. La progression simultanée et forte des deux indices témoigne d'un changement vers un modèle de polyculture d'une grande diversité. Dans ce contexte, l'augmentation de la production de betterave ne se fait pas au prix d'une spécialisation, mais s'intègre au contraire dans une stratégie de diversification globale du paysage agricole. Cela semble être une tendance de la région Grand-Est puisque la *Meurthe-et-Moselle* et la *Moselle* suivent une dynamique similaire ainsi que le département des *Vosges* dans une moindre mesure.
+
+
+- *Haute savoie* : l'indice de Shannon diminue de 0,95 à 0,92 et celui de Simpson de 0,49 à 0,44. La baisse des deux indices suggèrent une simplification du paysage agricole laissant peu de place à l'émergence de cultures secondaires.
+
+- *Creuse* : l'indice de Shannon augmente de 1,02 à 1,06 tandis que l'indice de Simpson diminue de 0,55 à 0,47. Cela suggère que la diversification est un phénomène marginal qui ne parvient pas à peser face à la dynamique de spécialisation des cultures dominantes.
+
+- *Lozère* : l'indide de Shannon augmente de 0,85 à 1,05 et celui de Simpson de 0,46 à 0,53 mais surtout grâce à un pic en 2015. Ces résultats suggèrent une hausse trompeuse de ces indices de diversité liée aux nouvelles règles de déclaration du RPG. En dehors de cet ajustement administratif, le système cultural semble rester rigide.
+
+
+Le développement de la filière bettavière dans le Grand-Est pourrait être lié au développement de groupes sucriers tels que _Cristal Union_ : née de la fusion de trois coopératives du Grand-Est et d'une du Centre-Val de Loire en l'an 2000, l'entreprise a ensuite fusionné avec Erstein (Bas-Rhin) en 2007 et s'élargit en 2012 en intégrant d'autres sucreries localisées dans les Hauts-de-France, Centre-Val de Loire, Normandie et Puy-de-Dôme. 
+--> Se renseigner sur la fin de ces quotas européens en 2017 !
