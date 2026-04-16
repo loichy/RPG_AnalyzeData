@@ -118,7 +118,7 @@ ggplot(RPG_R53_wide, aes(x = factor(year), y = as.numeric(surf_agri_geo_unit_m2)
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 ```
 
-Ce graphique montre que la surface agricole utilisée totale en France reste stable dans le temps (ligne rouge). De manière générale, on observe une légère augmentation de la surface agricole totale, à hauteur de 2% entre 2007 et 2023. La surface agricole française totale a atteint un premier maximum en 2012, puis suite à une diminution jusqu'en 2019, un nouveau maximum en 2021.
+Ce graphique montre que la surface agricole utilisée totale en France reste stable dans le temps (ligne rouge). De manière générale, on observe une légère augmentation de la surface agricole totale, à hauteur de 2% entre 2007 et 2023. La surface agricole française totale a atteint un premier maximum en 2013, puis suite à une diminution jusqu'en 2019, un nouveau maximum en 2021.
 
 La distribution de la surface agricole totale par commune montre également une stabilité importante (graphiques en violon, et boite à moustache associée). Près de 90% des communes en Bretagne ont une surface agricole utilisée inférieures à 3000 ha, et la médiane de la surface agricole utilisée des communes restent stable dans le temps (environ 1 080 ha).
 
