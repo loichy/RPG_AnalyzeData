@@ -17,7 +17,7 @@ gc()
 
 # Load package
 if (!require("pacman")) install.packages("pacman")
-pacman::p_load(tidyverse, data.table, here, sf, tmap, units, knitr, kableExtra, plotly, viridis, shiny, gganimate, gifski, vegan, paletteer)
+pacman::p_load(tidyverse, data.table, here, sf, tmap, units, knitr, kableExtra, plotly, viridis, shiny, vegan, paletteer, readxl)
 
 # List directories 
 dir <- list()
@@ -46,11 +46,15 @@ dep_shp <- read_sf(here(dir$shapefiles, "dep_shp/DEPARTEMENT.shp")) %>%
 
 com_shp <- read_sf(here(dir$shapefiles, "com_shp/Communes.shp")) %>%
   rename(insee = "DCOE_C_COD")
+
+pra_shp <- read_sf(here(dir$shapefiles, "pra_shp/CommunePra_SFWGS84_WithCell.shp"))
+
+pra_com <- read_xls(here(dir$raw, "Referentiel_CommuneRA_PRA_2017.xls"), skip = 5)
 ```
 
 # Introduction
 
-On va s'intéresser à l'évolution de cultures résistantes au changement climatique et dont les bienfaits sont relayés par les médias. Ainsi, on va s'intéresser aux cultures de chanvre et lin dans un premier temps (catégorie 7 et/ou 9 du RPG) et aux cultures de betteraves dans un second temps (catégorie 24). *Quid des catégories de semences pour le chanvre et lin et gels pour betteraves*.
+On va s'intéresser à l'évolution del cultures résistantes au changement climatique et dont les bienfaits sont relayés par les médias. Ainsi, on va s'intéresser aux cultures de chanvre et lin dans un premier temps (catégorie 7 et/ou 9 du RPG) et aux cultures de betteraves dans un second temps (catégorie 24). *Quid des catégories de semences pour le chanvre et lin et gels pour betteraves*.
 
 Groupe 7 : lin non textile, chanvre oléagineux, soja et autres oléagineux
 
@@ -142,56 +146,9 @@ ggplot(dep %>% filter(year == "2023")) +
 ```
 
 
-```{r GIF (trop gros), eval = F}
-anim <- ggplot(dep) +
-  geom_sf(aes(fill = mean_surf, geometry = geometry)) +
-  scale_fill_viridis_c(limits = c(0, max(dep$mean_surf, na.rm = TRUE))) +
-  transition_time(as.integer(year)) +
-  labs(title = "Année : {frame_time}") +
-  theme_minimal() +
-  theme(axis.text = element_blank(),
-        axis.ticks = element_blank(),
-        panel.grid = element_blank()) 
-
-#animate(anim, nframes = 20, fps = 2, renderer = gifski_renderer())
-```
-
-```{r curseur intéractif, eval = F}
-
-ui <- fluidPage(
-  titlePanel("Évolution des cultures de Lin et Chanvre"),
-  sidebarLayout(
-    sidebarPanel(
-      sliderInput("annee", "Choisir l'année :", 
-                  min = 2007, max = 2023, value = 2023, step = 2, sep = "")),
-    mainPanel(
-      plotOutput("map", height = "600px"))))
-
- server <- function(input, output) {
-  output$map <- renderPlot({
-    
-    # 1. Filtrer les données selon l'année choisie
-    data_filtree <- dep_sf %>% filter(year == input$annee)
-    
-    # 2. Créer la carte
-    ggplot(data_filtree) +
-      geom_sf(aes(fill = mean_surf)) +
-      # On fixe les limites pour que l'échelle ne bouge pas entre les années
-      scale_fill_viridis_c(limits = c(0, max(dep$mean_surf, na.rm = TRUE))) + 
-      theme_minimal() +
-      labs(title = paste("Surfaces en", input$annee), fill = "Surfaces") +
-      theme(axis.text = element_blank(), 
-            axis.ticks = element_blank(),
-            panel.grid = element_blank())})}
-
-shinyApp(ui, server)
-
-```
-
-
 Identifions les régions où ces cultures ont le plus évolué en s'intéressant au taux de croissance annuel moyen des surfaces totales et en pourcentages :
 
-```{r Taux de croissance, echo = F, warning = F}
+```{r Taux de croissance chanvre & lin, echo = F, warning = F}
 
 # Pour le groupe 9 : chanvre et lin textile
 
@@ -202,10 +159,11 @@ df_dep9 <- dep %>%
   unique() %>%
   arrange(year, departement) %>%
   group_by(departement) %>%
-  mutate(tc_perc = (mean_perc - lag(mean_perc))/lag(mean_perc * 100),
-         tc_surf = (mean_surf - lag(mean_surf))/lag(mean_surf) * 100,
-         tcam_perc = mean(tc_perc, na.rm = T),
-         tcam_surf = mean(tc_surf, na.rm = T)) %>%
+  mutate(tc_perc = (mean_perc - lag(mean_perc))/lag(mean_perc) * 100,
+         tc_surf = (mean_surf - lag(mean_surf))/lag(mean_surf) * 100) %>%
+  mutate(n_years = max(year) - min(year),
+         tcam_surf = ((last(mean_surf) / first(mean_surf))^(1 / n_years) - 1) * 100, 
+         tcam_perc = ((last(mean_perc) / first(mean_perc))^(1 / n_years) - 1) * 100) %>%
   ungroup()
 
 taux_perc_9 <- df_dep9 %>% 
@@ -237,10 +195,11 @@ df_dep7 <- dep %>%
   unique() %>%
   arrange(year, departement) %>%
   group_by(departement) %>%
-  mutate(tc_perc = (mean_perc - lag(mean_perc))/lag(mean_perc * 100),
-         tc_surf = (mean_surf - lag(mean_surf))/lag(mean_surf) * 100,
-         tcam_perc = mean(tc_perc, na.rm = T),
-         tcam_surf = mean(tc_surf, na.rm = T)) %>%
+  mutate(tc_perc = (mean_perc - lag(mean_perc))/lag(mean_perc) * 100,
+         tc_surf = (mean_surf - lag(mean_surf))/lag(mean_surf) * 100) %>%
+  mutate(n_years = max(year) - min(year),
+         tcam_surf = ((last(mean_surf) / first(mean_surf))^(1 / n_years) - 1) * 100, 
+         tcam_perc = ((last(mean_perc) / first(mean_perc))^(1 / n_years) - 1) * 100) %>%
   ungroup()
 
 taux_perc_7 <- df_dep7 %>% 
@@ -267,29 +226,35 @@ head(taux_surf_7, 10)
 
 Top 3 qui se détache du reste du peloton pour le groupe 7 : 
 1. Var
-2. Bouches-du-Rhône
-3. Alpes-de-Haute-Provence
+2. Puy-de-Dôme
+3. Territoire de Belfort
 
-Puis deuxième groupe avec l'Ardèche, le Puy-de-Dôme, la Haute-Vienne et la Corrèze soit.
+Puis qui revient dans le top10 en perc/surf sont : la Manche, le Rhône et la Corrèze.
 
-Pour le groupe de culture n°9, l'évolution est plus timide donc on ne va conserver que le top 3 :
-1. Manche
-2. Vosges
-3. Vaucluse
+Pour le groupe de culture n°9, un groupe de 3 se distingue par leur tcam en pourcentage : 
+1. Haute-Marne
+2. Vaucluse
+3. Hautes-Pyrénées
+
+Les départements vu dans les deux top10 sont sinon : la Manche, le Jura et le Lot-et-Garonne.
+
+En commun on retrouve donc la Manche !
+
 
 ```{r carte département id}
 
 ch_lin <- dep %>%
-  mutate(top = case_when(departement %in% c("83", "13", "04", "07", "63", "87", "19") ~ "7",
-                         departement %in% c("50", "88", "84") ~ "9",
-                         !(departement %in% c("83", "13", "04", "07", "63", "87", "19", "50", "88", "84")) ~ "Aucun"))
+  mutate(top = case_when(departement %in% c("83", "63", "19", "90", "69") ~ "7",
+                         departement %in% c("52", "84", "65", "39", "47") ~ "9",
+                         departement %in% c("50") ~ "7 & 9",
+                         !(departement %in% c("83", "63", "19", "90", "69", "52", "84", "65", "39", "47", "50")) ~ "Aucun"))
 
 ggplot(ch_lin %>% filter(year == "2023")) +
   geom_sf(aes(fill = top, geometry = geometry)) +
   theme_minimal() + 
   labs(title = "Département ayant le plus adopté le lin et le chanvre", 
       fill = "Top selon le groupe de culture") + 
-  scale_fill_manual(values = c("#1982C4", "#219EBC", "#FFCA3A")) + 
+  scale_fill_manual(values = c("#1982C4", "maroon2", "forestgreen", "#FFCA3A")) + 
   theme(axis.text = element_blank(),
         axis.ticks = element_blank(),
         panel.grid = element_blank()) 
@@ -338,10 +303,11 @@ df_dep_bet <- dep_bet %>%
   unique() %>%
   arrange(year, departement) %>%
   group_by(departement) %>%
-  mutate(tc_perc = (mean_perc - lag(mean_perc))/lag(mean_perc * 100),
-         tc_surf = (mean_surf - lag(mean_surf))/lag(mean_surf) * 100,
-         tcam_perc = mean(tc_perc, na.rm = T),
-         tcam_surf = mean(tc_surf, na.rm = T)) %>%
+  mutate(tc_perc = (mean_perc - lag(mean_perc))/lag(mean_perc) * 100,
+         tc_surf = (mean_surf - lag(mean_surf))/lag(mean_surf) * 100) %>%
+  mutate(n_years = max(year) - min(year),
+         tcam_surf = ((last(mean_surf) / first(mean_surf))^(1 / n_years) - 1) * 100, 
+         tcam_perc = ((last(mean_perc) / first(mean_perc))^(1 / n_years) - 1) * 100) %>%
   ungroup()
 
 taux_perc_24 <- df_dep_bet %>% 
@@ -364,14 +330,14 @@ taux_surf_24 <- df_dep_bet %>%
 
 head(taux_surf_24, 10)
 ```
-Lozère avec un taux de croissance fulgurant (on verra que ce n'était qu'une illusion administrative)!
+Les départements qui apparaissent dans les deux top10 sont : les Vosges, le Cher et la Haute-Saône. Bien suivis de la Manche, de l'Indre et de la Creuse + le Tarn-et-Garonne.
 
-sinon Meuse, Haute savoie, Moselle, Vosges, Meurthe-et-Moselle et Creuse :)
+(Mention spéciale pour la Corse : un coup 2A l'autre coup 2B)
 
 ```{r carte departement betterave}
 
 bet <- dep %>%
-  mutate(top = ifelse(departement %in% c("55", "74", "57", "88", "54", "48", "23"), "5", "Aucun"))
+  mutate(top = ifelse(departement %in% c("88", "18", "70", "50", "36", "23", "82"), "7", "Aucun"))
 
 ggplot(bet %>% filter(year == "2023")) +
   geom_sf(aes(fill = top, geometry = geometry)) +
@@ -385,7 +351,7 @@ ggplot(bet %>% filter(year == "2023")) +
 
 ```
 
-# Des indices de biodiversité
+# Des indices de biodiversité (à mettre à jour)
 
 ## Indice de Shannon (1949)
 
@@ -456,12 +422,15 @@ Top 3 qui se détache du reste du peloton pour le groupe 7 :
 1. Var
 2. Bouches-du-Rhône
 3. Alpes-de-Haute-Provence
-Puis deuxième groupe avec l'Ardèche, le Puy-de-Dôme, la Haute-Vienne et la Corrèze.
+
+Puis deuxième groupe avec l'Ardèche, le Puy-de-Dôme, la Haute-Vienne, les Hautes-Alpes, la Manche, la Haute-Loire, le Hérault et la Corrèze.
 
 Pour le groupe de culture n°9, l'évolution est plus timide donc on ne va conserver que le top 3 :
 1. Manche
 2. Vosges
 3. Vaucluse
+
+Mais aussi la Haute-Vienne, l'Essone et la Haute-Marne.
 
 On va donc s'intéresser à l'évolution des indices au sein de ces départements :
 
@@ -470,7 +439,7 @@ On va donc s'intéresser à l'évolution des indices au sein de ces département
 # On peut calculer la moyenne des indices par département
 
 RPG_wide_ch_lin <- RPG_wide_surf %>%
-  filter(departement %in% c("83", "13", "04", "07", "63", "87", "19", "50", "88", "84")) %>%
+  filter(departement %in% c("83", "13", "04", "07", "63", "87", "19", "05", "50", "43", "34", "88", "84", "91", "52")) %>%
   group_by(departement, year) %>%
   mutate(mean_shannon = mean(shannon),
          mean_simpson = mean(simpson))
@@ -481,11 +450,17 @@ Cet échantillon représente en moyenne 2830 communes réparties sur 10 départe
 
 ```{r index evolution chanvre et lin}
 
+mon_atlas_couleurs <- c(
+  "#E63946", "#F4A261", "#E76F51", "#D62828", "#FCBF49",
+  "#457B9D", "#1D3557", "#2A9D8F", "#0077B6", "#00B4D8",
+  "#606C38", "#283618", "#BC6C25", "#8E9AAF", "#4A4E69"
+)
+
 shannon_ch <- ggplot(RPG_wide_ch_lin, aes(x = as.numeric(year), y = mean_shannon, colour = NOM_DEP, fill = NOM_DEP)) +
   geom_line() + 
   theme_minimal() + 
-  scale_color_paletteer_d("ggsci::default_frontiers") +
-  scale_fill_paletteer_d("ggsci::default_frontiers") +
+  scale_fill_manual(values = mon_atlas_couleurs) +
+  scale_color_manual(values = mon_atlas_couleurs) +
   labs(title = "Evolution de l'indices de Shannon",
        x = "Année",
        y = "Indice de Shannon",
@@ -496,8 +471,8 @@ shannon_ch %>% plotly::ggplotly()
 simpson_ch <- ggplot(RPG_wide_ch_lin, aes(x = as.numeric(year), y = mean_simpson, colour = NOM_DEP, fill = NOM_DEP)) +
   geom_line() + 
   theme_minimal() + 
-  scale_color_paletteer_d("ggsci::default_frontiers") +
-  scale_fill_paletteer_d("ggsci::default_frontiers") +
+  scale_fill_manual(values = mon_atlas_couleurs) +
+  scale_color_manual(values = mon_atlas_couleurs) +
   labs(title = "Evolution de l'indices de Simpson",
        x = "Année",
        y = "Indice de Simpson",
@@ -525,14 +500,14 @@ Même dynamique pour l'*Ardèche* et pour le *Vaucluse* qui se situe tous dans l
 
 ## Retour sur la betterave
 
-Pour rappel, on avait identifié cinq département pour qui la betterave s'était développé soit vie le taux de croissance avec la Lozère ou les surfaces cultivées augmentées avec la Meuse, Haute savoie, Moselle, Vosges, Meurthe-et-Moselle et la Creuse :)
+Pour rappel, on avait identifié sept départements pour qui la betterave s'était développé soit vie le taux de croissance avec la Lozère ou les surfaces cultivées augmentées avec la Meuse, Haute savoie, Moselle, Vosges, Meurthe-et-Moselle, la Creuse, les Alpes-Maritimes et la Nièvre :)
 
 ```{r index betterave}
 
 # On peut calculer la moyenne des indices par département
 
 RPG_wide_bet <- RPG_wide_surf %>%
-  filter(departement %in% c("55", "74", "57", "88", "54", "48", "23")) %>%
+  filter(departement %in% c("55", "74", "57", "88", "54", "48", "23", "06", "58")) %>%
   group_by(departement, year) %>%
   mutate(mean_shannon = mean(shannon),
          mean_simpson = mean(simpson)) 
@@ -546,8 +521,8 @@ Cet échantillon représente en moyenne 2985 communes réparties sur 7 départem
 shannon_bet <- ggplot(RPG_wide_bet, aes(x = as.numeric(year), y = mean_shannon, colour = NOM_DEP, fill = NOM_DEP)) +
   geom_line() + 
   theme_minimal() + 
-  scale_color_paletteer_d("tvthemes::RoseQuartz") +
-  scale_fill_paletteer_d("tvthemes::RoseQuartz") +
+  scale_color_paletteer_d("ggprism::autumn_leaves") +
+  scale_fill_paletteer_d("ggprism::autumn_leaves") +
   labs(title = "Evolution de l'indices de Shannon",
        x = "Année",
        y = "Indice de Shannon",
@@ -558,8 +533,8 @@ shannon_bet %>% plotly::ggplotly()
 simpson_bet <- ggplot(RPG_wide_bet, aes(x = as.numeric(year), y = mean_simpson, colour = NOM_DEP, fill = NOM_DEP)) +
   geom_line() + 
   theme_minimal() + 
-  scale_color_paletteer_d("tvthemes::RoseQuartz") +
-  scale_fill_paletteer_d("tvthemes::RoseQuartz") +
+  scale_color_paletteer_d("ggprism::autumn_leaves") +
+  scale_fill_paletteer_d("ggprism::autumn_leaves") +
   labs(title = "Evolution de l'indices de Simpson",
        x = "Année",
        y = "Indice de Simpson",
@@ -583,3 +558,255 @@ Attention aux changements de 2015 : sans doute l'effet du changement de nomencla
 
 Le développement de la filière bettavière dans le Grand-Est pourrait être lié au développement de groupes sucriers tels que _Cristal Union_ : née de la fusion de trois coopératives du Grand-Est et d'une du Centre-Val de Loire en l'an 2000, l'entreprise a ensuite fusionné avec Erstein (Bas-Rhin) en 2007 et s'élargit en 2012 en intégrant d'autres sucreries localisées dans les Hauts-de-France, Centre-Val de Loire, Normandie et Puy-de-Dôme. 
 --> Se renseigner sur la fin de ces quotas européens en 2017 !
+
+# Des petites régions agricoles ? 
+
+Les régions agricoles (RA) et *petites régions agricoles (PRA)* ont été définies à partir de 1946 pour caractériser des zones agricoles homogènes.
+
+La RA couvre un nombre entier de communes et peut s’étendre sur plusieurs départements. La France métropolitaine est découpée en 432 RA (hors Paris).
+
+La PRA est constituée par le croisement du département et de la RA. On compte 713 PRA.
+
+Afin d’étudier l’évolution de l’agriculture, il était nécessaire de disposer d’un découpage stable de la France en unités aussi homogènes que possible du point de vue agricole, en s’affranchissant des découpages administratifs. Largement inspirées des régions géographiques, les RA et PRA ont une taille intermédiaire entre la commune (zone trop petite pour présenter des résultats) et le département (zone trop hétérogène).
+
+On a un shapefiles au niveau d'un maillage SAFRAN mais aussi un autre document qui associe à chaque commune le code PRA et RA : il ne nous reste plus qu'à fusionner selon le code PRA !
+
+```{r pra+com shp}
+
+pra <- pra_shp %>%
+  select(PRA_Code, AreaPRA, geometry) %>%
+  unique() %>%
+  full_join(pra_com, by = "PRA_Code") %>%
+  select(CODGEO, LIBGEO, DEP, REG, RA_Code, PRA_Code, PRA_Lib, geometry) %>%
+  filter(!is.na(PRA_Code))
+
+# ggplot(pra) +
+  # geom_sf(fill = "#6794A7", color = "#014D64", alpha = .6) +
+  # theme_void()
+
+```
+
+
+```{r sauvegarde de fichiers, eval = F}
+
+# 1. On ouvre le fichier (choisis le nom)
+png("data/final/pra_map.png", width = 2000, height = 1500, res = 300)
+
+# 2. On lance la fonction du graphique
+ggplot(pra) +
+  geom_sf(fill = "#6794A7", color = "#014D64", alpha = .6) +
+  theme_void()
+
+# 3. On ferme le fichier (INDISPENSABLE pour que le fichier soit créé)
+dev.off()
+```
+On recoupe maintenant avec les données du RPG :
+
+```{r}
+
+RPG_pra <- pra %>% 
+  rename(name = "LIBGEO") %>%
+  full_join(RPG, by = "name", relationship = "many-to-many") %>%
+  mutate(year = as.numeric(year))
+```
+
+## Chanvre et lin
+
+```{r Taux de croissance}
+
+# Pour le groupe 9 : chanvre et lin textile
+
+RPG_pra9 <- RPG_pra %>%
+  filter(CODE_GROUP == "9") %>%
+  group_by(year, PRA_Code) %>%
+  mutate(mean_perc = mean(surf_code_group_perc),
+         mean_surf = mean(surf_code_group_m2),
+         mean_surf = as.numeric(substr(mean_surf, 1, 9)),
+         mean_perc = as.numeric(substr(mean_perc, 1, 9))) %>%
+  ungroup()
+
+
+df_pra9 <- RPG_pra9 %>%
+  filter(mean_surf > 0) %>%
+  select(year, PRA_Code, PRA_Lib, mean_perc, mean_surf) %>%
+  unique() %>%
+  arrange(year, PRA_Code) %>%
+  group_by(PRA_Code) %>%
+  mutate(tc_perc = (mean_perc - lag(mean_perc))/lag(mean_perc) * 100,
+         tc_surf = (mean_surf - lag(mean_surf))/lag(mean_surf) * 100) %>%
+  mutate(n_years = max(year) - min(year),
+         tcam_surf = ((last(mean_surf) / first(mean_surf))^(1 / n_years) - 1) * 100, 
+         tcam_perc = ((last(mean_perc) / first(mean_perc))^(1 / n_years) - 1) * 100) %>%
+  ungroup()
+
+taux_perc_9_pra <- df_pra9 %>% 
+  select(PRA_Code, PRA_Lib, tcam_perc) %>% 
+  arrange(-tcam_perc) %>%
+  group_by(PRA_Code) %>%
+  mutate(n = n()) %>%
+  filter(n > 5) %>%
+  unique()
+
+top_perc9 <- head(taux_perc_9_pra, 100)
+
+taux_surf_9_pra <- df_pra9 %>% 
+  select(PRA_Code, PRA_Lib, tcam_surf) %>%
+  arrange(-tcam_surf) %>%
+  group_by(PRA_Code) %>%
+  mutate(n = n()) %>%
+  filter(n > 5) %>%
+  unique()
+
+top_surf9 <- head(taux_surf_9_pra, 100)
+
+# Extraire les PRA en commun :
+
+pra_communs_9 <- intersect(top_surf9$PRA_Code, top_perc9$PRA_Code)
+
+
+# Pour le groupe 7 : chanvre oléagineux, lin non textile, soja et autres oléagineux
+
+RPG_pra7 <- RPG_pra %>%
+  filter(CODE_GROUP == "7") %>%
+  group_by(year, PRA_Code) %>%
+  mutate(mean_perc = mean(surf_code_group_perc),
+         mean_surf = mean(surf_code_group_m2),
+         mean_perc = as.numeric(substr(mean_perc, 1, 9)),
+         mean_surf = as.numeric(substr(mean_surf, 1, 9))) %>%
+  ungroup()
+
+df_pra7 <- RPG_pra7 %>%
+  filter(mean_surf > 0) %>%
+  select(year, PRA_Code, PRA_Lib, mean_perc, mean_surf) %>%
+  unique() %>%
+  arrange(year, PRA_Code) %>%
+  group_by(PRA_Code) %>%
+  mutate(tc_perc = (mean_perc - lag(mean_perc))/lag(mean_perc) * 100,
+         tc_surf = (mean_surf - lag(mean_surf))/lag(mean_surf) * 100) %>%
+  mutate(n_years = max(year) - min(year),
+         tcam_surf = ((last(mean_surf) / first(mean_surf))^(1 / n_years) - 1) * 100, 
+         tcam_perc = ((last(mean_perc) / first(mean_perc))^(1 / n_years) - 1) * 100) %>%
+  ungroup()
+
+taux_perc_7_pra <- df_pra7 %>% 
+  select(PRA_Code, PRA_Lib, tcam_perc) %>% 
+  arrange(-tcam_perc) %>%
+  group_by(PRA_Code) %>%
+  mutate(n = n()) %>%
+  filter(n > 5) %>%
+  unique()
+
+top_perc7 <- head(taux_perc_7_pra, 100)
+
+taux_surf_7_pra <- df_pra7 %>% 
+  select(PRA_Code, PRA_Lib, tcam_surf) %>%
+  arrange(-tcam_surf) %>%
+  group_by(PRA_Code) %>%
+  mutate(n = n()) %>%
+  filter(n > 5) %>%
+  unique()
+
+top_surf7 <- head(taux_surf_7_pra, 100)
+
+# Extraire les PRA en commun :
+
+pra_communs_7 <- intersect(top_surf7$PRA_Code, top_perc7$PRA_Code)
+
+```
+
+Pour le groupe de culture 7, on retrouve en commun  les PRA suivantes : Hurepoix, Vallée de l'Isle, Haut-Embrunais, Polders du Mont-St-Michel, Plateau Lorrain Nord, Vic-Bihl et Saintonge Agricole.
+
+Pour le groupe de culture 9, on retrouve en commun (top15) les PRA suivantes : Haut-Limousin, Perche, Haut Bugey, Cluse de Chambéry, Woevre, Périphérie des Domes, Vallée du Grésivaudan et Blayais.
+
+```{r carte chanvre & lin}
+
+ch_lin_pra <- pra %>%
+  mutate(top = case_when(PRA_Code %in% pra_communs_7 ~ "7",
+                         PRA_Code %in% pra_communs_9 ~ "9",
+                         !(PRA_Code %in% c(pra_communs_7, pra_communs_9)) ~ "Aucun"))
+
+ggplot(ch_lin_pra) +
+  geom_sf(aes(fill = top, geometry = geometry)) +
+  theme_minimal() + 
+  labs(title = "PRA ayant le plus adopté le lin et le chanvre", 
+      fill = "Top selon le groupe de culture") + 
+  scale_fill_manual(values = c("#1982C4", "maroon2", "forestgreen", "#FFCA3A")) + 
+  theme(axis.text = element_blank(),
+        axis.ticks = element_blank(),
+        panel.grid = element_blank()) 
+
+```
+
+## Betterave
+
+```{r Taux de croissance betterave}
+
+# Betterave c'est le groupe 24 (pour l'instant)
+
+RPG_pra24 <- RPG_pra %>%
+  filter(CODE_GROUP == "24") %>%
+  group_by(year, PRA_Code) %>%
+  mutate(mean_perc = mean(surf_code_group_perc),
+         mean_surf = mean(surf_code_group_m2),
+         mean_surf = as.numeric(substr(mean_surf, 1, 9)),
+         mean_perc = as.numeric(substr(mean_perc, 1, 9))) %>%
+  ungroup()
+
+
+df_pra24 <- RPG_pra24 %>%
+  filter(mean_surf > 0) %>%
+  select(year, PRA_Code, PRA_Lib, mean_perc, mean_surf) %>%
+  unique() %>%
+  arrange(year, PRA_Code) %>%
+  group_by(PRA_Code) %>%
+  mutate(tc_perc = (mean_perc - lag(mean_perc))/lag(mean_perc) * 100,
+         tc_surf = (mean_surf - lag(mean_surf))/lag(mean_surf) * 100) %>%
+  mutate(n_years = max(year) - min(year),
+         tcam_surf = ((last(mean_surf) / first(mean_surf))^(1 / n_years) - 1) * 100, 
+         tcam_perc = ((last(mean_perc) / first(mean_perc))^(1 / n_years) - 1) * 100) %>%
+  ungroup()
+
+taux_perc_24_pra <- df_pra24 %>% 
+  select(PRA_Code, PRA_Lib, tcam_perc) %>% 
+  arrange(-tcam_perc) %>%
+  group_by(PRA_Code) %>%
+  mutate(n = n()) %>%
+  filter(n > 5) %>%
+  unique()
+
+top_perc24 <- head(taux_perc_24_pra, 100)
+
+taux_surf_24_pra <- df_pra24 %>% 
+  select(PRA_Code, PRA_Lib, tcam_surf) %>%
+  arrange(-tcam_surf) %>%
+  group_by(PRA_Code) %>%
+  mutate(n = n()) %>%
+  filter(n > 5) %>%
+  unique()
+
+top_surf24 <- head(taux_surf_24_pra, 100)
+
+# Extraire les PRA en commun :
+
+pra_communs_24 <- intersect(top_surf24$PRA_Code, top_perc24$PRA_Code)
+```
+
+D'où la carte suivante pour mieux visualiser :
+
+```{r carte betterave}
+
+bet_pra <- pra %>%
+  mutate(top = ifelse(PRA_Code %in% pra_communs_24, "Oui", "Non"))
+
+ggplot(bet_pra) +
+  geom_sf(aes(fill = top, geometry = geometry)) +
+  theme_minimal() + 
+  labs(title = "PRA ayant le plus adopté le groupe de culture de la betterave", 
+      fill = "Top") + 
+  scale_fill_manual(values = c("#FFCA3A", "violetred3")) + 
+  theme(axis.text = element_blank(),
+        axis.ticks = element_blank(),
+        panel.grid = element_blank()) 
+
+```
+
