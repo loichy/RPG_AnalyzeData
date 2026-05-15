@@ -61,12 +61,10 @@ Afin d’étudier l’évolution de l’agriculture, il était nécessaire de di
 ```{r sauvegarde de fichiers, eval = F}
 
 # 1. On ouvre le fichier (choisis le nom)
-png("data/final/pra_map.png", width = 2000, height = 1500, res = 300)
+png("data/final/lin_evo2.png", width = 2000, height = 1500, res = 300)
 
 # 2. On lance la fonction du graphique
-ggplot(pra) +
-  geom_sf(fill = "#6794A7", color = "#014D64", alpha = .6) +
-  theme_void()
+print(final_plot_lin$final_plot)
 
 # 3. On ferme le fichier (INDISPENSABLE pour que le fichier soit créé)
 dev.off()
@@ -214,13 +212,18 @@ analyse_culture <- function(data){
 ## Développement de l'axe : "taux de présence" pour la carte bivariée
 
 ajout_presence <- function(resultats_analyse, norm_year){
-  resultats_analyse %>%
+  
+  pra %>%
+    select(PRA_Code, PRA_Lib, geometry) %>% # Rajout des PRA manquantes
+    left_join(st_drop_geometry(resultats_analyse %>% 
     group_by(PRA_Code) %>%
     mutate(
       start_perc = mean_perc[year == norm_year][1], # Pour normaliser
       start_surf = mean_surf[year == norm_year][1]
     ) %>%
-    ungroup()
+    ungroup()), 
+    by = "PRA_Code") %>%
+    unique()
 }
 
 
@@ -229,19 +232,27 @@ ajout_presence <- function(resultats_analyse, norm_year){
 carte_biv <- function(df_culture, nom){
   
   # On veut normaliser la carte à la moyenne française :
-  moyenne_presence <- mean(df_culture$mean_perc)
+  moyenne_presence <- mean(df_culture$start_perc, na.rm = T)
+  
+  # On sépare les données en deux groupes : sous la moyenne et au-dessus
+  sous_moy <- df_bet_culture$start_perc[df_bet_culture$start_perc < moyenne_presence]
+sur_moy <- df_bet_culture$start_perc[df_bet_culture$start_perc >= moyenne_presence]
+
+  # On fait de même avec l'axe des TCAM
+tcam_neg <- df_bet_culture$tcam_perc[df_bet_culture$tcam_perc < 0]
+tcam_pos <- df_bet_culture$tcam_perc[df_bet_culture$tcam_perc > 0]
 
   # On fait ici ce que bi_class() est censé faire pour normaliser
   # 1. Créer les catégories pour le TCAM (Axe X)
 
   x_cat <- cut(df_culture$tcam_perc, 
-             breaks = c(-Inf, -0.005, 0.005, Inf), 
+             breaks = c(-Inf, median(tcam_neg, na.rm = TRUE), median(tcam_pos, na.rm = TRUE), Inf), 
              labels = c("1", "2", "3"))
 
   # 2. Créer les catégories pour la Présence (Axe Y)
 
   y_cat <- cut(df_culture$start_perc, 
-             breaks = c(-Inf, moyenne_presence * 0.8, moyenne_presence * 1.2, Inf), 
+             breaks = c(-Inf, median(sous_moy, na.rm = TRUE), median(sur_moy, na.rm = TRUE), Inf), 
              labels = c("1", "2", "3"))
 
   # 3. Combiner les deux pour créer la colonne bi_class formatée pour biscale
@@ -256,15 +267,15 @@ carte_biv <- function(df_culture, nom){
   # Et on trace la carte 
 
   map <- ggplot() +
-  geom_sf(data = biv_map, aes(fill = bi_class), color = "white", size = 0.1, show.legend = FALSE) +
-  bi_scale_fill(pal = "DkViolet", dim = 3) + # Utilisez votre palette préférée
+  geom_sf(data = biv_map, aes(fill = bi_class), color = "black", size = 0.1, show.legend = FALSE) +
+  bi_scale_fill(pal = "DkViolet", dim = 3, na.value = "white") + # Utilisez votre palette préférée
   labs(subtitle = paste0("Evolution de la culture ", nom)) +
   bi_theme()
 
 legend <- bi_legend(pal = "DkViolet",
                     dim = 3,
                     xlab = "TCAM", # Pivot zéro
-                    ylab = "% Présence", # Pivot moyenne (2015)
+                    ylab = "% Présence au départ", # Pivot moyenne (2015)
                     size = 8)
 
 final_plot <- ggdraw() +
@@ -273,7 +284,7 @@ final_plot <- ggdraw() +
 
   # On retourne la carte finale
   return(list(final_plot = final_plot,
-              moyenne = moyenne_presence,
+              biv_map = biv_map,
               x_breaks = x_cat,
               y_breaks = y_cat
               ))
@@ -314,7 +325,7 @@ CHV_pra <- culture_pra(RPG_CULT_pra, c("CHV"))
 
 resultats_chv_culture <- analyse_culture(CHV_pra)$df_complet
 
-df_chv_culture <- ajout_presence(resultats_chv_culture, 2015)
+df_chv_culture <- ajout_presence(resultats_chv_culture, 2015) 
 
 ```
 
@@ -358,7 +369,7 @@ Le développement de la filière bettavière dans le Grand-Est pourrait être li
 
 
 
-# Des indices de biodiversité (à mettre à jour)
+# Des indices de biodiversité 
 
 ## Indice de Shannon (1949)
 
@@ -381,14 +392,25 @@ Plus concrètement, l'indice de Simpson D est la probabilité deux individus cho
 
 # Il faut un format wide des données avec uniquement les surfaces de chaque groupe de culture pour calculer ces indices grâce à la fonction diversity du package vegan
 
-# On passe au format wide
+# On calcule par PRA
 
-RPG_wide_surf <- RPG %>%
-  select(year, insee, name, CODE_GROUP, surf_agri_geo_unit_m2, surf_code_group_m2) %>%
-  mutate(surf_code_group_m2 = as.numeric(surf_code_group_m2),
-         surf_agri_geo_unit_m2 = as.numeric(surf_agri_geo_unit_m2)) %>%
+PRA_cult <- RPG_CULT_pra %>%
+  select(PRA_Code, PRA_Lib, geometry, year, CODE_CULTU, surf_cult_m2) %>%
+  group_by(year, PRA_Code, CODE_CULTU) %>% # + par culture si non filtré
+    mutate(
+      surf_cult = sum(surf_cult_m2)
+      ) %>% 
+  ungroup() %>%
+  select(!c(surf_cult_m2))
+
+RPG_wide_pra <- PRA_cult %>%
+  select(year, insee, name, CODE_CULTU, surf_tot_geo_unit_m2, surf_agri_geo_unit_m2, surf_code_group_m2) %>%
+  mutate(
+    surf_code_group_m2 = as.numeric(surf_code_group_m2),
+    surf_agri_geo_unit_m2 = as.numeric(surf_agri_geo_unit_m2)
+    ) %>%
   pivot_wider(id_cols = c(year, insee, name, surf_agri_geo_unit_m2,),
-              names_from = CODE_GROUP,
+              names_from = CODE_CULTU,
               values_from = surf_code_group_m2,
               names_prefix = "surf_code_group_") %>%
   mutate(across(starts_with("surf_code_group_"), ~ replace_na(., 0)),
