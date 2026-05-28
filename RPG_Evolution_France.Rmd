@@ -17,7 +17,7 @@ gc()
 
 # Load package
 if (!require("pacman")) install.packages("pacman")
-pacman::p_load(tidyverse, data.table, here, sf, tmap, units, knitr, kableExtra, plotly, viridis, shiny, vegan, paletteer, readxl, biscale, cowplot)
+pacman::p_load(tidyverse, data.table, here, sf, tmap, units, knitr, kableExtra, plotly, viridis, shiny, vegan, paletteer, readxl, biscale, cowplot, rstatix)
 
 # List directories 
 dir <- list()
@@ -36,7 +36,7 @@ lapply(dir, function(i) dir.create(i, recursive = T, showWarnings = F))
 
 ```{r load data, include=FALSE}
 
-RPG_GROUP <- readRDS(here(dir$raw, "RPG_Aggregated_GROUP.rds"))
+# RPG_GROUP <- readRDS(here(dir$raw, "RPG_Aggregated_GROUP.rds"))
 RPG_CULT <- readRDS(here(dir$raw, "RPG_Aggregated_CULT.rds"))
 
 # RPG_wide <- readRDS(here(dir$raw, "RPG_Aggregated_All_wide.rds"))
@@ -44,6 +44,7 @@ RPG_CULT <- readRDS(here(dir$raw, "RPG_Aggregated_CULT.rds"))
 pra_shp <- read_sf(here(dir$shapefiles, "pra_shp/CommunePra_SFWGS84_WithCell.shp"))
 
 pra_com <- read_xls(here(dir$raw, "Referentiel_CommuneRA_PRA_2017.xls"), skip = 5)
+
 ```
 
 
@@ -61,10 +62,10 @@ Afin d’étudier l’évolution de l’agriculture, il était nécessaire de di
 ```{r sauvegarde de fichiers, eval = F}
 
 # 1. On ouvre le fichier (choisis le nom)
-png("data/final/lin_evo2.png", width = 2000, height = 1500, res = 300)
+png("data/final/shannon_evo.png", width = 2000, height = 1500, res = 300)
 
 # 2. On lance la fonction du graphique
-print(final_plot_lin$final_plot)
+print(final_plot_shannon$final_plot)
 
 # 3. On ferme le fichier (INDISPENSABLE pour que le fichier soit créé)
 dev.off()
@@ -97,10 +98,10 @@ On trouve 714 PRA présents avant même la fusion des données alors qu'en ligne
 ```{r pra+com shp}
 
 pra <- pra_shp %>%
-  select(PRA_Code, geometry) %>%
+  select(PRA_Code, ) %>%
   unique() %>%
   full_join(pra_com, by = "PRA_Code") %>%
-  select(CODGEO, LIBGEO, PRA_Code, PRA_Lib, geometry) %>%
+  select(CODGEO, LIBGEO, PRA_Code, PRA_Lib, ) %>%
   filter(!is.na(PRA_Code))
 
 # ggplot(pra) +
@@ -117,7 +118,34 @@ RPG_CULT_pra <- pra %>%
   mutate(year = as.numeric(year)) %>%
   select(!c(data_type, name, region_code, dept_code))
 
-test5 <- RPG_CULT_pra %>% filter(insee == "50129")
+
+# Pour avoir le nombre de parcelles par PRA :
+
+nb_parcel <- RPG_CULT_pra %>%
+  st_drop_geometry() %>%
+  select(insee, PRA_Code, year, N_Parcels) %>%
+  unique() %>%
+  group_by(PRA_Code, year) %>%
+  mutate(n_parcels = sum(N_Parcels)) %>%
+  select(PRA_Code, year, n_parcels) %>%
+  unique() %>%
+  filter(!is.na(year))
+
+# test <- RPG_CULT_pra %>%
+#   st_drop_geometry() %>%
+#   select(PRA_Code, year, CODE_CULTU, parcel_cult_n) %>%
+#   full_join(nb_parcel, by = c("year", "PRA_Code")) %>%
+#   group_by(year, PRA_Code, CODE_CULTU) %>% # + par culture si non filtré
+#   mutate(n_parcels_cult = sum(parcel_cult_n)) %>% 
+#   ungroup() %>% 
+#   mutate(mean_perc = as.numeric(n_parcels_cult / n_parcels))
+# 
+# test2 <- test %>%
+#   select(PRA_Code, year, CODE_CULTU, mean_perc) %>%
+#   unique() %>%
+#   group_by(year, PRA_Code) %>%
+#   mutate(somme = sum(mean_perc))
+
 ```
 
 
@@ -150,62 +178,29 @@ analyse_culture <- function(data){
   # 1. Filtrage et calculs initiaux
   
   rpg_filtre <- data %>%
+    full_join(nb_parcel, by = c("year", "PRA_Code")) %>%
     group_by(year, PRA_Code) %>% # + par culture si non filtré
-    mutate(
-        surf_cult = sum(surf_cult_m2),
-        surf_agri = sum(surf_agri_geo_unit_m2),
-        n_parcels = sum(N_Parcels),
-        n_parcels_cult = sum(parcel_cult_n)
-    ) %>% 
-  ungroup() %>% 
-  mutate(
-         mean_surf = as.numeric(surf_cult / surf_agri),
-         mean_perc = as.numeric(n_parcels_cult / n_parcels)
-           ) 
+    mutate(n_parcels_cult = sum(parcel_cult_n)) %>% 
+    ungroup() %>%
+    mutate(mean_perc = as.numeric(n_parcels_cult / n_parcels)) 
   
   # 2. Calcul des TCAM
   
   df_pra <- rpg_filtre %>%
-    filter(mean_surf > 0) %>%
-    select(year, PRA_Code, PRA_Lib, mean_perc, mean_surf) %>%
+    select(year, PRA_Code, PRA_Lib, mean_perc) %>%
     unique() %>%
     arrange(year, PRA_Code) %>%
     group_by(PRA_Code) %>%
     mutate(
       tc_perc = (mean_perc - lag(mean_perc))/lag(mean_perc) * 100,
-      tc_surf = (mean_surf - lag(mean_surf))/lag(mean_surf) * 100,
       n_years = max(year) - min(year),
-      tcam_surf = ((last(mean_surf) / first(mean_surf))^(1 / n_years) - 1) * 100, 
       tcam_perc = ((last(mean_perc) / first(mean_perc))^(1 / n_years) - 1) * 100
       ) %>%
     ungroup()
   
-  # 3. Top des TCAM
-  
-  calculer_top <- function(df, quel_tcam){
-    df %>%
-      select(PRA_Code, PRA_Lib, !!sym(quel_tcam)) %>%
-      arrange(desc(!!sym(quel_tcam))) %>%
-      group_by(PRA_Code) %>%
-      mutate(n = n()) %>%
-      filter(n > 5) %>%
-      distinct() %>%
-      head(100)
-  }
-  
-  top_perc <- calculer_top(df_pra, "tcam_perc")
-  top_surf <- calculer_top(df_pra, "tcam_surf")
-  
-  # 4. Extraction des PRA communs
-  pra_communs <- intersect(top_surf$PRA_Code, top_perc$PRA_Code)
 
-  # On retourne une liste contenant tous les résultats importants
-  return(list(
-    df_complet = df_pra,
-    top_perc = top_perc,
-    top_surf = top_surf,
-    pra_communs = pra_communs
-  ))
+  # On les résultats importants
+  return(df_complet = df_pra)
 }
 
 
@@ -214,15 +209,14 @@ analyse_culture <- function(data){
 ajout_presence <- function(resultats_analyse, norm_year){
   
   pra %>%
-    select(PRA_Code, PRA_Lib, geometry) %>% # Rajout des PRA manquantes
+    select(PRA_Code, PRA_Lib, ) %>% # Rajout des PRA manquantes
     left_join(st_drop_geometry(resultats_analyse %>% 
     group_by(PRA_Code) %>%
     mutate(
-      start_perc = mean_perc[year == norm_year][1], # Pour normaliser
-      start_surf = mean_surf[year == norm_year][1]
+      start_perc = mean_perc[year == norm_year][1] # Pour normaliser
     ) %>%
     ungroup()), 
-    by = "PRA_Code") %>%
+    by = "PRA_Code", relationship = "many-to-many") %>%
     unique()
 }
 
@@ -231,40 +225,48 @@ ajout_presence <- function(resultats_analyse, norm_year){
 
 carte_biv <- function(df_culture, nom){
   
-  # On veut normaliser la carte à la moyenne française :
+  # 1. Préparation des données (normalisation à la moyenne)
   moyenne_presence <- mean(df_culture$start_perc, na.rm = T)
+  moyenne_tcam <- mean(df_culture$tcam_perc, na.rm = T)
   
-  # On sépare les données en deux groupes : sous la moyenne et au-dessus
-  sous_moy <- df_bet_culture$start_perc[df_bet_culture$start_perc < moyenne_presence]
-sur_moy <- df_bet_culture$start_perc[df_bet_culture$start_perc >= moyenne_presence]
+  df_culture$dev_start_perc <- df_culture$start_perc - moyenne_presence
+  df_culture$dev_tcam_perc <- df_culture$tcam_perc - moyenne_tcam
+  
+  tercile_start_perc <- quantile(df_culture$dev_start_perc, c(0.333,0.666), na.rm = T)
+  tercile_tcam_perc <- quantile(df_culture$dev_tcam_perc, c(0.333, 0.666), na.rm = T)
+  
 
-  # On fait de même avec l'axe des TCAM
-tcam_neg <- df_bet_culture$tcam_perc[df_bet_culture$tcam_perc < 0]
-tcam_pos <- df_bet_culture$tcam_perc[df_bet_culture$tcam_perc > 0]
+  # 2. On définit les catégories
 
-  # On fait ici ce que bi_class() est censé faire pour normaliser
-  # 1. Créer les catégories pour le TCAM (Axe X)
-
-  x_cat <- cut(df_culture$tcam_perc, 
-             breaks = c(-Inf, median(tcam_neg, na.rm = TRUE), median(tcam_pos, na.rm = TRUE), Inf), 
+  df_culture$x_cat <- cut(df_culture$dev_tcam_perc, 
+             breaks = c(-Inf, tercile_tcam_perc, Inf), 
              labels = c("1", "2", "3"))
+  
+  df_culture$x_cat2 <- cut(df_culture$dev_tcam_perc,
+             breaks = c(-Inf, tercile_tcam_perc, Inf),
+             labels = c(
+               paste0("Sous ", 100*round(tercile_tcam_perc[1],3), "%"), 
+               "Entre", 
+               paste0("Au-dessus ", 100*round(tercile_tcam_perc[2],3), "%")))
 
-  # 2. Créer les catégories pour la Présence (Axe Y)
-
-  y_cat <- cut(df_culture$start_perc, 
-             breaks = c(-Inf, median(sous_moy, na.rm = TRUE), median(sur_moy, na.rm = TRUE), Inf), 
+  df_culture$y_cat <- cut(df_culture$dev_start_perc,
+             breaks = c(-Inf, tercile_start_perc, Inf),
              labels = c("1", "2", "3"))
-
-  # 3. Combiner les deux pour créer la colonne bi_class formatée pour biscale
-
+  
+  df_culture$y_cat2 <- cut(df_culture$dev_start_perc,
+             breaks = c(-Inf, tercile_start_perc, Inf),
+             labels = c(
+               paste0("Sous ", 100*round(tercile_start_perc[1],3), "%"), 
+               "Entre", 
+               paste0("Au-dessus ", 100*round(tercile_start_perc[2],3), "%")))
+  
   biv_map <- df_culture %>%
-    mutate(bi_class = paste0(x_cat, "-", y_cat))
+    mutate(bi_class = paste0(df_culture$x_cat, "-", df_culture$y_cat))
 
-  # Si certaines zones n'ont pas de données (NA), on les gère
-  biv_map$bi_class[is.na(x_cat) | is.na(y_cat)] <- NA
+  biv_map$bi_class[is.na(df_culture$x_cat) | is.na(df_culture$y_cat)] <- NA
 
 
-  # Et on trace la carte 
+  # 3. Tracé de la carte
 
   map <- ggplot() +
   geom_sf(data = biv_map, aes(fill = bi_class), color = "black", size = 0.1, show.legend = FALSE) +
@@ -272,11 +274,24 @@ tcam_pos <- df_bet_culture$tcam_perc[df_bet_culture$tcam_perc > 0]
   labs(subtitle = paste0("Evolution de la culture ", nom)) +
   bi_theme()
 
+  # --- Préparation des labels personnalisés pour la légende ---
+  
+  tcam_b1 <- round(100 * tercile_tcam_perc[1], 1)
+  tcam_b2 <- round(100 * tercile_tcam_perc[2], 1)
+  
+  pres_b1 <- round(100 * tercile_start_perc[1], 1)
+  pres_b2 <- round(100 * tercile_start_perc[2], 1)
+  
+  # Construction de chaînes de caractères explicites avec flèches
+  
+  lab_x <- paste0("TCAM (", tcam_b1, "% / ", tcam_b2, "%)")
+  lab_y <- paste0("Déviation à la présence au départ (", pres_b1, "% / ", pres_b2, "%)")
+
 legend <- bi_legend(pal = "DkViolet",
                     dim = 3,
-                    xlab = "TCAM", # Pivot zéro
-                    ylab = "% Présence au départ", # Pivot moyenne (2015)
-                    size = 8)
+                    xlab = lab_x, # Pivot moyenne
+                    ylab = lab_y, # Pivot moyenne 
+                    size = 5)
 
 final_plot <- ggdraw() +
   draw_plot(map, 0, 0, 1, 1) +
@@ -285,8 +300,7 @@ final_plot <- ggdraw() +
   # On retourne la carte finale
   return(list(final_plot = final_plot,
               biv_map = biv_map,
-              x_breaks = x_cat,
-              y_breaks = y_cat
+              df_culture = df_culture
               ))
 }
 ```
@@ -299,7 +313,7 @@ Commençons par le lin : LIH, LIP et LIF : on va sommer les valeurs pour avoir L
 
 LIN_pra <- culture_pra(RPG_CULT_pra, c("LIH", "LIP", "LIF"))
 
-resultats_lin_culture <- analyse_culture(LIN_pra)$df_complet
+resultats_lin_culture <- analyse_culture(LIN_pra)
 
 df_lin_culture <- ajout_presence(resultats_lin_culture, 2015)
 
@@ -323,7 +337,7 @@ On peut continuer avec le chanvre qui n'a qu'une seule culture : CHV (9)
 
 CHV_pra <- culture_pra(RPG_CULT_pra, c("CHV"))
 
-resultats_chv_culture <- analyse_culture(CHV_pra)$df_complet
+resultats_chv_culture <- analyse_culture(CHV_pra)
 
 df_chv_culture <- ajout_presence(resultats_chv_culture, 2015) 
 
@@ -347,7 +361,7 @@ On fait la même chose pour la betterave : BVF et BTN
 
 BET_pra <- culture_pra(RPG_CULT_pra, c("BVF", "BTN"))
   
-resultats_bet_culture <- analyse_culture(BET_pra)$df_complet
+resultats_bet_culture <- analyse_culture(BET_pra)
 
 df_bet_culture <- ajout_presence(resultats_bet_culture, 2015)
 
@@ -362,11 +376,6 @@ final_plot_bet <- carte_biv(df_bet_culture, "de la betterave")
 print(final_plot_bet$final_plot)
 
 ```
-
-Le développement de la filière bettavière dans le Grand-Est pourrait être lié au développement de groupes sucriers tels que _Cristal Union_ : née de la fusion de trois coopératives du Grand-Est et d'une du Centre-Val de Loire en l'an 2000, l'entreprise a ensuite fusionné avec Erstein (Bas-Rhin) en 2007 et s'élargit en 2012 en intégrant d'autres sucreries localisées dans les Hauts-de-France, Centre-Val de Loire, Normandie et Puy-de-Dôme. 
---> Se renseigner sur la fin de ces quotas européens en 2017 !
-
-
 
 
 # Des indices de biodiversité 
@@ -386,59 +395,280 @@ Si Shannon donne un aperçu de l'uniformité de la diversité sur une parcelle, 
 Plus concrètement, l'indice de Simpson D est la probabilité deux individus choisis au hasard soient de la même espèce : c'est pour cela qu'il prend des valeurs allant de 0 à 1. Ainsi, un $D$ grand signifie qu'une espèce est dominante. C'est pour cette raison que certains auteurs interprètent l'indice $1-D$ : plus il est grand, plus il y a de la diversité. Le package utilisé ici calcule justement $1-D$.
 
 
-## Calcul des indices (à mettre à jour si utilisé)
+## Calcul des indices 
 
-```{r prep index, eval = F}
+```{r prep index}
 
 # Il faut un format wide des données avec uniquement les surfaces de chaque groupe de culture pour calculer ces indices grâce à la fonction diversity du package vegan
 
 # On calcule par PRA
-
 PRA_cult <- RPG_CULT_pra %>%
-  select(PRA_Code, PRA_Lib, geometry, year, CODE_CULTU, surf_cult_m2) %>%
+  select(PRA_Code, PRA_Lib, , year, CODE_CULTU, surf_cult_m2) %>%
   group_by(year, PRA_Code, CODE_CULTU) %>% # + par culture si non filtré
     mutate(
       surf_cult = sum(surf_cult_m2)
       ) %>% 
   ungroup() %>%
-  select(!c(surf_cult_m2))
-
-RPG_wide_pra <- PRA_cult %>%
-  select(year, insee, name, CODE_CULTU, surf_tot_geo_unit_m2, surf_agri_geo_unit_m2, surf_code_group_m2) %>%
-  mutate(
-    surf_code_group_m2 = as.numeric(surf_code_group_m2),
-    surf_agri_geo_unit_m2 = as.numeric(surf_agri_geo_unit_m2)
-    ) %>%
-  pivot_wider(id_cols = c(year, insee, name, surf_agri_geo_unit_m2,),
-              names_from = CODE_CULTU,
-              values_from = surf_code_group_m2,
-              names_prefix = "surf_code_group_") %>%
-  mutate(across(starts_with("surf_code_group_"), ~ replace_na(., 0)),
-         departement = substr(insee, 1, 2))
-
-# On isole uniquement les colonnes de cultures 
-matrice_cultures <- RPG_wide_surf %>% 
-  select(starts_with("surf_code_group_"))
-
-# Calcul des indices
-RPG_wide_surf <- RPG_wide_surf %>%
-  mutate(
-    shannon = diversity(matrice_cultures, index = "shannon"),
-    simpson = diversity(matrice_cultures, index = "simpson"))
-
-# On va juste rajouter le nom des départements pour rendre les graphiques plus lisibles :
-
-nom_dep <- dep_shp %>% 
-  select(NOM_DEP, departement) %>%
-  st_drop_geometry() %>%
+  select(!c(surf_cult_m2)) %>%
   unique()
 
-RPG_wide_surf <- RPG_wide_surf %>%
-  left_join(nom_dep, by = "departement")
+# On passe au format wide pour avoir les infos par PRA et année
+RPG_wide_pra <- PRA_cult %>%
+  pivot_wider(id_cols = c(year, PRA_Code, PRA_Lib, ),
+              names_from = CODE_CULTU,
+              values_from = surf_cult,
+              names_prefix = "surf_cult_") %>%
+  filter(!is.na(year)) %>%
+   filter(!is.na(PRA_Code)) %>%
+  mutate(across(starts_with("surf_cult_"), ~ replace_na(., 0)))
 
-# Il y a des pb dans les données qui concernent cet échantillon :
+# On isole uniquement les colonnes de cultures 
+matrice_cultures <- RPG_wide_pra %>%
+  st_drop_geometry() %>%
+  select(starts_with("surf_cult_"))
 
-test2 <- RPG_wide_surf %>% filter(shannon == 0, simpson == 1)
+# Calcul des indices
+RPG_wide_pra <- RPG_wide_pra %>%
+  mutate(
+    shannon = diversity(matrice_cultures, index = "shannon"),
+    simpson = diversity(matrice_cultures, index = "simpson")
+    ) %>%
+  arrange(PRA_Code, year) %>%
+  group_by(PRA_Code) %>%
+  mutate(
+      n_years = max(year) - min(year),
+      tcam_shannon = ((last(shannon) / first(shannon))^(1 / n_years) - 1) * 100,
+      tcam_simpson = ((last(simpson) / first(simpson))^(1 / n_years) - 1) * 100
+      ) %>%
+  ungroup()
+```
 
+Faisons un tour de ces deux indices en s'intéressant à leurs statistiques descriptives pour les cultures au niveau des PRA
+
+```{r stat desc}
+
+RPG_wide_pra_2015 <- RPG_wide_pra %>%
+  filter(year == 2015) 
+
+RPG_wide_pra_2024 <- RPG_wide_pra %>%
+  filter(year == 2024)
+
+RPG_wide_pra_tcam <- RPG_wide_pra %>%
+  select(PRA_Code, tcam_shannon, tcam_simpson) %>%
+  unique()
+
+# shannon_2015 <- summary(RPG_wide_pra_2015$shannon)
+# shannon_2024 <- summary(RPG_wide_pra_2024$shannon)
+# shannon_tcam <- summary(RPG_wide_pra_tcam$tcam_shannon)
+# 
+# test <- as.data.frame(shannon_2015[c(1:6)])
+# 
+# simpson_2015 <- summary(RPG_wide_pra_2015$simpson)
+# simpson_2024 <- summary(RPG_wide_pra_2024$simpson)
+# simpson_tcam <- summary(RPG_wide_pra_tcam$tcam_simpson)
+
+stat_desc1 <- RPG_wide_pra_2015 %>%
+  st_drop_geometry() %>%
+  rename(shannon_2015 = shannon,
+         simpson_2015 = simpson) %>%
+  get_summary_stats(shannon_2015, simpson_2015)
+
+stat_desc2 <- RPG_wide_pra_2024 %>%
+  st_drop_geometry() %>%
+  rename(shannon_2024 = shannon,
+         simpson_2024 = simpson) %>%
+  get_summary_stats(shannon_2024, simpson_2024)
+
+stat_desc3 <- RPG_wide_pra_tcam %>%
+  st_drop_geometry() %>%
+  get_summary_stats(tcam_shannon, tcam_simpson)
+
+stat_desc <- full_join(stat_desc1, stat_desc2) %>%
+  full_join(stat_desc3) %>%
+  mutate(ordre = if_else(str_detect(variable, "shannon"), 1, 2)) %>%
+  arrange(ordre) %>%
+  select(variable, min, q1, median, mean, q3, max, sd)
+
+stat_desc %>%
+  kable(booktabs = T) %>%
+  kable_styling() %>%
+  pack_rows("Shannon", 1, 3) %>%
+  pack_rows("Simpson", 4, 6)
+```
+\begin{table}
+\centering
+\begin{tabular}{lrrrrrrr}
+\toprule
+ & Min & Q1 & Médiane & Moyenne & Q3 & Max & Ecart-type\\
+\midrule
+\addlinespace[0.3em]
+\multicolumn{8}{l}{\textbf{Shannon}}\\
+\hspace{1em}2015 & 0.119 & 1.689 & 2.092 & 2.000 & 2.370 & 3.271 & 0.548\\
+\hspace{1em}2024 & 0.000 & 1.613 & 2.115 & 1.953 & 2.385 & 3.202 & 0.617\\
+\hspace{1em}TCAM & -11.588 & -1.246 & -0.251 & -0.465 & 0.560 & 8.247 & 1.739\\
+\addlinespace[0.3em]
+\multicolumn{8}{l}{\textbf{Simpson}}\\
+\hspace{1em}2015 & 0.034 & 0.683 & 0.794 & 0.740 & 0.843 & 0.939 & 0.157\\
+\hspace{1em}2024 & 0.000 & 0.637 & 0.796 & 0.720 & 0.850 & 0.942 & 0.188\\
+\hspace{1em}TCAM & -15.075 & -0.883 & -0.074 & -0.494 & 0.446 & 11.155 & 1.864\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+
+
+Ici, on veut une analyse plus "qualitative" : 
+- Axe X : a diminué, stagné, augmenté
+- Axe Y : la déviation par rapport à la moyenne de valeur de départ 
+
+```{r fonction carte index}
+
+# Pour l'utiliser, il faut un RPG_wide ne contenant qu'un seul indice (shannon ou simpson)
+
+index_carte <- function(RPG_wide, nom){
+  
+  df_culture <- RPG_wide %>%
+    rename(index = starts_with(nom)) %>%
+    group_by(PRA_Code) %>%
+  mutate(
+    start = index[year == 2015][1]
+    ) %>%
+    ungroup()
+  
+  # 1. Préparation des données (normalisation à la moyenne)
+  moyenne_depart <- mean(df_culture$start, na.rm = T)
+  
+  df_culture$dev_start <- df_culture$start - moyenne_depart
+  df_culture$evolution <- df_culture$index - df_culture$start
+  
+  tercile_start <- quantile(df_culture$dev_start, c(0.333,0.666), na.rm = T)
+  tercile_evolution <- quantile(df_culture$evolution, c(0.333, 0.666), na.rm = T)
+
+  # 2. On définit les catégories
+
+  df_culture$x_cat <- cut(df_culture$evolution, 
+             breaks = c(-Inf, tercile_evolution, Inf), 
+             labels = c("1", "2", "3"))
+  
+  df_culture$x_cat2 <- cut(df_culture$evolution,
+             breaks = c(-Inf, tercile_evolution, Inf),
+             labels = c(
+               paste0("Sous ", tercile_evolution[1], "%"), 
+               "Entre", 
+               paste0("Au-dessus ", tercile_evolution[2], "%")))
+
+  df_culture$y_cat <- cut(df_culture$dev_start,
+             breaks = c(-Inf, tercile_start, Inf),
+             labels = c("1", "2", "3"))
+  
+  df_culture$y_cat2 <- cut(df_culture$dev_start,
+             breaks = c(-Inf, tercile_start, Inf),
+             labels = c(
+               paste0("Sous ", tercile_start[1], "%"), 
+               "Entre", 
+               paste0("Au-dessus ", tercile_start[2], "%")))
+  
+  biv_map <- df_culture %>%
+    mutate(bi_class = paste0(df_culture$x_cat, "-", df_culture$y_cat))
+
+  biv_map$bi_class[is.na(df_culture$x_cat) | is.na(df_culture$y_cat)] <- NA
+
+
+  # 3. Tracé de la carte
+
+  map <- ggplot() +
+  geom_sf(data = biv_map %>%
+            filter(year >= 2024), 
+          aes(fill = bi_class), color = "black", size = 0.1, show.legend = FALSE) +
+  bi_scale_fill(pal = "BlueYl", dim = 3, na.value = "white") + 
+  labs(subtitle = paste0("Evolution de l'indice de ", nom)) +
+  bi_theme()
+
+  # --- Préparation des labels personnalisés pour la légende ---
+  
+  tcam_b1 <- round(tercile_evolution[1], 3)
+  tcam_b2 <- round(tercile_evolution[2], 3)
+  
+  pres_b1 <- round(tercile_start[1], 3)
+  pres_b2 <- round(tercile_start[2], 3)
+  
+  # Construction de chaînes de caractères explicites avec flèches
+  
+  lab_x <- paste0("Evolution (", tcam_b1, " / ", tcam_b2, ")")
+  lab_y <- paste0("Déviation à la moyenne de départ (", pres_b1, " / ", pres_b2, ")")
+
+legend <- bi_legend(pal = "BlueYl",
+                    dim = 3,
+                    xlab = lab_x, # Pivot moyenne
+                    ylab = lab_y, # Pivot moyenne 
+                    size = 5)
+
+final_plot <- ggdraw() +
+  draw_plot(map, 0, 0, 1, 1) +
+  draw_plot(legend, 0.05, 0.05, 0.25, 0.25)
+
+  # On retourne la carte finale
+  return(list(final_plot = final_plot,
+              biv_map = biv_map,
+              df_culture = df_culture
+              ))
+}
+
+```
+
+
+```{r carte shannon}
+
+final_plot_shannon <- index_carte(RPG_wide_pra %>%
+                                    select(-simpson), 
+                                  nom = "shannon")
+
+print(final_plot_shannon$final_plot)
+
+```
+
+```{r carte simpson}
+
+final_plot_simpson <- index_carte(RPG_wide_pra %>%
+                                    select(-shannon), 
+                                  nom = "simpson")
+
+print(final_plot_simpson$final_plot)
+
+```
+
+Bleu (Bretagne notamment) : baisse de l'indice de shannon et stagnation de celui de simpson : c'est la disparition discrète d'espèces rares. Le milieu perd des espèces qui étaient déjà très peu représentées. Simpson ne remarque rien (les dominants sont inchangés), mais Shannon décline.
+
+On peut faire un tableau récapitulatif :
+
+```{r tableau récap indices}
+
+# Création des données
+
+df_indices <- data.frame(
+  Shannon = c("En hausse ($\\nearrow$)", "En baisse ($\\searrow$)", "Stable ($\\rightarrow$)", "Stable ($\\rightarrow$)", "En hausse ($\\nearrow$)", "En baisse ($\\searrow$)"),
+  Simpson = c("En hausse ($\\nearrow$)", "En baisse ($\\searrow$)", "En hausse ($\\nearrow$)", "En baisse ($\\searrow$)", "Stable ou en baisse", "Stable ($\\rightarrow$)"),
+  Interpretation = c(
+    "Amélioration globale de la biodiversité. Le milieu s'enrichit en nouvelles espèces et/ou les effectifs deviennent plus homogènes (baisse de la dominance).",
+    "Dégradation globale / Perturbation. Perte d'espèces (souvent les plus fragiles) et/ou installation d'une forte dominance par une ou deux espèces opportunistes.",
+    "Rééquilibrage des forces en présence. La richesse spécifique (nombre d'espèces) n'a pas changé, mais les espèces dominantes perdent du terrain au profit des autres, rendant le milieu plus équitable.",
+    "Début de monopolisation. Le nombre d'espèces reste identique, mais une ou deux espèces commencent à sur-dominer le milieu, réduisant l'équitabilité globale.",
+    "Arrivée d'espèces rares / colonisation discrète. De nouvelles espèces s'installent avec de très petits effectifs. Shannon le capte immédiatement (hausse), tandis que Simpson reste insensible car les espèces dominantes n'ont pas bougé.",
+    "Disparition discrète d'espèces rares. Le milieu perd des espèces qui étaient déjà très peu représentées. Simpson ne remarque rien (les dominants sont inchangés), mais Shannon décline."
+  )
+)
+
+# On génère le tableau stylisé
+
+kable(df_indices, 
+      col.names = c("Évolution de Shannon ($H'$)", "Évolution de Simpson ($1-D$)", "Interprétation écologique (Situation sur le terrain)"),
+      escape = FALSE, # Permet d'interpréter le LaTeX ($H'$) et le Markdown (**gras**)
+      align = c("l", "l", "l"),
+      caption = "Grille d'interprétation croisée des indices de Shannon et Simpson") %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"),
+                full_width = TRUE,
+                position = "center") %>%
+  column_spec(1, bold = TRUE, width = "4cm") %>%
+  column_spec(2, bold = TRUE, width = "4cm")
 ```
 
