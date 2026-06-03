@@ -61,13 +61,15 @@ pra_com <- read_xls(here(dir$raw, "Referentiel_CommuneRA_PRA_2017.xls"), skip = 
 
 RPG_CULT_pra <- pra_com %>% 
   rename(insee = "CODGEO") %>%
-  full_join(RPG_CULT, by = "insee", relationship = "many-to-many") %>%
+  right_join(RPG_CULT, by = "insee", relationship = "many-to-many") %>%
   mutate(year = as.numeric(year)) %>%
   select(!c(data_type, name, region_code, dept_code))
 
+# check <- RPG_GROUP_pra %>% filter(is.na(year))
+
 RPG_GROUP_pra <- pra_com %>% 
   rename(insee = "CODGEO") %>%
-  full_join(RPG_GROUP, by = "insee", relationship = "many-to-many") %>%
+  right_join(RPG_GROUP, by = "insee", relationship = "many-to-many") %>%
   mutate(year = as.numeric(year)) %>%
   select(!c(data_type, name, region_code))
 
@@ -86,7 +88,6 @@ RPG_GROUP_pra <- pra_com %>%
 
 
  agrreg_pra <- pra_insee_filtered %>%
-  filter(!is.na(year)) %>%
   group_by(PRA_Code, year) %>%
   summarise(
      n_parcels = sum(N_Parcels, na.rm = TRUE),
@@ -95,7 +96,6 @@ RPG_GROUP_pra <- pra_com %>%
      .groups = "drop")
  
  agrreg_pra2 <- pra_insee_filtered2 %>%
-   filter(!is.na(year)) %>%
    group_by(PRA_Code, year) %>%
    summarise(
      n_parcels = sum(N_Parcels, na.rm = TRUE),
@@ -124,7 +124,7 @@ RPG_GROUP_pra <- pra_com %>%
    summarise(n_parcels_cult = sum(parcel_cult_n),
              surf_cult_m2 = sum(surf_cult_m2),
              .groups = "drop") %>%
-   full_join(agrreg_pra, by = c("PRA_Code", "year")) %>%
+   left_join(agrreg_pra, by = c("PRA_Code", "year")) %>%
    mutate(perc_cult_parcel = as.numeric(n_parcels_cult / n_parcels),
           perc_cult_m2 = as.numeric(surf_cult_m2 / surf_agri_m2)
           ) 
@@ -136,17 +136,18 @@ RPG_GROUP_pra <- pra_com %>%
    summarise(n_parcels_group = sum(parcel_code_group_n),
              surf_code_group_m2 = sum(surf_code_group_m2),
              .groups = "drop") %>%
-   full_join(agrreg_pra2, by = c("PRA_Code", "year")) %>%
+   left_join(agrreg_pra2, by = c("PRA_Code", "year")) %>%
    mutate(perc_group_parcel = as.numeric(n_parcels_group / n_parcels),
           perc_group_m2 = as.numeric(surf_code_group_m2 / surf_agri_m2)
           ) 
  
  # On teste en s'assurant que la somme des % fait bien 1 : OK
  
- # test3 <- RPG_Aggregated_GROUP_Pra %>%
- #   group_by(year, PRA_Code) %>%
- #   summarise(taux = sum(perc_group_m2), .groups = "drop")
+ test3 <- RPG_Aggregated_GROUP_Pra %>%
+   group_by(year, PRA_Code) %>%
+   summarise(taux = sum(perc_group_m2), .groups = "drop")
 
+ 
  
  # On sauvegarde :
  

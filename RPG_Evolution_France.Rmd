@@ -182,9 +182,9 @@ carte_biv <- function(df_culture, nom){
   df_culture$x_cat2 <- cut(df_culture$dev_tcam_perc,
              breaks = c(-Inf, tercile_tcam_perc, Inf),
              labels = c(
-               paste0("Sous ", 100*round(tercile_tcam_perc[1],3), "%"), 
+               paste0("Sous ", round(tercile_tcam_perc[1],3), "%"), 
                "Entre", 
-               paste0("Au-dessus ", 100*round(tercile_tcam_perc[2],3), "%")))
+               paste0("Au-dessus ", round(tercile_tcam_perc[2],3), "%")))
 
   df_culture$y_cat <- cut(df_culture$dev_start_perc,
              breaks = c(-Inf, tercile_start_perc, Inf),
@@ -214,8 +214,8 @@ carte_biv <- function(df_culture, nom){
 
   # --- Préparation des labels personnalisés pour la légende ---
   
-  tcam_b1 <- round(100 * tercile_tcam_perc[1], 1)
-  tcam_b2 <- round(100 * tercile_tcam_perc[2], 1)
+  tcam_b1 <- round(tercile_tcam_perc[1], 2)
+  tcam_b2 <- round(tercile_tcam_perc[2], 2)
   
   pres_b1 <- round(100 * tercile_start_perc[1], 1)
   pres_b2 <- round(100 * tercile_start_perc[2], 1)
@@ -485,11 +485,11 @@ index_carte <- function(RPG_wide, nom){
 
   # --- Préparation des labels personnalisés pour la légende ---
   
-  tcam_b1 <- round(tercile_evolution[1], 3)
-  tcam_b2 <- round(tercile_evolution[2], 3)
+  tcam_b1 <- round(tercile_evolution[1], 2)
+  tcam_b2 <- round(tercile_evolution[2], 2)
   
-  pres_b1 <- round(tercile_start[1], 3)
-  pres_b2 <- round(tercile_start[2], 3)
+  pres_b1 <- round(tercile_start[1], 2)
+  pres_b2 <- round(tercile_start[2], 2)
   
   # Construction de chaînes de caractères explicites avec flèches
   
@@ -569,10 +569,29 @@ kable(df_indices,
   column_spec(2, bold = TRUE, width = "4cm")
 ```
 
-Bleu (Bretagne notamment) : baisse de l'indice de shannon et simpson : perte en diversité et/ou installation d'une forte dominance. Peut refléter le processus ayant suivi la fin des quota de lait (2008 puis 2015) qui a mené à la spécialisation de la Bretagne dans la production de lait : Avignon & Guige (2023). Aussi regarder concentration des élevages porçins (comme dans 60/70s).
+## Suggestions de mécanismes
+
+Bretagne : baisse de l'indice de shannon et simpson : perte en diversité et/ou installation d'une forte dominance. 
+
+(1) Reflète le processus ayant suivi la fin des quota de lait (2008 puis 2015) qui a contribué à renforcer l’inégale répartition des vaches laitières (VL) en France. La taille du cheptel de VL a augmenté de plus de 12000 têtes dans les Départements d’Ille-et-Vilaine et de la Manche et a baissé dans le Sud-Ouest de la France. 
+Avignon & Guige (2023) : polarisation de la production de lait en faveur des grandes exploitations en Bretagne (ie forte présence initiale) : économies d’échelles et progrès technique. 
+
+(2) Recensement agricole 2020 : 
+Réduction des exploitations : 416 054 exploitations contre 514 964 en 2010 mais 
+Augmentation des surfaces par exploitations : Surface Agricole Utile / Nombre d’exploitations agricoles est passé de 52,6 hectares en 2010 à 64,6 hectares en 2020
+
+--> Ainsi, production laitière a pris de plus en plus de place en Bretagne (de même avec élevage porçin?)
+
 
 Zones montagneuses (Pyrénées, Alpes, Massif Central, Corse, Jura, Vosges) : aucune évolution des indices, pratiques agricoles peu présentes dans ces zones par nature (géologique, terrain compliqué).
 
 Les zones de moyenne et haute montagne sont historiquement dédiées au pastoralisme et à l'élevage extensif. Les terres arables y sont rares en raison du relief et du climat. Par conséquent, l'indice reste bas et totalement stable.
 
-Revoyran & al. (2022) : enquête quanti et "qualitative" sur les causes et méthodes de diversification : utilisent Shannon et Simpson. Ils mettent en avant 3 types de scénario guidés par 3 types de motivation (logique agronomique, de marché et de travail) et permis par 3 types de ressources clés : relations de marché, équipement et ressource de travail et la connaissance et l'apprentissage.
+
+Enfin, on voit que Bassin parisien voit ses deux indices augmenter ce qui traduit une amélioration globale de la biodiversité. Le milieu s'enrichit en nouvelles espèces et/ou les effectifs deviennent plus homogènes.
+
+(1) : Décembre 2020, Stratégie nationale pour les protéines végétales : doubler surface agricole de protéagineux : 1 à 2 millions d’hectares d’ici 2030 (ie 8% de la surface utile) de légumineuses à graines et fourragères + préservation des surfaces oléagineuses à 2 millions d’hectares aussi.
+--> Pour l'indépendance protéinique face au soja importé ! Cela incite donc encore plus à se tourner vers des récoltes de protéagineux et oléagineux.
+
+(2) : Interdiction des néonicotinoïdes en janvier 2023 : chute de la production de betterave. Cela force à l'allongement des rotations courtes traditionnelles pour casser le cycle des bioagresseurs. Cette situation aurait donc pu bénéficier aux olégaineux/protéagineux.
+--> Introduction de cultures résilientes comme le tournesol (qui migre vers les zones Nord et Île-de-France) ou le sarrasin permet de répartir les risques face au manque d'eau et aux sécheresses printanières répétées.
