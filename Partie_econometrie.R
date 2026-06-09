@@ -142,6 +142,8 @@ df_pra$gsdd_bin_27_more <- df_pra$gsdd_above27
 # On peut par exemple expliquée la surface des protéagineux : groupe 8
 # On pourra différencier daily_min, max et mean 
 
+# 1. Surface en ha
+
 model1 <- function (code_group, nom, stat) {
 
 df <- df_pra %>%
@@ -205,3 +207,71 @@ model1("2", "Maïs", "daily_mean")
 model1("21", "Vignes", "daily_mean")
 
 model1("20", "Vergers", "daily_mean")
+
+
+# 2. Surface en %
+
+model2 <- function (code_group, nom, stat) {
+  
+  df <- df_pra %>%
+    filter(CODE_GROUP == code_group, statistic.x == stat)
+  
+  # On peut exprimer la surface plantée en ha : 1 ha = 10 000m2
+  
+  # On liste toutes les colonnes qui commencent par gsdd_bin_
+  les_bins <- grep("^gsdd_bin_", names(df), value = TRUE)
+  
+  # On crée la formule : "surf_code_group_m2 ~ gsdd_bin_0_3 + gsdd_bin_03_06 + ..."
+  
+  reg_surf_mean <- feols(
+    as.formula(paste("log(perc_group_m2) ~", paste(les_bins, collapse = " + "))), 
+    df)
+  
+  # On peut rajouter des effets fixes années :
+  
+  fe_surf_mean1 <- feols(
+    log(perc_group_m2) ~ gsdd_bin_00_03 + gsdd_bin_03_06 + gsdd_bin_06_09 
+    + gsdd_bin_09_12 + gsdd_bin_12_15 + gsdd_bin_15_18 + gsdd_bin_18_21 + 
+      gsdd_bin_21_24 + gsdd_bin_24_27 + gsdd_bin_27_more | year, df)
+  
+  # Et aussi des effets fixes PRA :
+  
+  fe_surf_mean2 <- feols(
+    log(perc_group_m2) ~ gsdd_bin_00_03 + gsdd_bin_03_06 + gsdd_bin_06_09 
+    + gsdd_bin_09_12 + gsdd_bin_12_15 + gsdd_bin_15_18 + gsdd_bin_18_21 + 
+      gsdd_bin_21_24 + gsdd_bin_24_27 + gsdd_bin_27_more | year + code_insee, df)
+  
+  # On arrange les titres pour que ce soit plus lisible :
+  
+  mon_dico <- c(
+    "gsdd_bin_00_03"  = "Tranche GSDD [0°C - 3°C]",
+    "gsdd_bin_03_06" = "Tranche GSDD [3°C - 6°C]",
+    "gsdd_bin_06_09" = "Tranche GSDD [6°C - 9°C]",
+    "gsdd_bin_09_12" = "Tranche GSDD [9°C - 12°C]",
+    "gsdd_bin_12_15" = "Tranche GSDD [12°C - 15°C]",
+    "gsdd_bin_15_18" = "Tranche GSDD [15°C - 18°C]",
+    "gsdd_bin_18_21" = "Tranche GSDD [18°C - 21°C]",
+    "gsdd_bin_21_24" = "Tranche GSDD [21°C - 24°C]",
+    "gsdd_bin_24_27" = "Tranche GSDD [24°C - 27°C]",
+    "gsdd_bin_27_more" = "Tranche GSDD [+27°C]",
+    "(Intercept)"    = "Constante",
+    "log(perc_group_m2)" = paste0("Log(Surface de ", nom, " en %)")
+  )
+  
+  latex <- etable(reg_surf_mean, fe_surf_mean1, fe_surf_mean2,
+                  dict = mon_dico,
+                  tex = T)
+  
+  return(latex)
+}
+
+
+model2("8", "Protéagineux", "daily_mean")
+
+model2("1", "Blé", "daily_mean")
+
+model2("2", "Maïs", "daily_mean")
+
+model2("21", "Vignes", "daily_mean")
+
+model2("20", "Vergers", "daily_mean")

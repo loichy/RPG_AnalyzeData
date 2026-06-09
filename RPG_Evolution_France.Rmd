@@ -63,10 +63,10 @@ Afin d’étudier l’évolution de l’agriculture, il était nécessaire de di
 ```{r sauvegarde de fichiers, eval = F}
 
 # 1. On ouvre le fichier (choisis le nom)
-png("data/final/shannon_evo.png", width = 2000, height = 1500, res = 300)
+png("data/final/verger_evo.png", width = 2000, height = 1500, res = 300)
 
 # 2. On lance la fonction du graphique
-print(final_plot_shannon$final_plot)
+print(final_plot_verger$final_plot)
 
 # 3. On ferme le fichier (INDISPENSABLE pour que le fichier soit créé)
 dev.off()
@@ -315,6 +315,91 @@ print(final_plot_bet$final_plot)
 
 ```
 
+## Le maïs
+
+```{r analyse maïs}
+
+MAIS_pra <- culture_pra(RPG_CULT_pra, c("MID", "MIE", "MIS"))
+  
+resultats_mais_culture <- analyse_culture(MAIS_pra)
+
+df_mais_culture <- ajout_presence(resultats_mais_culture, 2015)
+
+```
+
+Et la carte : 
+
+```{r carte biv maïs}
+
+final_plot_mais <- carte_biv(df_mais_culture, "du maïs")
+
+print(final_plot_mais$final_plot)
+
+```
+## Le blé
+
+```{r analyse blé}
+
+BLE_pra <- culture_pra(RPG_CULT_pra, c("BTP", "BTH"))
+  
+resultats_ble_culture <- analyse_culture(BLE_pra)
+
+df_ble_culture <- ajout_presence(resultats_ble_culture, 2015)
+
+```
+
+Et la carte : 
+
+```{r carte biv blé}
+
+final_plot_ble <- carte_biv(df_ble_culture, "du blé")
+
+print(final_plot_ble$final_plot)
+
+```
+
+## La vigne
+
+```{r analyse vigne}
+
+VIGNE_pra <- culture_pra(RPG_CULT_pra, c("VRC", "VRN", "VRT", "RVI"))
+  
+resultats_vigne_culture <- analyse_culture(VIGNE_pra)
+
+df_vigne_culture <- ajout_presence(resultats_vigne_culture, 2015)
+
+```
+
+Et la carte : 
+
+```{r carte biv vigne}
+
+final_plot_vigne <- carte_biv(df_vigne_culture, "des vignes")
+
+print(final_plot_vigne$final_plot)
+
+```
+## Le verger
+
+```{r analyse verger}
+
+VERGER_pra <- culture_pra(RPG_CULT_pra, c("AGR", "ANA", "AVO", "BCA", "BCF", "BCI", "BCP", "BCR", "BEA", "BEF", "BEI", "BEP", "BER", "CAC", "CBT", "PFR", "PRU", "PVT", "PWT", "VGD", "VRG"))
+  
+resultats_verger_culture <- analyse_culture(VERGER_pra)
+
+df_verger_culture <- ajout_presence(resultats_verger_culture, 2015)
+
+```
+
+Et la carte : 
+
+```{r carte biv maïs}
+
+final_plot_verger <- carte_biv(df_verger_culture, "des vergers")
+
+print(final_plot_verger$final_plot)
+
+```
 
 # Des indices de biodiversité 
 
