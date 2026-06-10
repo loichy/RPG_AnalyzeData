@@ -188,7 +188,9 @@ mon_dico <- c(
   "gsdd_bin_24_27" = "Tranche GSDD [24°C - 27°C]",
   "gsdd_bin_27_more" = "Tranche GSDD [+27°C]",
     "(Intercept)"    = "Constante",
-  "log(surf_code_group_m2/10000)" = paste0("Log(Surface de ", nom, " en ha)")
+  "log(surf_code_group_m2/10000)" = paste0("Log(Surface de ", nom, " en ha)"),
+  "year" = "Année",
+  "code_insee" = "PRA"
 )
 
 latex <- etable(reg_surf_mean, fe_surf_mean1, fe_surf_mean2,
@@ -206,12 +208,11 @@ model1("2", "Maïs", "daily_mean")
 
 model1("21", "Vignes", "daily_mean")
 
-model1("20", "Vergers", "daily_mean")
 
 
 # 2. Surface en %
 
-model2 <- function (code_group, nom, stat) {
+model1_bis <- function (code_group, nom, stat) {
   
   df <- df_pra %>%
     filter(CODE_GROUP == code_group, statistic.x == stat)
@@ -255,7 +256,9 @@ model2 <- function (code_group, nom, stat) {
     "gsdd_bin_24_27" = "Tranche GSDD [24°C - 27°C]",
     "gsdd_bin_27_more" = "Tranche GSDD [+27°C]",
     "(Intercept)"    = "Constante",
-    "log(perc_group_m2)" = paste0("Log(Surface de ", nom, " en %)")
+    "log(perc_group_m2)" = paste0("Log(Surface de ", nom, " en %)"),
+    "year" = "Année",
+    "code_insee" = "PRA"
   )
   
   latex <- etable(reg_surf_mean, fe_surf_mean1, fe_surf_mean2,
@@ -266,6 +269,62 @@ model2 <- function (code_group, nom, stat) {
 }
 
 
+model1_bis("8", "Protéagineux", "daily_mean")
+
+model1_bis("1", "Blé", "daily_mean")
+
+model1_bis("2", "Maïs", "daily_mean")
+
+model1_bis("21", "Vignes", "daily_mean")
+
+
+# ==== Modèle n°2 : Surface_plantée = B*GSL + epsilon ====
+
+# 1. Surface en ha
+
+model2 <- function (code_group, nom, stat) {
+  
+  df <- df_pra %>%
+    filter(CODE_GROUP == code_group, statistic.x == stat)
+  
+  # On peut adopter une forme quadratique pour capturer les effets non-linéaires
+  
+  df$gsl_days2 <- df$gsl_days^2
+
+  
+  # On crée la formule : "surf_code_group_m2 ~ gsdd_bin_0_3 + gsdd_bin_03_06 + ..."
+  
+  reg_surf_mean <- feols(
+    log(surf_code_group_m2/10000) ~ gsl_days + gsl_days2, df)
+  
+  # On peut rajouter des effets fixes années :
+  
+  fe_surf_mean1 <- feols(
+    log(surf_code_group_m2/10000) ~ gsl_days + gsl_days2 | year, df)
+  
+  # Et aussi des effets fixes PRA :
+  
+  fe_surf_mean2 <- feols(
+    log(surf_code_group_m2/10000) ~ gsl_days + gsl_days2 | year + code_insee, df)
+  
+  # On arrange les titres pour que ce soit plus lisible :
+  
+  mon_dico <- c(
+    "gsl_days" = "GSL",
+    "gsl_days2" = "(GSL)$^2$",
+    "(Intercept)"    = "Constante",
+    "log(surf_code_group_m2/10000)" = paste0("Log(Surface de ", nom, " en ha)"),
+    "year" = "Année",
+    "code_insee" = "PRA"
+  )
+  
+  latex <- etable(reg_surf_mean, fe_surf_mean1, fe_surf_mean2,
+                  dict = mon_dico,
+                  tex = T)
+  
+  return(latex)
+}
+
 model2("8", "Protéagineux", "daily_mean")
 
 model2("1", "Blé", "daily_mean")
@@ -274,4 +333,165 @@ model2("2", "Maïs", "daily_mean")
 
 model2("21", "Vignes", "daily_mean")
 
-model2("20", "Vergers", "daily_mean")
+
+
+# 2. Surface en %
+
+model2_bis <- function (code_group, nom, stat) {
+  
+  df <- df_pra %>%
+    filter(CODE_GROUP == code_group, statistic.x == stat)
+  
+  # On peut adopter une forme quadratique pour capturer les effets non-linéaires
+  
+  df$gsl_days2 <- df$gsl_days^2
+  
+  
+  # On crée la formule : "surf_code_group_m2 ~ gsdd_bin_0_3 + gsdd_bin_03_06 + ..."
+  
+  reg_surf_mean <- feols(
+    log(perc_group_m2) ~ gsl_days + gsl_days2, df)
+  
+  # On peut rajouter des effets fixes années :
+  
+  fe_surf_mean1 <- feols(
+    log(perc_group_m2) ~ gsl_days + gsl_days2 | year, df)
+  
+  # Et aussi des effets fixes PRA :
+  
+  fe_surf_mean2 <- feols(
+    log(perc_group_m2) ~ gsl_days + gsl_days2 | year + code_insee, df)
+  
+  # On arrange les titres pour que ce soit plus lisible :
+  
+  mon_dico <- c(
+    "gsl_days" = "GSL",
+    "gsl_days2" = "(GSL)$^2$",
+    "(Intercept)"    = "Constante",
+    "log(perc_group_m2)" = paste0("Log(Surface de ", nom, " en %)"),
+    "year" = "Année",
+    "code_insee" = "PRA"
+  )
+  
+  latex <- etable(reg_surf_mean, fe_surf_mean1, fe_surf_mean2,
+                  dict = mon_dico,
+                  tex = T)
+  
+  return(latex)
+}
+
+model2_bis("8", "Protéagineux", "daily_mean")
+
+model2_bis("1", "Blé", "daily_mean")
+
+model2_bis("2", "Maïs", "daily_mean")
+
+model2_bis("21", "Vignes", "daily_mean")
+
+# ==== Modèle n°3 : Surface_plantée = B*GSL_start_doy + epsilon ====
+
+#. 1 Surface en ha
+
+model3 <- function (code_group, nom, stat) {
+  
+  df <- df_pra %>%
+    filter(CODE_GROUP == code_group, statistic.x == stat)
+  
+  # On peut adopter une forme quadratique pour capturer les effets non-linéaires
+  
+  df$gsl_start_doy2 <- df$gsl_start_doy^2
+  
+  
+  # On crée la formule : "surf_code_group_m2 ~ gsdd_bin_0_3 + gsdd_bin_03_06 + ..."
+  
+  reg_surf_mean <- feols(
+    log(surf_code_group_m2/10000) ~ gsl_start_doy + gsl_start_doy2, df)
+  
+  # On peut rajouter des effets fixes années :
+  
+  fe_surf_mean1 <- feols(
+    log(surf_code_group_m2/10000) ~ gsl_start_doy + gsl_start_doy2 | year, df)
+  
+  # Et aussi des effets fixes PRA :
+  
+  fe_surf_mean2 <- feols(
+    log(surf_code_group_m2/10000) ~ gsl_start_doy + gsl_start_doy2 | year + code_insee, df)
+  
+  # On arrange les titres pour que ce soit plus lisible :
+  
+  mon_dico <- c(
+    "gsl_start_doy" = "1st GSL doy",
+    "gsl_start_doy2" = "(1st GSL doy)$^2$",
+    "(Intercept)"    = "Constante",
+    "log(surf_code_group_m2/10000)" = paste0("Log(Surface de ", nom, " en ha)"),
+    "year" = "Année",
+    "code_insee" = "PRA"
+  )
+  
+  latex <- etable(reg_surf_mean, fe_surf_mean1, fe_surf_mean2,
+                  dict = mon_dico,
+                  tex = T)
+  
+  return(latex)
+}
+
+model3("8", "Protéagineux", "daily_mean")
+
+model3("1", "Blé", "daily_mean")
+
+model3("2", "Maïs", "daily_mean")
+
+model3("21", "Vignes", "daily_mean")
+
+# 2. Surface en %
+
+model3_bis <- function (code_group, nom, stat) {
+  
+  df <- df_pra %>%
+    filter(CODE_GROUP == code_group, statistic.x == stat)
+  
+  # On peut adopter une forme quadratique pour capturer les effets non-linéaires
+  
+  df$gsl_start_doy2 <- df$gsl_start_doy^2
+  
+  
+  # On crée la formule : "surf_code_group_m2 ~ gsdd_bin_0_3 + gsdd_bin_03_06 + ..."
+  
+  reg_surf_mean <- feols(
+    log(perc_group_m2) ~ gsl_start_doy + gsl_start_doy2, df)
+  
+  # On peut rajouter des effets fixes années :
+  
+  fe_surf_mean1 <- feols(
+    log(perc_group_m2) ~ gsl_start_doy + gsl_start_doy2 | year, df)
+  
+  # Et aussi des effets fixes PRA :
+  
+  fe_surf_mean2 <- feols(
+    log(perc_group_m2) ~ gsl_start_doy + gsl_start_doy2 | year + code_insee, df)
+  
+  # On arrange les titres pour que ce soit plus lisible :
+  
+  mon_dico <- c(
+    "gsl_start_doy" = "1st GSL doy",
+    "gsl_start_doy2" = "(1st GSL doy)$^2$",
+    "(Intercept)"    = "Constante",
+    "log(perc_group_m2)" = paste0("Log(Surface de ", nom, " en %)"),
+    "year" = "Année",
+    "code_insee" = "PRA"
+  )
+  
+  latex <- etable(reg_surf_mean, fe_surf_mean1, fe_surf_mean2,
+                  dict = mon_dico,
+                  tex = T)
+  
+  return(latex)
+}
+
+model3_bis("8", "Protéagineux", "daily_mean")
+
+model3_bis("1", "Blé", "daily_mean")
+
+model3_bis("2", "Maïs", "daily_mean")
+
+model3_bis("21", "Vignes", "daily_mean")

@@ -63,10 +63,10 @@ Afin d’étudier l’évolution de l’agriculture, il était nécessaire de di
 ```{r sauvegarde de fichiers, eval = F}
 
 # 1. On ouvre le fichier (choisis le nom)
-png("data/final/verger_evo.png", width = 2000, height = 1500, res = 300)
+png("data/final/protéagineux_evo.png", width = 2000, height = 1500, res = 300)
 
 # 2. On lance la fonction du graphique
-print(final_plot_verger$final_plot)
+print(final_plot_prot$final_plot)
 
 # 3. On ferme le fichier (INDISPENSABLE pour que le fichier soit créé)
 dev.off()
@@ -393,11 +393,33 @@ df_verger_culture <- ajout_presence(resultats_verger_culture, 2015)
 
 Et la carte : 
 
-```{r carte biv maïs}
+```{r carte biv verger}
 
 final_plot_verger <- carte_biv(df_verger_culture, "des vergers")
 
 print(final_plot_verger$final_plot)
+
+```
+
+## Les protéagineux
+
+```{r analyse protéagineux}
+
+PROT_pra <- culture_pra(RPG_CULT_pra, c("FEV", "FVL", "FVT", "LDH", "LDP", "LDT", "MPC", "MPP", "MPT", "PAG", "PHI", "PPR", "PPT"))
+  
+resultats_prot_culture <- analyse_culture(PROT_pra)
+
+df_prot_culture <- ajout_presence(resultats_prot_culture, 2015)
+
+```
+
+Et la carte : 
+
+```{r carte biv prot}
+
+final_plot_prot <- carte_biv(df_prot_culture, "des protéagineux")
+
+print(final_plot_prot$final_plot)
 
 ```
 
