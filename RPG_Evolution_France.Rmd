@@ -423,6 +423,28 @@ print(final_plot_prot$final_plot)
 
 ```
 
+## Les légumineuses à grain
+
+```{r analyse légumineuses}
+
+LEGU_pra <- culture_pra(RPG_CULT_pra, c("LEC", "PCH"))
+  
+resultats_legu_culture <- analyse_culture(LEGU_pra)
+
+df_legu_culture <- ajout_presence(resultats_legu_culture, 2015)
+
+```
+
+Et la carte : 
+
+```{r carte biv prot}
+
+final_plot_legu <- carte_biv(df_prot_culture, "des légumineuses")
+
+print(final_plot_legu$final_plot)
+
+```
+
 # Des indices de biodiversité 
 
 ## Indice de Shannon (1949)
