@@ -265,7 +265,7 @@ stat_desc %>%
     "gsl_days" = "GSL",
     "gsl_start_doy" = "1st GSL doy"
   )) %>%
-  kable(booktabs = T, "latex") %>% # Add "latex" to get the Latex table
+  kable(booktabs = T) %>% # Add "latex" to get the Latex table
   kable_styling() %>%
   pack_rows("2007", 1, 13) %>%
   pack_rows("2024", 14, 26)
@@ -296,7 +296,7 @@ stat_desc2 %>%
     "gsl_days" = "GSL",
     "gsl_start_doy" = "1st GSL doy"
   )) %>%
-  kable(booktabs = T, "latex") %>% # Add "latex" to get the Latex table
+  kable(booktabs = T) %>% # Add "latex" to get the Latex table
   kable_styling()
 
 
