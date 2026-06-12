@@ -14,7 +14,7 @@ gc()
 if (!require("pacman")) install.packages("pacman")
 pacman::p_load(tidyverse, data.table, here, sf, tmap, units, knitr, kableExtra, 
                plotly, viridis, shiny, vegan, paletteer, readxl, biscale, cowplot, 
-               rstatix, fixest)
+               rstatix, fixest, dplyr, stringr)
 
 # List directories 
 dir <- list()
@@ -101,10 +101,18 @@ gaez_filtered <- gaez_data %>%
   filter(model == "IPSL-CM5A-LR", rcp == "rcp6p0", variable == "ylHr0") %>%
   arrange(pra_code, groupe_rpg) %>%
   group_by(pra_code, groupe_rpg) %>%
+  # We chose a simple sum, what about a weighted mean?
   mutate(value_hist_group = sum(value_hist, na.rm = T),
          value_group = sum(value, na.rm = T),
          change_group = (value_group-value_hist_group)/value_hist_group) %>%
   ungroup()
+
+gaez_pra <- gaez_filtered %>%
+  select(!c(crop, theme_id, value_hist, value, change)) %>%
+  unique() %>%
+  rename("LIBELLE_GROUPE_CULTURE" = "groupe_rpg",
+         "code_insee" = "pra_code") %>%
+  mutate(code_insee = str_remove(code_insee, "^0"))
 
 
 # To join the data, the PRA codes cannot start with a 0
@@ -122,7 +130,11 @@ df_pra_yearly <- RPG_GROUP_pra %>%
   select(-PRA_Lib) %>%
   left_join(climate_pra_yearly, 
             by = c("code_insee", "year"), 
-            relationship = "many-to-many") 
+            relationship = "many-to-many") %>%
+  left_join(gaez_pra, by = c("LIBELLE_GROUPE_CULTURE", "code_insee")) %>%
+  # Comme gaez ne concerne pas tous les groupes RPG,
+  # On remplace les Na par 0 dans change pour les régressions
+  mutate(change_group = replace(change_group, is.na(change_group), 0))
 
 # We see that the number of observations isn't multiplied by 3 (eventhough there
 # are 3 differents statistics) : daily_minimum doesn't have as many observations
@@ -233,7 +245,8 @@ stat_desc_2007 <- df_pra %>%
                     gsdd_bin_09_12, gsdd_bin_12_15,  gsdd_bin_15_18, 
                     gsdd_bin_18_21, gsdd_bin_21_24, gsdd_bin_24_27, gsdd_bin_27_more, 
                     gsl_days, gsl_start_doy, 
-                    total_precip_wet_days_mm)
+                    total_precip_wet_days_mm,
+                    change_group)
 
 stat_desc_2024 <- df_pra %>%
   filter(year == 2024) %>%
@@ -241,7 +254,8 @@ stat_desc_2024 <- df_pra %>%
                     gsdd_bin_09_12, gsdd_bin_12_15,  gsdd_bin_15_18, 
                     gsdd_bin_18_21, gsdd_bin_21_24, gsdd_bin_24_27, gsdd_bin_27_more, 
                     gsl_days, gsl_start_doy, 
-                    total_precip_wet_days_mm)
+                    total_precip_wet_days_mm,
+                    change_group)
 
 stat_desc <- stat_desc_2007 %>%
   full_join(stat_desc_2024) %>%
@@ -263,7 +277,8 @@ stat_desc %>%
     "total_precip_wet_days_mm" = "PRCP totales annuelles",
     "total_precip_wet_days_mm2" = "(PRCP totales annuelles)$^2$",
     "gsl_days" = "GSL",
-    "gsl_start_doy" = "1st GSL doy"
+    "gsl_start_doy" = "1st GSL doy",
+    "change_group" = "Taux de croissance des rendements potentiels"
   )) %>%
   kable(booktabs = T) %>% # Add "latex" to get the Latex table
   kable_styling() %>%
@@ -272,10 +287,11 @@ stat_desc %>%
 
 stat_desc2 <- df_pra %>%
   get_summary_stats(gsdd_bin_00_03, gsdd_bin_03_06, gsdd_bin_06_09, 
-                                gsdd_bin_09_12, gsdd_bin_12_15,  gsdd_bin_15_18, 
-                                gsdd_bin_18_21, gsdd_bin_21_24, gsdd_bin_24_27, gsdd_bin_27_more, 
-                                gsl_days, gsl_start_doy, 
-                                total_precip_wet_days_mm) %>%
+                    gsdd_bin_09_12, gsdd_bin_12_15,  gsdd_bin_15_18, 
+                    gsdd_bin_18_21, gsdd_bin_21_24, gsdd_bin_24_27, gsdd_bin_27_more, 
+                    gsl_days, gsl_start_doy, 
+                    total_precip_wet_days_mm,
+                    change_group) %>%
   select(variable, min, q1, median, mean, q3, max, sd)
 
 stat_desc2 %>%
@@ -294,7 +310,8 @@ stat_desc2 %>%
     "total_precip_wet_days_mm" = "PRCP totales annuelles",
     "total_precip_wet_days_mm2" = "(PRCP totales annuelles)$^2$",
     "gsl_days" = "GSL",
-    "gsl_start_doy" = "1st GSL doy"
+    "gsl_start_doy" = "1st GSL doy",
+    "change_group" = "Taux de croissance des rendements potentiels"
   )) %>%
   kable(booktabs = T) %>% # Add "latex" to get the Latex table
   kable_styling()
@@ -317,7 +334,7 @@ df <- df_pra %>%
 les_bins <- grep("^gsdd_bin_", names(df), value = TRUE)
 
 # We will want to control for precipitations
-df_pra$total_precip_wet_days_mm2 <- df_pra$total_precip_wet_days_mm^2
+df$total_precip_wet_days_mm2 <- df$total_precip_wet_days_mm^2
 
 # We create the formula: "surf_code_group_m2 ~ gsdd_bin_0_3 + gsdd_bin_03_06 + ..."
 
@@ -339,11 +356,14 @@ fe_surf_mean2 <- feols(
   + gsdd_bin_09_12 + gsdd_bin_12_15 + gsdd_bin_15_18 + gsdd_bin_18_21 + 
     gsdd_bin_21_24 + gsdd_bin_24_27 + gsdd_bin_27_more | year + code_insee, df)
 
+
+# We add precipitation and potentiel yields controls
+
 fe_surf_mean3 <- feols(
   log(surf_code_group_m2/10000) ~ gsdd_bin_00_03 + gsdd_bin_03_06 + gsdd_bin_06_09 
   + gsdd_bin_09_12 + gsdd_bin_12_15 + gsdd_bin_15_18 + gsdd_bin_18_21 + 
     gsdd_bin_21_24 + gsdd_bin_24_27 + gsdd_bin_27_more + 
-    total_precip_wet_days_mm + total_precip_wet_days_mm2 | year + code_insee, df)
+    total_precip_wet_days_mm + total_precip_wet_days_mm2 + change_group | year + code_insee, df)
 
 
 mon_dico <- c(
@@ -362,7 +382,8 @@ mon_dico <- c(
   "year" = "Année",
   "code_insee" = "PRA",
   "total_precip_wet_days_mm" = "PRCP totales annuelles",
-  "total_precip_wet_days_mm2" = "(PRCP totales annuelles)$^2$"
+  "total_precip_wet_days_mm2" = "(PRCP totales annuelles)$^2$",
+  "change_group" = "Taux de croissance des rendements potentiels"
 )
 
 latex <- etable(reg_surf_mean, fe_surf_mean1, fe_surf_mean2, fe_surf_mean3,
@@ -414,11 +435,13 @@ model1_bis <- function (code_group, nom, stat) {
     + gsdd_bin_09_12 + gsdd_bin_12_15 + gsdd_bin_15_18 + gsdd_bin_18_21 + 
       gsdd_bin_21_24 + gsdd_bin_24_27 + gsdd_bin_27_more | year + code_insee, df)
   
+  # We add precipitation and potentiel yields controls
+  
   fe_surf_mean3 <- feols(
     log(perc_group_m2) ~ gsdd_bin_00_03 + gsdd_bin_03_06 + gsdd_bin_06_09 
     + gsdd_bin_09_12 + gsdd_bin_12_15 + gsdd_bin_15_18 + gsdd_bin_18_21 + 
       gsdd_bin_21_24 + gsdd_bin_24_27 + gsdd_bin_27_more + 
-      total_precip_wet_days_mm + total_precip_wet_days_mm2 | year + code_insee, df)
+      total_precip_wet_days_mm + total_precip_wet_days_mm2 + change_group | year + code_insee, df)
   
   
   mon_dico <- c(
@@ -437,7 +460,8 @@ model1_bis <- function (code_group, nom, stat) {
     "year" = "Année",
     "code_insee" = "PRA", 
     "total_precip_wet_days_mm" = "PRCP totales annuelles",
-    "total_precip_wet_days_mm2" = "(PRCP totales annuelles)$^2$"
+    "total_precip_wet_days_mm2" = "(PRCP totales annuelles)$^2$",
+    "change_group" = "Taux de croissance des rendements potentiels"
   )
   
   latex <- etable(reg_surf_mean, fe_surf_mean1, fe_surf_mean2, fe_surf_mean3,
