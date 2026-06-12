@@ -1,6 +1,6 @@
 # =============================================================================.
-# Partie économétrique : on va tenter d'expliquer l'évolution de certaines 
-# surfaces par le changement climatique : variable de température/précipitation
+# Econometric Analysis: we want to measure the impact of climate change (through 
+# long term changes in temperature, precipitations, GSL) on crop choice.
 # =============================================================================.
 
 
@@ -31,7 +31,7 @@ dir$shapefiles <- here(dir$data, "shapefiles")
 lapply(dir, function(i) dir.create(i, recursive = T, showWarnings = F))
 
 
-# Load the data : au niveau des PRA et par année
+# Load the data: au niveau des PRA et par année
 
 temp_pra_yearly <- readRDS("D:/Data/ERA5_Data/final/era5_2m_temperature_pra_yearly_1980_2024_reference_1971_2000.rds") %>%
   select(-quarter, -month, -freq)
@@ -41,9 +41,10 @@ precip_pra_yearly <- readRDS("D:/Data/ERA5_Data/final/era5_total_precipitation_p
 
 gaez_data <- readRDS("D:/Data/GAEZ_Data/Final/GAEZ_yieldchange_pra.rds")
 
+
 # Adding the RPG cultures to the dataframe
-# Il manque 7 cultures par rapport au départ : 
-# Pas d'équivalents dans les groupes de culture FR : c'est ok
+# 7 crops from the gaez data don't have an equivalent in the rpg groups
+
 correspondance_gaez_rpg <- tribble(
   ~culture_gaez,        ~groupe_rpg,
   "Buckwheat",          "Autres céréales",
@@ -92,9 +93,10 @@ correspondance_gaez_rpg <- tribble(
 ) %>%
   rename("crop" = "culture_gaez")
 
+
 gaez_filtered <- gaez_data %>%
   full_join(correspondance_gaez_rpg, by = "crop") %>%
-  # On filtre : choix arbitraire sinon 
+  # We choose to filter by one model, one projection and one variable, if not : 
   # group_by(model, rcp, variable) %>%
   filter(model == "IPSL-CM5A-LR", rcp == "rcp6p0", variable == "ylHr0") %>%
   arrange(pra_code, groupe_rpg) %>%
@@ -105,12 +107,12 @@ gaez_filtered <- gaez_data %>%
   ungroup()
 
 
-# Par soucis de concordance, le code de la PRA ne peut pas commencer par zéro
+# To join the data, the PRA codes cannot start with a 0
 
 RPG_GROUP_pra <- readRDS("D:/Data/RPG_Data/final/RPG_Aggregated_GROUP_Pra.rds") %>%
   rename(code_insee = "PRA_Code") %>%
   mutate(code_insee = str_remove(code_insee, "^0")) %>%
-  filter(code_insee != "75000") # On enlève PARIS - 75000 (une seule obs en 2024)
+  filter(code_insee != "75000") # We take Paris out - 75000 (only one observation)
 
 climate_pra_yearly <- temp_pra_yearly %>%
   left_join(precip_pra_yearly, 
@@ -122,28 +124,27 @@ df_pra_yearly <- RPG_GROUP_pra %>%
             by = c("code_insee", "year"), 
             relationship = "many-to-many") 
 
-
-# On remarque que le nb d'observations n'est pas multiplié par 3 (malgré 3 stat 
-# différentes pour températures) car daily_minimum n'a pas autant d'observations
+# We see that the number of observations isn't multiplied by 3 (eventhough there
+# are 3 differents statistics) : daily_minimum doesn't have as many observations
 # table(temp_pra_yearly$statistic)
 
-temp_min <- temp_pra_yearly %>%
-  filter(statistic == "daily_minimum") %>%
-  select(year, code_insee, statistic)
-
-temp_max <- temp_pra_yearly %>%
-  filter(statistic == "daily_maximum") %>%
-  select(year, code_insee, statistic)
-
-check <- temp_min %>%
-  full_join(temp_max, by = c("year", "code_insee")) %>%
-  filter(is.na(statistic.x))
+# temp_min <- temp_pra_yearly %>%
+#   filter(statistic == "daily_minimum") %>%
+#   select(year, code_insee, statistic)
+# 
+# temp_max <- temp_pra_yearly %>%
+#   filter(statistic == "daily_maximum") %>%
+#   select(year, code_insee, statistic)
+# 
+# check <- temp_min %>%
+#   full_join(temp_max, by = c("year", "code_insee")) %>%
+#   filter(is.na(statistic.x))
 
 
 # ==== Testing Data on Basque Country ====
 
-# On va d'abord tracer quelques graphiques pour contrôler la logique des données
-# On se focalise sur une PRA pour simplifier : MONTAGNE BASQUE - 64, code 64140
+# Let's plot a few graphs to test the logic of the data
+# We focus on one PRA to simplify: MONTAGNE BASQUE - 64, code 64140
 
 df_basque <- df_pra_yearly %>%
   filter(code_insee == "64140") 
@@ -154,8 +155,8 @@ ggplot(df_basque %>%
   labs(y = "Growing season degre-days > 25°C",
        x = "Year")
 
-# Pics exceptionnels en 2003, 2019 et 2022 
-# Correspond bien aux canicules de 2003, 2019 (records battus) et 2022
+# Exceptionnal temperatures in 2003, 2019 and 2022 
+# Which matches well the 2003, 2019 and 2022 heatwaves
 
 ggplot(df_basque, aes(x = year, y = R95p)) +
   geom_line() + theme_bw() +
@@ -167,22 +168,22 @@ ggplot(df_basque, aes(x = year, y = R99p)) +
   labs(y = "Total rainfall above the 99th percentile",
        x = "Year")
 
-# Pic en 2013 alors que la région a connu des inondations monstrueuses : cohérent
-# La série temporelle semble tout à fait logique !
+# Pic in 2013: region experienced large floods: consistent
+# The time series makes perfect sense!
 
 
 # ==== Building the indicators for future models ====
 
 
-# 1. Formons des bins de 3°C des GSDD :
+# 1. WE build 3°C GSDD bins:
 
 df_pra <- df_pra_yearly 
 
-# On définit les bornes inférieures : pour aller jusqu'à gsdd_bin_24_27
+# We define the lower bounds: to go until gsdd_bin_24_27
 
 bornes_inf <- seq(0, 24, by = 3)
 
-# Boucle pour créer les bins
+# Loop to create the bins 
 
 for (i in bornes_inf) {
   inf <- i
@@ -197,13 +198,13 @@ for (i in bornes_inf) {
   df_pra[[nom_bin]] <- df_pra[[col_inf]] - df_pra[[col_sup]]
 }
 
-# Cas particulier pour le dernier bin : 27_more
+# Special case for the last bin: 27_more
 
 df_pra$gsdd_bin_27_more <- df_pra$gsdd_above27 
 
 
-# On va vouloir contrôler pour les précipitations annuelles totales 
-# On multiplie par 1000 pour avoir une évolution en mm au lieu de m
+# We want to control for total annual precipitation
+# We multiply by 1000 to have the evolution in mm instead of m
 
 df_pra$total_precip_wet_days_mm <- 1000*df_pra$total_precip_wet_days
 
@@ -264,7 +265,7 @@ stat_desc %>%
     "gsl_days" = "GSL",
     "gsl_start_doy" = "1st GSL doy"
   )) %>%
-  kable(booktabs = T, "latex") %>% # Rajouter "latex" pour avoir tableau en Latex
+  kable(booktabs = T, "latex") %>% # Add "latex" to get the Latex table
   kable_styling() %>%
   pack_rows("2007", 1, 13) %>%
   pack_rows("2024", 14, 26)
@@ -295,44 +296,43 @@ stat_desc2 %>%
     "gsl_days" = "GSL",
     "gsl_start_doy" = "1st GSL doy"
   )) %>%
-  kable(booktabs = T, "latex") %>% # Rajouter "latex" pour avoir tableau en Latex
+  kable(booktabs = T, "latex") %>% # Add "latex" to get the Latex table
   kable_styling()
 
 
-# ==== Modèle n°1 : Surface_plantée = B*GSDD (bins de 3°C) + ... + epsilon ====
+# ==== Model n°1 : Planted_surface = B*GSDD (3°C bins) + ... + epsilon ====
 
-# On peut par exemple expliquée la surface des protéagineux : groupe 8
-# On pourra différencier daily_min, max et mean 
+# For the moment, we will only use the daily_mean statistic 
 
-# 1. Surface en ha
+# 1. Surface in ha
 
 model1 <- function (code_group, nom, stat) {
 
 df <- df_pra %>%
   filter(CODE_GROUP == code_group, statistic.x == stat)
 
-# On peut exprimer la surface plantée en ha : 1 ha = 10 000m2
+# 1 ha = 10 000m2
 
-# On liste toutes les colonnes qui commencent par gsdd_bin_
+# We list all the columns that start with gsdd_bin_
 les_bins <- grep("^gsdd_bin_", names(df), value = TRUE)
 
-# On va vouloir contrôler pour les précipitations
+# We will want to control for precipitations
 df_pra$total_precip_wet_days_mm2 <- df_pra$total_precip_wet_days_mm^2
 
-# On crée la formule : "surf_code_group_m2 ~ gsdd_bin_0_3 + gsdd_bin_03_06 + ..."
+# We create the formula: "surf_code_group_m2 ~ gsdd_bin_0_3 + gsdd_bin_03_06 + ..."
 
 reg_surf_mean <- feols(
   as.formula(paste("log(surf_code_group_m2/10000) ~", paste(les_bins, collapse = " + "))), 
   df)
 
-# On peut rajouter des effets fixes années :
+# We add year fixed effects
 
 fe_surf_mean1 <- feols(
   log(surf_code_group_m2/10000) ~ gsdd_bin_00_03 + gsdd_bin_03_06 + gsdd_bin_06_09 
   + gsdd_bin_09_12 + gsdd_bin_12_15 + gsdd_bin_15_18 + gsdd_bin_18_21 + 
     gsdd_bin_21_24 + gsdd_bin_24_27 + gsdd_bin_27_more | year, df)
 
-# Et aussi des effets fixes PRA :
+# And PRA fixed effects
 
 fe_surf_mean2 <- feols(
   log(surf_code_group_m2/10000) ~ gsdd_bin_00_03 + gsdd_bin_03_06 + gsdd_bin_06_09 
@@ -345,7 +345,6 @@ fe_surf_mean3 <- feols(
     gsdd_bin_21_24 + gsdd_bin_24_27 + gsdd_bin_27_more + 
     total_precip_wet_days_mm + total_precip_wet_days_mm2 | year + code_insee, df)
 
-# On arrange les titres pour que ce soit plus lisible :
 
 mon_dico <- c(
   "gsdd_bin_00_03"  = "Tranche GSDD [0°C - 3°C]",
@@ -383,35 +382,32 @@ model1("21", "Vignes", "daily_mean")
 
 
 
-# 2. Surface en %
+# 2. Surface in %
 
 model1_bis <- function (code_group, nom, stat) {
   
   df <- df_pra %>%
     filter(CODE_GROUP == code_group, statistic.x == stat)
   
-  # On peut exprimer la surface plantée en ha : 1 ha = 10 000m2
-  
-  # On liste toutes les colonnes qui commencent par gsdd_bin_
+  # We list all the columns that start with gsdd_bin_
   les_bins <- grep("^gsdd_bin_", names(df), value = TRUE)
   
-  # On crée la formule : "surf_code_group_m2 ~ gsdd_bin_0_3 + gsdd_bin_03_06 + ..."
-  
+  # We create the formula: "surf_code_group_m2 ~ gsdd_bin_0_3 + gsdd_bin_03_06 + ..."
   reg_surf_mean <- feols(
     as.formula(paste("log(perc_group_m2) ~", paste(les_bins, collapse = " + "))), 
     df)
   
-  # On va vouloir contrôler pour les précipitations annuelles totales 
+  # We will want to control for precipitations 
   df$total_precip_wet_days_mm2 <- df$total_precip_wet_days_mm^2
   
-  # On peut rajouter des effets fixes années :
+  # We add year fixed effects
   
   fe_surf_mean1 <- feols(
     log(perc_group_m2) ~ gsdd_bin_00_03 + gsdd_bin_03_06 + gsdd_bin_06_09 
     + gsdd_bin_09_12 + gsdd_bin_12_15 + gsdd_bin_15_18 + gsdd_bin_18_21 + 
       gsdd_bin_21_24 + gsdd_bin_24_27 + gsdd_bin_27_more | year, df)
   
-  # Et aussi des effets fixes PRA :
+  # And PRA fixed effects
   
   fe_surf_mean2 <- feols(
     log(perc_group_m2) ~ gsdd_bin_00_03 + gsdd_bin_03_06 + gsdd_bin_06_09 
@@ -424,8 +420,6 @@ model1_bis <- function (code_group, nom, stat) {
       gsdd_bin_21_24 + gsdd_bin_24_27 + gsdd_bin_27_more + 
       total_precip_wet_days_mm + total_precip_wet_days_mm2 | year + code_insee, df)
   
-  
-  # On arrange les titres pour que ce soit plus lisible :
   
   mon_dico <- c(
     "gsdd_bin_00_03"  = "Tranche GSDD [0°C - 3°C]",
@@ -463,35 +457,29 @@ model1_bis("2", "Maïs", "daily_mean")
 model1_bis("21", "Vignes", "daily_mean")
 
 
-# ==== Modèle n°2 : Surface_plantée = B*GSL + ... + epsilon ====
+# ==== Model n°2 : Planted_surface = B*GSL + ... + epsilon ====
 
-# 1. Surface en ha
+# 1. Surface in ha
 
 model2 <- function (code_group, nom, stat) {
   
   df <- df_pra %>%
     filter(CODE_GROUP == code_group, statistic.x == stat)
   
-  # On peut adopter une forme quadratique pour capturer les effets non-linéaires
-  
+  # We want to capture non-linear effects
   df$gsl_days2 <- df$gsl_days^2
-  
-  # On peut adopter une forme quadratique pour capturer les effets non-linéaires
   
   df$gsl_start_doy2 <- df$gsl_start_doy^2
 
-  
-  # On crée la formule : "surf_code_group_m2 ~ gsdd_bin_0_3 + gsdd_bin_03_06 + ..."
-  
   reg_surf_mean <- feols(
     log(surf_code_group_m2/10000) ~ gsl_days + gsl_days2, df)
   
-  # On peut rajouter des effets fixes années :
+  # We add year fixed effects
   
   fe_surf_mean1 <- feols(
     log(surf_code_group_m2/10000) ~ gsl_days + gsl_days2 | year, df)
   
-  # Et aussi des effets fixes PRA :
+  # And PRA fixed effects
   
   fe_surf_mean2 <- feols(
     log(surf_code_group_m2/10000) ~ gsl_days + gsl_days2 | year + code_insee, df)
@@ -500,9 +488,7 @@ model2 <- function (code_group, nom, stat) {
     log(surf_code_group_m2/10000) ~ gsl_days + gsl_days2
     + gsl_start_doy + gsl_start_doy2 | year + code_insee, df)
   
-  
-  # On arrange les titres pour que ce soit plus lisible :
-  
+
   mon_dico <- c(
     "gsl_days" = "GSL",
     "gsl_days2" = "(GSL)$^2$",
@@ -531,33 +517,28 @@ model2("21", "Vignes", "daily_mean")
 
 
 
-# 2. Surface en %
+# 2. Surface in %
 
 model2_bis <- function (code_group, nom, stat) {
   
   df <- df_pra %>%
     filter(CODE_GROUP == code_group, statistic.x == stat)
   
-  # On peut adopter une forme quadratique pour capturer les effets non-linéaires
-  
+  # We want to capture non-linear effects
   df$gsl_days2 <- df$gsl_days^2
-  
-  # On peut adopter une forme quadratique pour capturer les effets non-linéaires
-  
+
   df$gsl_start_doy2 <- df$gsl_start_doy^2
   
-  
-  # On crée la formule : "surf_code_group_m2 ~ gsdd_bin_0_3 + gsdd_bin_03_06 + ..."
-  
+
   reg_surf_mean <- feols(
     log(perc_group_m2) ~ gsl_days + gsl_days2, df)
   
-  # On peut rajouter des effets fixes années :
+  # We add year fixed effects
   
   fe_surf_mean1 <- feols(
     log(perc_group_m2) ~ gsl_days + gsl_days2 | year, df)
   
-  # Et aussi des effets fixes PRA :
+  # And PRA fixed effects
   
   fe_surf_mean2 <- feols(
     log(perc_group_m2) ~ gsl_days + gsl_days2 | year + code_insee, df)
@@ -566,8 +547,7 @@ model2_bis <- function (code_group, nom, stat) {
     log(perc_group_m2) ~ gsl_days + gsl_days2
     + gsl_start_doy + gsl_start_doy2 | year + code_insee, df)
   
-  # On arrange les titres pour que ce soit plus lisible :
-  
+
   mon_dico <- c(
     "gsl_days" = "GSL",
     "gsl_days2" = "(GSL)$^2$",
