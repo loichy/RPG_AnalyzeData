@@ -14,7 +14,7 @@ gc()
 if (!require("pacman")) install.packages("pacman")
 pacman::p_load(tidyverse, data.table, here, sf, tmap, units, knitr, kableExtra, 
                plotly, viridis, shiny, vegan, paletteer, readxl, biscale, cowplot, 
-               rstatix, fixest, dplyr, stringr)
+               rstatix, fixest, dplyr, stringr, modelsummary)
 
 # List directories 
 dir <- list()
@@ -31,7 +31,7 @@ dir$shapefiles <- here(dir$data, "shapefiles")
 lapply(dir, function(i) dir.create(i, recursive = T, showWarnings = F))
 
 
-# Load the data: au niveau des PRA et par année
+# Load the data: yearly and PRA located data
 
 temp_pra_yearly <- readRDS("D:/Data/ERA5_Data/final/era5_2m_temperature_pra_yearly_1980_2024_reference_1971_2000.rds") %>%
   select(-quarter, -month, -freq)
@@ -101,14 +101,24 @@ gaez_filtered <- gaez_data %>%
   filter(model == "IPSL-CM5A-LR", rcp == "rcp6p0", variable == "ylHr0") %>%
   arrange(pra_code, groupe_rpg) %>%
   group_by(pra_code, groupe_rpg) %>%
-  # We chose a simple sum, what about a weighted mean?
-  mutate(value_hist_group = sum(value_hist, na.rm = T),
-         value_group = sum(value, na.rm = T),
-         change_group = (value_group-value_hist_group)/value_hist_group) %>%
+  # Create weights associated to each GAEZ crop
+  mutate(
+    sum_value_hist_group = sum(value_hist[value_hist > 0], na.rm = T), # Compute for each RPG category to the total cumulated yields from each PRA
+    weight = if_else(sum_value_hist_group > 0,
+                     value_hist / sum_value_hist_group, # Weight corresponds to the proportion of each GAEZ crop yield in the total yield of the RPG category
+                     0)) %>%
   ungroup()
 
-gaez_pra <- gaez_filtered %>%
-  select(!c(crop, theme_id, value_hist, value, change)) %>%
+
+# Aggregate at RPG level while taking into account the weights associated to each GAEZ crops
+gaez_pra <- gaez_filtered %>% 
+  group_by(pra_code, groupe_rpg) %>% 
+  summarise(
+    value_hist_rpg = sum(value_hist * weight, na.rm = TRUE),
+    value_futur_rpg = sum(value * weight, na.rm = TRUE),
+    .groups = "drop"
+  ) %>% 
+  mutate(change_group = (value_futur_rpg - value_hist_rpg)/value_hist_rpg) %>% 
   unique() %>%
   rename("LIBELLE_GROUPE_CULTURE" = "groupe_rpg",
          "code_insee" = "pra_code") %>%
@@ -131,10 +141,12 @@ df_pra_yearly <- RPG_GROUP_pra %>%
   left_join(climate_pra_yearly, 
             by = c("code_insee", "year"), 
             relationship = "many-to-many") %>%
-  left_join(gaez_pra, by = c("LIBELLE_GROUPE_CULTURE", "code_insee")) %>%
-  # Comme gaez ne concerne pas tous les groupes RPG,
-  # On remplace les Na par 0 dans change pour les régressions
-  mutate(change_group = replace(change_group, is.na(change_group), 0))
+  left_join(gaez_pra, by = c("LIBELLE_GROUPE_CULTURE", "code_insee")) %>% 
+  mutate(
+    change_group = replace(change_group, is.na(change_group), 0),
+    value_hist_rpg = replace(value_hist_rpg, is.na(value_hist_rpg), 0),
+    value_futur_rpg = replace(value_futur_rpg, is.na(value_futur_rpg), 0)
+         ) 
 
 # We see that the number of observations isn't multiplied by 3 (eventhough there
 # are 3 differents statistics) : daily_minimum doesn't have as many observations
@@ -239,27 +251,38 @@ mon_dico <- c(
 
 # ==== Descriptive statistics ====
 
-stat_desc_2007 <- df_pra %>%
-  filter(year == 2007) %>%
+stat_desc <- df_pra %>%
+  filter(statistic.x == "daily_mean") %>%
   get_summary_stats(gsdd_bin_00_03, gsdd_bin_03_06, gsdd_bin_06_09, 
                     gsdd_bin_09_12, gsdd_bin_12_15,  gsdd_bin_15_18, 
                     gsdd_bin_18_21, gsdd_bin_21_24, gsdd_bin_24_27, gsdd_bin_27_more, 
                     gsl_days, gsl_start_doy, 
                     total_precip_wet_days_mm,
-                    change_group)
-
-stat_desc_2024 <- df_pra %>%
-  filter(year == 2024) %>%
-  get_summary_stats(gsdd_bin_00_03, gsdd_bin_03_06, gsdd_bin_06_09, 
-                    gsdd_bin_09_12, gsdd_bin_12_15,  gsdd_bin_15_18, 
-                    gsdd_bin_18_21, gsdd_bin_21_24, gsdd_bin_24_27, gsdd_bin_27_more, 
-                    gsl_days, gsl_start_doy, 
-                    total_precip_wet_days_mm,
-                    change_group)
-
-stat_desc <- stat_desc_2007 %>%
-  full_join(stat_desc_2024) %>%
+                    change_group) %>%
   select(variable, min, q1, median, mean, q3, max, sd)
+
+df_stat <- df_pra %>%
+  filter(statistic.x == "daily_mean") 
+
+datasummary(
+  ('Tranche GSDD [0°C - 3°C]' = gsdd_bin_00_03) + 
+    ('Tranche GSDD [3°C - 6°C]' = gsdd_bin_03_06) + 
+    ('Tranche GSDD [6°C - 9°C]' = gsdd_bin_06_09) +
+    ('Tranche GSDD [9°C - 12°C]' = gsdd_bin_09_12) + 
+    ('Tranche GSDD [12°C - 15°C]' = gsdd_bin_12_15) +  
+    ('Tranche GSDD [15°C - 18°C]' = gsdd_bin_15_18) + 
+    ('Tranche GSDD [18°C - 21°C]' = gsdd_bin_18_21) + 
+    ('Tranche GSDD [21°C - 24°C]' = gsdd_bin_21_24) + 
+    ('Tranche GSDD [24°C - 27°C]' = gsdd_bin_24_27) + 
+    ('Tranche GSDD [+27°C]' = gsdd_bin_27_more) + 
+    ('GSL' = gsl_days) + 
+    ('1st GSL doy' = gsl_start_doy) + 
+    ('PRCP totales annuelles en mm' = total_precip_wet_days_mm) +
+    ('Taux de croissance des rendements potentiels' = change_group) ~   
+    N + Mean + SD + Median + Min + Max,                            
+  data = df_stat,
+  output = "latex"   
+)
 
 stat_desc %>%
   mutate(variable = recode(
@@ -280,40 +303,7 @@ stat_desc %>%
     "gsl_start_doy" = "1st GSL doy",
     "change_group" = "Taux de croissance des rendements potentiels"
   )) %>%
-  kable(booktabs = T) %>% # Add "latex" to get the Latex table
-  kable_styling() %>%
-  pack_rows("2007", 1, 13) %>%
-  pack_rows("2024", 14, 26)
-
-stat_desc2 <- df_pra %>%
-  get_summary_stats(gsdd_bin_00_03, gsdd_bin_03_06, gsdd_bin_06_09, 
-                    gsdd_bin_09_12, gsdd_bin_12_15,  gsdd_bin_15_18, 
-                    gsdd_bin_18_21, gsdd_bin_21_24, gsdd_bin_24_27, gsdd_bin_27_more, 
-                    gsl_days, gsl_start_doy, 
-                    total_precip_wet_days_mm,
-                    change_group) %>%
-  select(variable, min, q1, median, mean, q3, max, sd)
-
-stat_desc2 %>%
-  mutate(variable = recode(
-    variable,
-    "gsdd_bin_00_03"  = "Tranche GSDD [0°C - 3°C]",
-    "gsdd_bin_03_06" = "Tranche GSDD [3°C - 6°C]",
-    "gsdd_bin_06_09" = "Tranche GSDD [6°C - 9°C]",
-    "gsdd_bin_09_12" = "Tranche GSDD [9°C - 12°C]",
-    "gsdd_bin_12_15" = "Tranche GSDD [12°C - 15°C]",
-    "gsdd_bin_15_18" = "Tranche GSDD [15°C - 18°C]",
-    "gsdd_bin_18_21" = "Tranche GSDD [18°C - 21°C]",
-    "gsdd_bin_21_24" = "Tranche GSDD [21°C - 24°C]",
-    "gsdd_bin_24_27" = "Tranche GSDD [24°C - 27°C]",
-    "gsdd_bin_27_more" = "Tranche GSDD [+27°C]",
-    "total_precip_wet_days_mm" = "PRCP totales annuelles",
-    "total_precip_wet_days_mm2" = "(PRCP totales annuelles)$^2$",
-    "gsl_days" = "GSL",
-    "gsl_start_doy" = "1st GSL doy",
-    "change_group" = "Taux de croissance des rendements potentiels"
-  )) %>%
-  kable(booktabs = T) %>% # Add "latex" to get the Latex table
+  kable(booktabs = T,"latex") %>% # Add "latex" to get the Latex table
   kable_styling()
 
 
@@ -365,6 +355,11 @@ fe_surf_mean3 <- feols(
     gsdd_bin_21_24 + gsdd_bin_24_27 + gsdd_bin_27_more + 
     total_precip_wet_days_mm + total_precip_wet_days_mm2 + change_group | year + code_insee, df)
 
+# fe_surf_mean4 <- feols(
+#   log(surf_code_group_m2/10000) ~ gsdd_bin_00_03 + gsdd_bin_03_06 + gsdd_bin_06_09 
+#   + gsdd_bin_09_12 + gsdd_bin_12_15 + gsdd_bin_15_18 + gsdd_bin_18_21 + 
+#     gsdd_bin_21_24 + gsdd_bin_24_27 + gsdd_bin_27_more + change_group | year + code_insee, df)
+
 
 mon_dico <- c(
   "gsdd_bin_00_03"  = "Tranche GSDD [0°C - 3°C]",
@@ -387,8 +382,9 @@ mon_dico <- c(
 )
 
 latex <- etable(reg_surf_mean, fe_surf_mean1, fe_surf_mean2, fe_surf_mean3,
+                # fe_surf_mean4,
        dict = mon_dico,
-       tex = T)
+       tex = F)
 
 return(latex)
 }
