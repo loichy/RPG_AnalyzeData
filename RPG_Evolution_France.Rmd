@@ -17,7 +17,7 @@ gc()
 
 # Load package
 if (!require("pacman")) install.packages("pacman")
-pacman::p_load(tidyverse, data.table, here, sf, tmap, units, knitr, kableExtra, plotly, viridis, shiny, vegan, paletteer, readxl, biscale, cowplot, rstatix)
+pacman::p_load(tidyverse, data.table, here, sf, tmap, units, knitr, kableExtra, plotly, viridis, shiny, vegan, paletteer, readxl, biscale, cowplot, rstatix, fixest, dplyr, stringr, modelsummary)
 
 # List directories 
 dir <- list()
@@ -437,7 +437,7 @@ df_legu_culture <- ajout_presence(resultats_legu_culture, 2015)
 
 Et la carte : 
 
-```{r carte biv prot}
+```{r carte biv légumineuse}
 
 final_plot_legu <- carte_biv(df_prot_culture, "des légumineuses")
 
@@ -724,3 +724,859 @@ Enfin, on voit que Bassin parisien voit ses deux indices augmenter ce qui tradui
 
 (2) : Interdiction des néonicotinoïdes en janvier 2023 : chute de la production de betterave. Cela force à l'allongement des rotations courtes traditionnelles pour casser le cycle des bioagresseurs. Cette situation aurait donc pu bénéficier aux olégaineux/protéagineux.
 --> Introduction de cultures résilientes comme le tournesol (qui migre vers les zones Nord et Île-de-France) ou le sarrasin permet de répartir les risques face au manque d'eau et aux sécheresses printanières répétées.
+
+# Analyse économétrique
+
+```{r data prep}
+
+# Load the data: yearly and PRA located data
+
+temp_pra_yearly <- readRDS("D:/Data/ERA5_Data/final/era5_2m_temperature_pra_yearly_1980_2024_reference_1971_2000.rds") %>%
+  select(-quarter, -month, -freq)
+
+precip_pra_yearly <- readRDS("D:/Data/ERA5_Data/final/era5_total_precipitation_pra_yearly_1980_2024_reference_1971_2000.rds") %>%
+  select(-quarter, -month, -freq)
+
+gaez_data <- readRDS("D:/Data/GAEZ_Data/Final/GAEZ_yieldchange_pra.rds")
+
+
+# Adding the RPG cultures to the dataframe
+# 7 crops from the gaez data don't have an equivalent in the rpg groups
+
+correspondance_gaez_rpg <- tribble(
+  ~culture_gaez,        ~groupe_rpg,
+  "Buckwheat",          "Autres céréales",
+  "Foxtail millet",     "Autres céréales",
+  "Oat",                "Autres céréales",
+  "Pearl millet",       "Autres céréales",
+  "Rye",                "Autres céréales",
+  "Sorghum",            "Autres céréales",
+  "Switchgrass",        "Autres céréales",
+  "Tobacco",            "Autres cultures industrielles",
+  "Groundnut",          "Autres oléagineux",
+  "Soybean",            "Autres oléagineux",
+  "Wheat",              "Blé tendre",
+  "Sugar beet",         "Canne à sucre",
+  "Sugar cane",         "Canne à sucre",
+  "Rapeseed",           "Colza",
+  "Miscanthus",         "Divers",
+  "Alfalfa",            "Fourrage",
+  "Napier grass",       "Fourrage",
+  "Cabbage",            "Légumes ou fleurs",
+  "Carrot",             "Légumes ou fleurs",
+  "Onion",              "Légumes ou fleurs",
+  "Phaseolus bean",     "Légumes ou fleurs",
+  "Sweet potato",       "Légumes ou fleurs",
+  "Tomato",             "Légumes ou fleurs",
+  "White potato",       "Légumes ou fleurs",
+  "Yam",                "Légumes ou fleurs",
+  "Chickpea",           "Légumineuses à grains",
+  "Cowpea",             "Légumineuses à grains",
+  "Dry pea",            "Légumineuses à grains",
+  "Gram",               "Légumineuses à grains",
+  "Pigeonpea",          "Légumineuses à grains",
+  "Maize",              "Maïs grain et ensilage",
+  "Olive",              "Oliviers",
+  "Barley",             "Orge",
+  "Grass",              "Pâturages",
+  "Cotton",             "Plantes à fibres",
+  "Flax",               "Plantes à fibres",
+  "Dryland rice",       "Riz",
+  "Wetland rice",       "Riz",
+  "Sunflower",          "Tournesol",
+  "Banana",             "Vergers",
+  "Citrus",             "Vergers",
+  "Cocoa",              "Vergers",
+  "Coffee",             "Vergers"
+) %>%
+  rename("crop" = "culture_gaez")
+
+
+gaez_filtered <- gaez_data %>%
+  full_join(correspondance_gaez_rpg, by = "crop") %>%
+  # We choose to filter by one model, one projection and one variable, if not : 
+  # group_by(model, rcp, variable) %>%
+  filter(model == "IPSL-CM5A-LR", rcp == "rcp6p0", variable == "ylHr0") %>%
+  arrange(pra_code, groupe_rpg) %>%
+  group_by(pra_code, groupe_rpg) %>%
+  # Create weights associated to each GAEZ crop
+  mutate(
+    sum_value_hist_group = sum(value_hist[value_hist > 0], na.rm = T), # Compute for each RPG category to the total cumulated yields from each PRA
+    weight = if_else(sum_value_hist_group > 0,
+                     value_hist / sum_value_hist_group, # Weight corresponds to the proportion of each GAEZ crop yield in the total yield of the RPG category
+                     0)) %>%
+  ungroup()
+
+
+# Aggregate at RPG level while taking into account the weights associated to each GAEZ crops
+gaez_pra <- gaez_filtered %>% 
+  group_by(pra_code, groupe_rpg) %>% 
+  summarise(
+    value_hist_rpg = sum(value_hist * weight, na.rm = TRUE),
+    value_futur_rpg = sum(value * weight, na.rm = TRUE),
+    .groups = "drop"
+  ) %>% 
+  mutate(change_group = (value_futur_rpg - value_hist_rpg)/value_hist_rpg) %>% 
+  unique() %>%
+  rename("LIBELLE_GROUPE_CULTURE" = "groupe_rpg",
+         "code_insee" = "pra_code") %>%
+  mutate(code_insee = str_remove(code_insee, "^0"))
+
+
+# To join the data, the PRA codes cannot start with a 0
+
+RPG_GROUP_pra <- readRDS("D:/Data/RPG_Data/final/RPG_Aggregated_GROUP_Pra.rds") %>%
+  rename(code_insee = "PRA_Code") %>%
+  mutate(code_insee = str_remove(code_insee, "^0")) %>%
+  filter(code_insee != "75000") # We take Paris out - 75000 (only one observation)
+
+climate_pra_yearly <- temp_pra_yearly %>%
+  left_join(precip_pra_yearly, 
+            by = c("code_insee", "name_insee", "year", "reference_period"))
+
+df_pra_yearly <- RPG_GROUP_pra %>%
+  select(-PRA_Lib) %>%
+  left_join(climate_pra_yearly, 
+            by = c("code_insee", "year"), 
+            relationship = "many-to-many") %>%
+  left_join(gaez_pra, by = c("LIBELLE_GROUPE_CULTURE", "code_insee")) %>% 
+  mutate(
+    change_group = replace(change_group, is.na(change_group), 0),
+    value_hist_rpg = replace(value_hist_rpg, is.na(value_hist_rpg), 0),
+    value_futur_rpg = replace(value_futur_rpg, is.na(value_futur_rpg), 0)
+         ) 
+
+# We see that the number of observations isn't multiplied by 3 (eventhough there
+# are 3 differents statistics) : daily_minimum doesn't have as many observations
+# table(temp_pra_yearly$statistic)
+
+# temp_min <- temp_pra_yearly %>%
+#   filter(statistic == "daily_minimum") %>%
+#   select(year, code_insee, statistic)
+# 
+# temp_max <- temp_pra_yearly %>%
+#   filter(statistic == "daily_maximum") %>%
+#   select(year, code_insee, statistic)
+# 
+# check <- temp_min %>%
+#   full_join(temp_max, by = c("year", "code_insee")) %>%
+#   filter(is.na(statistic.x))
+
+```
+
+```{r Testing Data on Basque Country}
+
+# Let's plot a few graphs to test the logic of the data
+# We focus on one PRA to simplify: MONTAGNE BASQUE - 64, code 64140
+
+df_basque <- df_pra_yearly %>%
+  filter(code_insee == "64140") 
+
+ggplot(df_basque %>%
+         filter(statistic.x == "daily_mean"), aes(x = year, y = gsdd_above25)) +
+  geom_line() + theme_bw() +
+  labs(y = "Growing season degre-days > 25°C",
+       x = "Year")
+
+# Exceptionnal temperatures in 2003, 2019 and 2022 
+# Which matches well the 2003, 2019 and 2022 heatwaves
+
+ggplot(df_basque, aes(x = year, y = R95p)) +
+  geom_line() + theme_bw() +
+  labs(y = "Total rainfall above the 95th percentile",
+       x = "Year")
+
+ggplot(df_basque, aes(x = year, y = R99p)) +
+  geom_line() + theme_bw() +
+  labs(y = "Total rainfall above the 99th percentile",
+       x = "Year")
+
+# Pic in 2013: region experienced large floods: consistent
+# The time series makes perfect sense!
+
+```
+
+```{r Building the indicators for future models}
+
+# Bins created in the function directly !
+
+# We want to control for total annual precipitation
+# We multiply by 1000 to have the evolution in mm instead of m
+
+df_pra_yearly$total_precip_wet_days_mm <- 1000*df_pra_yearly$total_precip_wet_days
+
+df_pra <- df_pra_yearly
+
+# We define the lower bounds: to go until gsdd_bin_24_27
+
+bornes_inf <- seq(0, 24, by = 3)
+
+# Loop to create the bins 
+
+for (i in bornes_inf) {
+  inf <- i
+  sup <- i+3
+  
+  # Formatage avec deux chiffres (ex: 00, 03, 06...)
+  col_inf <- paste0("gsdd_above", sprintf("%02d", inf))
+  col_sup <- paste0("gsdd_above", sprintf("%02d", sup))
+  nom_bin <- paste0("gsdd_bin_", sprintf("%02d", inf), "_", sprintf("%02d", sup))
+  
+  # Calcul de la différence 
+  df_pra[[nom_bin]] <- df_pra[[col_inf]] - df_pra[[col_sup]]
+}
+
+# Special case for the last bin: 27_more
+
+df_pra$gsdd_bin_27_more <- df_pra$gsdd_above27
+
+
+mon_dico <- c(
+  "gsdd_bin_00_03"  = "Tranche GSDD [0°C - 3°C]",
+  "gsdd_bin_03_06" = "Tranche GSDD [3°C - 6°C]",
+  "gsdd_bin_06_09" = "Tranche GSDD [6°C - 9°C]",
+  "gsdd_bin_09_12" = "Tranche GSDD [9°C - 12°C]",
+  "gsdd_bin_12_15" = "Tranche GSDD [12°C - 15°C]",
+  "gsdd_bin_15_18" = "Tranche GSDD [15°C - 18°C]",
+  "gsdd_bin_18_21" = "Tranche GSDD [18°C - 21°C]",
+  "gsdd_bin_21_24" = "Tranche GSDD [21°C - 24°C]",
+  "gsdd_bin_24_27" = "Tranche GSDD [24°C - 27°C]",
+  "gsdd_bin_27_more" = "Tranche GSDD [+27°C]",
+  "gsdd_bin_00_10" = "Tranche GSDD [0°C - 10°C]",
+  "gsdd_bin_10_26" = "Tranche GSDD [10°C - 26°C]",
+  "gsdd_bin_26_more" = "Tranche GSDD [+26°C]",
+  "total_precip_wet_days_mm" = "PRCP totales annuelles",
+  "total_precip_wet_days_mm2" = "(PRCP totales annuelles)$^2$",
+  "gsl_days" = "GSL",
+  "gsl_start_doy" = "1st GSL doy",
+  "year" = "Année",
+  "code_insee" = "PRA"
+)
+
+```
+
+```{r Descriptive statistics}
+
+stat_desc <- df_pra %>%
+  filter(statistic.x == "daily_mean") %>%
+  get_summary_stats(gsdd_bin_00_03, gsdd_bin_03_06, gsdd_bin_06_09, 
+                    gsdd_bin_09_12, gsdd_bin_12_15,  gsdd_bin_15_18, 
+                    gsdd_bin_18_21, gsdd_bin_21_24, gsdd_bin_24_27, gsdd_bin_27_more, 
+                    gsl_days, gsl_start_doy, 
+                    total_precip_wet_days_mm,
+                    change_group) %>%
+  select(variable, min, q1, median, mean, q3, max, sd)
+
+df_stat <- df_pra %>%
+  filter(statistic.x == "daily_mean") 
+
+datasummary(
+  ('Tranche GSDD [0°C - 3°C]' = gsdd_bin_00_03) + 
+    ('Tranche GSDD [3°C - 6°C]' = gsdd_bin_03_06) + 
+    ('Tranche GSDD [6°C - 9°C]' = gsdd_bin_06_09) +
+    ('Tranche GSDD [9°C - 12°C]' = gsdd_bin_09_12) + 
+    ('Tranche GSDD [12°C - 15°C]' = gsdd_bin_12_15) +  
+    ('Tranche GSDD [15°C - 18°C]' = gsdd_bin_15_18) + 
+    ('Tranche GSDD [18°C - 21°C]' = gsdd_bin_18_21) + 
+    ('Tranche GSDD [21°C - 24°C]' = gsdd_bin_21_24) + 
+    ('Tranche GSDD [24°C - 27°C]' = gsdd_bin_24_27) + 
+    ('Tranche GSDD [+27°C]' = gsdd_bin_27_more) + 
+    ('GSL' = gsl_days) + 
+    ('1st GSL doy' = gsl_start_doy) + 
+    ('PRCP totales annuelles en mm' = total_precip_wet_days_mm) +
+    ('Taux de croissance des rendements potentiels' = change_group) ~   
+    N + Mean + SD + Median + Min + Max,                            
+  data = df_stat,
+  output = "latex"   
+)
+
+stat_desc %>%
+  mutate(variable = recode(
+    variable,
+    "gsdd_bin_00_03"  = "Tranche GSDD [0°C - 3°C]",
+    "gsdd_bin_03_06" = "Tranche GSDD [3°C - 6°C]",
+    "gsdd_bin_06_09" = "Tranche GSDD [6°C - 9°C]",
+    "gsdd_bin_09_12" = "Tranche GSDD [9°C - 12°C]",
+    "gsdd_bin_12_15" = "Tranche GSDD [12°C - 15°C]",
+    "gsdd_bin_15_18" = "Tranche GSDD [15°C - 18°C]",
+    "gsdd_bin_18_21" = "Tranche GSDD [18°C - 21°C]",
+    "gsdd_bin_21_24" = "Tranche GSDD [21°C - 24°C]",
+    "gsdd_bin_24_27" = "Tranche GSDD [24°C - 27°C]",
+    "gsdd_bin_27_more" = "Tranche GSDD [+27°C]",
+    "total_precip_wet_days_mm" = "PRCP totales annuelles",
+    "total_precip_wet_days_mm2" = "(PRCP totales annuelles)$^2$",
+    "gsl_days" = "GSL",
+    "gsl_start_doy" = "1st GSL doy",
+    "change_group" = "Taux de croissance des rendements potentiels"
+  )) %>%
+  kable(booktabs = T,"latex") %>% # Add "latex" to get the Latex table
+  kable_styling()
+
+```
+
+```{r Model 1 : Planted_surface ~ B*GSDD (3°C bins) }
+
+
+# For the moment, we will only use the daily_mean statistic 
+
+# 1. Surface in ha
+
+model1 <- function (code_group, nom, stat) {
+
+df <- df_pra %>%
+  filter(CODE_GROUP == code_group, statistic.x == stat)
+
+# 1 ha = 10 000m2
+
+# We list all the columns that start with gsdd_bin_
+les_bins <- grep("^gsdd_bin_", names(df), value = TRUE)
+
+# We will want to control for precipitations 
+df$total_precip_wet_days_mm2 <- df$total_precip_wet_days_mm^2
+
+controls <- c("total_precip_wet_days_mm", "total_precip_wet_days_mm2")
+
+# We create the formula: "surf_code_group_m2 ~ gsdd_bin_0_3 + gsdd_bin_03_06 + ..."
+
+reg_surf_mean <- feols(
+  as.formula(paste("log(surf_code_group_m2/10000) ~", paste(les_bins, collapse = " + "))), 
+  df)
+
+# We add year fixed effects
+
+fe_surf_mean1 <- feols(
+  as.formula(paste("log(surf_code_group_m2/10000) ~", paste(les_bins, collapse = " + "), "| year")), 
+  df)
+
+# And PRA fixed effects
+
+fe_surf_mean2 <- feols(
+  as.formula(paste("log(surf_code_group_m2/10000) ~", paste(les_bins, collapse = " + "), "| year + code_insee")),
+  df)
+
+
+# We add precipitation controls
+
+fe_surf_mean3 <- feols(
+  as.formula(paste("log(surf_code_group_m2/10000) ~", paste(les_bins, collapse = " + "), 
+                   "+", paste(controls, collapse = " + "), "| year + code_insee")),
+  df)
+
+# We add potential yield controls
+
+fe_surf_mean4 <- feols(
+  as.formula(paste("log(surf_code_group_m2/10000) ~", paste(les_bins, collapse = " + "), 
+                   "+", paste(controls, collapse = " + "), "+ i(year, change_group)", "| year + code_insee")),
+  df)
+
+
+latex <- etable(reg_surf_mean, fe_surf_mean1, fe_surf_mean2, fe_surf_mean3,
+                fe_surf_mean4,
+       dict = mon_dico,
+       tex = F)
+
+return(list(latex = latex, model = fe_surf_mean4, bins = les_bins))
+}
+
+model1("8", "Protéagineux", "daily_mean")
+
+model1("1", "Blé", "daily_mean")
+
+model1("2", "Maïs", "daily_mean")
+
+model1("21", "Vignes", "daily_mean")
+
+
+
+# 2. Surface in %
+
+model1_bis <- function (code_group, nom, stat) {
+  
+  df <- df_pra %>%
+    filter(CODE_GROUP == code_group, statistic.x == stat)
+  
+  # We list all the columns that start with gsdd_bin_
+  les_bins <- grep("^gsdd_bin_", names(df), value = TRUE)
+  
+  # We will want to control for precipitations 
+  df$total_precip_wet_days_mm2 <- df$total_precip_wet_days_mm^2
+  
+  controls <- c("total_precip_wet_days_mm", "total_precip_wet_days_mm2")
+  
+  # We create the formula: "surf_code_group_m2 ~ gsdd_bin_0_3 + gsdd_bin_03_06 + ..."
+  reg_surf_mean <- feols(
+    as.formula(paste("log(perc_group_m2) ~", paste(les_bins, collapse = " + "))), 
+    df)
+  
+  # We add year fixed effects
+  fe_surf_mean1 <- feols(
+      as.formula(paste("log(perc_group_m2) ~", paste(les_bins, collapse = " + "), "| year")), 
+      df)
+  
+  # And PRA fixed effects
+  fe_surf_mean2 <- feols(
+    as.formula(paste("log(perc_group_m2) ~", paste(les_bins, collapse = " + "), "| year + code_insee")),
+    df)
+  
+  # We add precipitation controls
+  fe_surf_mean3 <- feols(
+    as.formula(paste("log(perc_group_m2) ~", paste(les_bins, collapse = " + "), 
+                     "+", paste(controls, collapse = " + "), "| year + code_insee")),
+    df)
+  
+  # We add potential yield controls
+  
+  fe_surf_mean4 <- feols(
+    as.formula(paste("log(perc_group_m2) ~", paste(les_bins, collapse = " + "), 
+                     "+", paste(controls, collapse = " + "), "+ i(year, change_group)", "| year + code_insee")),
+    df)
+  
+  latex <- etable(reg_surf_mean, fe_surf_mean1, fe_surf_mean2, fe_surf_mean3,
+                  fe_surf_mean4,
+                  dict = mon_dico,
+                  tex = F)
+  
+  return(list(latex = latex, model = fe_surf_mean4, bins = les_bins, type = "step"))
+}
+
+
+model1_bis("8", "Protéagineux", "daily_mean")
+
+model1_bis("1", "Blé", "daily_mean")
+
+model1_bis("2", "Maïs", "daily_mean")
+
+model1_bis("21", "Vignes", "daily_mean")
+
+```
+
+```{r Model n°2 : Planted_surface ~ B*GSL, eval = F}
+
+# 1. Surface in ha
+
+model2 <- function (code_group, nom, stat) {
+  
+  df <- df_pra %>%
+    filter(CODE_GROUP == code_group, statistic.x == stat)
+  
+  # We want to capture non-linear effects
+  df$gsl_days2 <- df$gsl_days^2
+  
+  df$gsl_start_doy2 <- df$gsl_start_doy^2
+
+  reg_surf_mean <- feols(
+    log(surf_code_group_m2/10000) ~ gsl_days + gsl_days2, df)
+  
+  # We add year fixed effects
+  
+  fe_surf_mean1 <- feols(
+    log(surf_code_group_m2/10000) ~ gsl_days + gsl_days2 | year, df)
+  
+  # And PRA fixed effects
+  
+  fe_surf_mean2 <- feols(
+    log(surf_code_group_m2/10000) ~ gsl_days + gsl_days2 | year + code_insee, df)
+  
+  fe_surf_mean3 <- feols(
+    log(surf_code_group_m2/10000) ~ gsl_days + gsl_days2
+    + gsl_start_doy + gsl_start_doy2 | year + code_insee, df)
+  
+
+  mon_dico <- c(
+    "gsl_days" = "GSL",
+    "gsl_days2" = "(GSL)$^2$",
+    "(Intercept)"    = "Constante",
+    "log(surf_code_group_m2/10000)" = paste0("Log(Surface de ", nom, " en ha)"),
+    "year" = "Année",
+    "code_insee" = "PRA",
+    "gsl_start_doy" = "1st GSL doy",
+    "gsl_start_doy2" = "(1st GSL doy)$^2$"
+  )
+  
+  latex <- etable(reg_surf_mean, fe_surf_mean1, fe_surf_mean2, fe_surf_mean3,
+                  dict = mon_dico,
+                  tex = F)
+  
+  return(latex)
+}
+
+model2("8", "Protéagineux", "daily_mean")
+
+model2("1", "Blé", "daily_mean")
+
+model2("2", "Maïs", "daily_mean")
+
+model2("21", "Vignes", "daily_mean")
+
+
+
+# 2. Surface in %
+
+model2_bis <- function (code_group, nom, stat) {
+  
+  df <- df_pra %>%
+    filter(CODE_GROUP == code_group, statistic.x == stat)
+  
+  # We want to capture non-linear effects
+  df$gsl_days2 <- df$gsl_days^2
+
+  df$gsl_start_doy2 <- df$gsl_start_doy^2
+  
+
+  reg_surf_mean <- feols(
+    log(perc_group_m2) ~ gsl_days + gsl_days2, df)
+  
+  # We add year fixed effects
+  
+  fe_surf_mean1 <- feols(
+    log(perc_group_m2) ~ gsl_days + gsl_days2 | year, df)
+  
+  # And PRA fixed effects
+  
+  fe_surf_mean2 <- feols(
+    log(perc_group_m2) ~ gsl_days + gsl_days2 | year + code_insee, df)
+  
+  fe_surf_mean3 <- feols(
+    log(perc_group_m2) ~ gsl_days + gsl_days2
+    + gsl_start_doy + gsl_start_doy2 | year + code_insee, df)
+  
+
+  mon_dico <- c(
+    "gsl_days" = "GSL",
+    "gsl_days2" = "(GSL)$^2$",
+    "(Intercept)"    = "Constante",
+    "log(perc_group_m2)" = paste0("Log(Surface de ", nom, " en %)"),
+    "year" = "Année",
+    "code_insee" = "PRA",
+    "gsl_start_doy" = "1st GSL doy",
+    "gsl_start_doy2" = "(1st GSL doy)$^2$"
+  )
+  
+  latex <- etable(reg_surf_mean, fe_surf_mean1, fe_surf_mean2, fe_surf_mean3,
+                  dict = mon_dico,
+                  tex = F)
+  
+  return(latex)
+}
+
+model2_bis("8", "Protéagineux", "daily_mean")
+
+model2_bis("1", "Blé", "daily_mean")
+
+model2_bis("2", "Maïs", "daily_mean")
+
+model2_bis("21", "Vignes", "daily_mean")
+
+```
+
+```{r Model n°3 : Planted_surface ~ B*GSDD(non linear function)}
+
+# We will tend to use the daily_maximum here
+
+# 1. Surface in ha
+
+model3 <- function (code_group, nom, stat, breaks) {
+  
+  df <- df_pra_yearly %>%
+    filter(CODE_GROUP == code_group, statistic.x == stat)
+  
+  # We define the lower bounds: to go until gsdd_bin_26_more
+  
+  # Loop to create the bins 
+  
+  # Loop to create the bins between breakpoints
+  for (i in seq_along(breaks)) {
+    inf <- breaks[i]
+    sup <- if (i < length(breaks)) breaks[i + 1] else NULL
+    
+    col_inf <- paste0("gsdd_above", sprintf("%02d", inf))
+    
+    if (!is.null(sup)) {
+      # Standard bin between two breakpoints
+      col_sup <- paste0("gsdd_above", sprintf("%02d", sup))
+      nom_bin <- paste0("gsdd_bin_", sprintf("%02d", inf), "_", sprintf("%02d", sup))
+      df[[nom_bin]] <- df[[col_inf]] - df[[col_sup]]
+    } else {
+      # Last bin: above the last breakpoint
+      nom_bin <- paste0("gsdd_bin_", sprintf("%02d", inf), "_more")
+      df[[nom_bin]] <- df[[col_inf]]
+    }
+  }
+  
+  # 1 ha = 10 000m2
+  
+  # We list all the columns that start with gsdd_bin_
+  les_bins <- grep("^gsdd_bin_", names(df), value = TRUE)
+  
+  # We will want to control for precipitations
+  df$total_precip_wet_days_mm2 <- df$total_precip_wet_days_mm^2
+  
+  # We define the controls we want to set
+  
+  controls <- c("total_precip_wet_days_mm", "total_precip_wet_days_mm2")
+  
+  # We create the formula: "surf_code_group_m2 ~ gsdd_bin_0_3 + gsdd_bin_03_06 + ..."
+  
+  reg_surf_mean <- feols(
+    as.formula(paste("log(surf_code_group_m2/10000) ~", paste(les_bins, collapse = " + "))), 
+    df)
+  
+  # We add year fixed effects
+  
+  fe_surf_mean1 <- feols(
+    as.formula(paste("log(surf_code_group_m2/10000) ~", paste(les_bins, collapse = " + "), "| year")), 
+    df)
+  
+  # And PRA fixed effects
+  
+  fe_surf_mean2 <- feols(
+    as.formula(paste("log(surf_code_group_m2/10000) ~", paste(les_bins, collapse = " + "), "| year + code_insee")),
+    df)
+  
+  
+  # We add precipitation and potentiel yields controls
+  
+  fe_surf_mean3 <- feols(
+    as.formula(paste("log(surf_code_group_m2/10000) ~", paste(les_bins, collapse = " + "), 
+                     "+", paste(controls, collapse = " + "), "| year + code_insee")),
+    df)
+  
+  # We add potential yield controls
+  
+  fe_surf_mean4 <- feols(
+    as.formula(paste("log(surf_code_group_m2/10000) ~", paste(les_bins, collapse = " + "), 
+                     "+", paste(controls, collapse = " + "), "+ i(year, change_group)", "| year + code_insee")),
+    df)
+  
+  latex <- etable(reg_surf_mean, fe_surf_mean1, fe_surf_mean2, fe_surf_mean3,
+                  fe_surf_mean4,
+                  dict = mon_dico,
+                  tex = F)
+  
+  return(list(latex = latex, model = fe_surf_mean4, bins = les_bins))
+}
+
+model3("8", "Protéagineux", "daily_maximum", c(0, 10, 26))
+
+model3("1", "Blé", "daily_maximum", c(0, 10, 26))
+
+model3("2", "Maïs", "daily_maximum", c(0, 10, 26))
+
+model3("21", "Vignes", "daily_maximum", c(0, 10, 26))
+
+# 1. Surface in ha
+
+model3_bis <- function (code_group, nom, stat, breaks) {
+  
+  df <- df_pra_yearly %>%
+    filter(CODE_GROUP == code_group, statistic.x == stat)
+  
+  # We define the lower bounds: to go until gsdd_bin_26_more
+  
+  # Loop to create the bins 
+  
+  # Loop to create the bins between breakpoints
+  for (i in seq_along(breaks)) {
+    inf <- breaks[i]
+    sup <- if (i < length(breaks)) breaks[i + 1] else NULL
+    
+    col_inf <- paste0("gsdd_above", sprintf("%02d", inf))
+    
+    if (!is.null(sup)) {
+      # Standard bin between two breakpoints
+      col_sup <- paste0("gsdd_above", sprintf("%02d", sup))
+      nom_bin <- paste0("gsdd_bin_", sprintf("%02d", inf), "_", sprintf("%02d", sup))
+      df[[nom_bin]] <- df[[col_inf]] - df[[col_sup]]
+    } else {
+      # Last bin: above the last breakpoint
+      nom_bin <- paste0("gsdd_bin_", sprintf("%02d", inf), "_more")
+      df[[nom_bin]] <- df[[col_inf]]
+    }
+  }
+  
+  # 1 ha = 10 000m2
+  
+  # We list all the columns that start with gsdd_bin_
+  les_bins <- grep("^gsdd_bin_", names(df), value = TRUE)
+  
+  # We will want to control for precipitations
+  df$total_precip_wet_days_mm2 <- df$total_precip_wet_days_mm^2
+  
+  # We define the controls we want to set
+  
+  controls <- c("total_precip_wet_days_mm", "total_precip_wet_days_mm2")
+  
+  # We create the formula: "perc_group_m2 ~ gsdd_bin_... + ..."
+  
+  reg_surf_mean <- feols(
+    as.formula(paste("log(perc_group_m2) ~", paste(les_bins, collapse = " + "))), 
+    df)
+  
+  # We add year fixed effects
+  
+  fe_surf_mean1 <- feols(
+    as.formula(paste("log(perc_group_m2) ~", paste(les_bins, collapse = " + "), "| year")), 
+    df)
+  
+  # And PRA fixed effects
+  
+  fe_surf_mean2 <- feols(
+    as.formula(paste("log(perc_group_m2) ~", paste(les_bins, collapse = " + "), "| year + code_insee")),
+    df)
+  
+  
+  # We add precipitation controls
+  
+  fe_surf_mean3 <- feols(
+    as.formula(paste("log(perc_group_m2) ~", paste(les_bins, collapse = " + "), 
+                     "+", paste(controls, collapse = " + "), "| year + code_insee")),
+    df)
+  
+  # We add potential yield controls
+  
+  fe_surf_mean4 <- feols(
+    as.formula(paste("log(perc_group_m2) ~", paste(les_bins, collapse = " + "), 
+                     "+", paste(controls, collapse = " + "), "+ i(year, change_group)", "| year + code_insee")),
+    df)
+
+  
+  
+  latex <- etable(reg_surf_mean, fe_surf_mean1, fe_surf_mean2, fe_surf_mean3,
+                  fe_surf_mean4,
+                  dict = mon_dico,
+                  tex = F)
+  
+  return(list(latex = latex, model = fe_surf_mean4, bins = les_bins, type = "step"))
+}
+
+model3_bis("8", "Protéagineux", "daily_maximum", c(0, 10, 26))
+
+model3_bis("1", "Blé", "daily_maximum", c(0, 10, 26))
+
+model3_bis("2", "Maïs", "daily_maximum", c(0, 10, 26))
+
+model3_bis("21", "Vignes", "daily_maximum", c(0, 10, 26))
+
+```
+
+```{r plotting results function example}
+
+plot_superpose <- function(res_model1, res_model3, nom, 
+                           temp_range = c(0, 40)) {
+  
+  # Extraire coefs + CI + midpoints
+  extract_plot_df <- function(res) {
+    model    <- res$model
+    les_bins <- res$bins
+    
+    coefs <- coef(model)[les_bins]
+    ci    <- confint(model, level = 0.95)[les_bins, ]
+    
+    # Midpoint de chaque bin à partir du nom de colonne
+    parse_midpoint <- function(bin_name) {
+      parts  <- gsub("gsdd_bin_", "", bin_name)
+      bounds <- strsplit(parts, "_")[[1]]
+      if (bounds[2] == "more") {
+        return(as.numeric(bounds[1]) + 2)
+      } else {
+        return((as.numeric(bounds[1]) + as.numeric(bounds[2])) / 2)
+      }
+    }
+    
+    midpoints <- sapply(les_bins, parse_midpoint)
+    
+    df_out <- data.frame(
+      midpoint = midpoints,
+      coef     = as.numeric(coefs),
+      ci_low   = as.numeric(ci[, 1]),
+      ci_high  = as.numeric(ci[, 2])
+    )
+    
+    # Centrage comme dans l'article (impact pondéré = 0)
+    center        <- mean(df_out$coef, na.rm = TRUE)
+    df_out$coef   <- df_out$coef   - center
+    df_out$ci_low <- df_out$ci_low - center
+    df_out$ci_high<- df_out$ci_high- center
+    
+    return(df_out)
+  }
+  
+  # Extraire les deux séries
+  df_step <- extract_plot_df(res_model1)  # bins larges → step function bleue
+  df_nl   <- extract_plot_df(res_model3)  # bins fins  → courbe rouge
+  
+  # Pour model3 : interpolation en courbe lisse (comme dans l'article)
+  # On utilise spline sur les midpoints pour obtenir une ligne continue
+  spline_fit <- spline(df_nl$midpoint, df_nl$coef, 
+                       xout = seq(temp_range[1], temp_range[2], by = 0.5))
+  df_nl_smooth <- data.frame(
+    midpoint = spline_fit$x,
+    coef     = spline_fit$y
+  )
+  
+  # Plot 
+  p <- ggplot() +
+    
+    # CI gris du modèle step (model1)
+    geom_ribbon(data = df_step,
+                aes(x = midpoint, ymin = ci_low, ymax = ci_high),
+                fill = "grey70", alpha = 0.35) +
+    
+    # Step function bleue (model1 — bins larges)
+    geom_step(data = df_step,
+              aes(x = midpoint, y = coef),
+              color = "steelblue", linewidth = 0.9, direction = "mid") +
+    
+    # Courbe non linéaire rouge lissée (model3 — bins fins)
+    geom_line(data = df_nl_smooth,
+              aes(x = midpoint, y = coef),
+              color = "red", linewidth = 0.9) +
+    
+    # Points model3 (optionnel, à retirer si trop chargé)
+    # geom_point(data = df_nl, aes(x = midpoint, y = coef),
+    #            color = "red", size = 1.2) +
+    
+    # Ligne zéro
+    geom_hline(yintercept = 0, linetype = "dashed", color = "grey40") +
+    
+    # Légende manuelle comme dans l'article
+    scale_color_manual(
+      name   = NULL,
+      values = c("Step Function" = "steelblue", "Piecewise Linear" = "red"),
+      guide  = guide_legend(override.aes = list(linewidth = 1.2))
+    ) +
+    
+    # Ajouter les deux séries dans la légende via un mapping artificiel
+    geom_line(data = df_step, aes(x = midpoint, y = coef, color = "Step Function"),
+              linewidth = 0) +
+    geom_line(data = df_nl_smooth, aes(x = midpoint, y = coef, color = "Piecewise Linear"),
+              linewidth = 0) +
+    
+    labs(
+      title = nom,
+      x     = "Temperature (Celsius)",
+      y     = "Log Yield (Log Ha)"
+    ) +
+    # coord_cartesian(ylim = c(-0.08, 0.03)) +
+    theme_classic(base_size = 13) +
+    theme(
+      plot.title       = element_text(hjust = 0.5, face = "bold"),
+      legend.position  = c(0.25, 0.25),
+      legend.background= element_rect(fill = "white", color = "grey80"),
+      panel.grid.major.y = element_line(color = "grey92")
+    )
+  
+  return(p)
+}
+
+```
+
+```{r view plot}
+
+res1 <- model1_bis("2", "Maïs", "daily_maximum")
+res3 <- model3_bis("2", "Maïs", "daily_maximum", c(0, 10, 26))
+
+p <- plot_superpose(res1, res3, nom = "Maïs")
+print(p)
+```
+
