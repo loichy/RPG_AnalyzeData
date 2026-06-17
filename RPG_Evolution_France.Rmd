@@ -48,6 +48,20 @@ pra <- read_sf(here(dir$shapefiles, "pra_shp/CommunePra_SFWGS84_WithCell.shp")) 
 
 ```
 
+# Introduction
+
+Le changement climatique est aujourd'hui une réalité que l'on ne peut plus éviter. La question n'est plus de savoir si ses effets se feront sentir, mais comment s'y adapter. D’après la définition du GIEC, cela correspond à adopter une démarche d’ajustement au climat actuel ou attendu, ainsi qu’à ses conséquences. Dans ce contexte, l'agriculture est l'un des secteurs les plus directement exposés puisque les températures, précipitations et la longueur des saisons conditionnent tout ce qu'un agriculteur peut planter et ensuite récolter en fonction des rendements.
+
+C'est dans ce cadre que s'inscrit ce projet de recherche, dont l'objectif est de capturer le rôle du changement climatique dans l'évolution des choix de cultures en France.
+
+Pour cela, on dispose de plusieurs sources de données :
+
+- Le Registre Parcellaire Graphique  (RPG). Ce sont les données déclarées par les agriculteurs dans le cadre de leurs demandes d'aides PAC : ils y renseignent ce qu'ils ont planté, parcelle par parcelle. Cela donne donc une image très fine de l'occupation du sol agricole en France.
+
+- Les données météo de Copernicus. Elles offrent une résolution géographique fine sur les températures et les précipitations. On en a notamment profité pour créer une nouvelle variable : la saison de croissance. Elle est définie comme la période démarrant aux 6 premiers jours consécutifs où la température >5°C au printemps, et se terminant aux 6 premiers jours où <5°C après le 1er juillet. Cette variable capture mieux que la température moyenne la fenêtre réelle disponible pour la croissance des plantes et donc l'évolution des conditions agricoles sous l'effet du changement climatique.
+
+- Enfin, on dispose de données du GAEZ qui fournit des informations sur les risques et les opportunités actuels et futurs liés à la production agricole, sur la demande en eau d'irrigation, ainsi que sur les options en matière de développement des cultures et d'adaptation. Ce modèle prend en compte les contraintes de ressources et d'opportunités en fonction des caractéristiques écophysiologiques des plantes, des exigences climatiques et édaphiques des cultures et s'appuie sur ces éléments pour évaluer l'adéquation et le potentiel de production de chaque type de culture. 
+
 
 # Des petites régions agricoles ? 
 
@@ -72,29 +86,14 @@ print(final_plot_prot$final_plot)
 dev.off()
 ```
 
-On va s'intéresser à l'évolution del cultures résistantes au changement climatique et dont les bienfaits sont relayés par les médias. Ainsi, on va s'intéresser aux cultures de chanvre et lin dans un premier temps (catégorie 7 et/ou 9 du RPG) et aux cultures de betteraves dans un second temps (catégorie 24). 
+On va s'intéresser à l'évolution des cultures résistantes au changement climatique et dont les bienfaits sont relayés par les médias. Ainsi, on va s'intéresser aux cultures de lin et de betteraves dans un premier temps. Dans un second temps, on s'intéressera à des cultures plus historiques et souvent couvertes par la littérature : le blé et le maïs. Enfin, on jettera un rapide coup d'oeil aux vignes, cultures pérennes en expansion dans certaines régions et en disparition dans d'autres.
 
-Identifions les régions où ces cultures ont le plus évolué en s'intéressant au taux de croissance annuel moyen des surfaces totales et en pourcentages et au taux de présence initial (2015 pour l'instant).
-
-Pour le lin, on a : 
-
-LIH : Lin non textile d’hiver (7)
-LIP : Lin non textile de printemps (7)
-LIF : Lin fibres (9)
-
-Et seul pour le chanvre : CHV (9)
-
-Pour la betterave :
-
-BVF : Betterave fourragère (16)
-BTN : Betterave non fourragère / Bette (24)
+On identifie les régions où ces cultures ont le plus évolué en s'intéressant au taux de croissance annuel moyen des surfaces totales et en pourcentages et au taux de présence initial (2015 pour l'instant).
 
 
 ## Préparation des données et fonctions 
 
 On a un shapefiles au niveau d'un maillage SAFRAN mais aussi un autre document qui associe à chaque commune le code PRA et RA : il ne nous reste plus qu'à fusionner selon le code PRA !
-
-On trouve 714 PRA présents avant même la fusion des données alors qu'en ligne, on nous dit qu'il existe 713 PRA (?)
 
 
 ```{r création fonctions}
@@ -243,9 +242,9 @@ final_plot <- ggdraw() +
 }
 ```
 
-## Le lin
+## Des cultures prometteuses
 
-Commençons par le lin : LIH, LIP et LIF : on va sommer les valeurs pour avoir LIN :
+[Citer avantages lin/betterave, cf veille]
 
 ```{r analyse lin}
 
@@ -257,7 +256,6 @@ df_lin_culture <- ajout_presence(resultats_lin_culture, 2015)
 
 ```
 
-On va maintenant construire un graphique bivarié :
 
 ```{r carte biv LIN}
 
@@ -267,11 +265,10 @@ print(final_plot_lin$final_plot)
 
 ```
 
-## Le chanvre
+On remarque que le lin n'était pas cultivé dans toute l'hexagone en 2015 (zones blanches). C'est une culture historiquement développée dans le nord de la France mais dont la surface (en %) tend à y progresser moins vite que dans le reste du pays.
 
-On peut continuer avec le chanvre qui n'a qu'une seule culture : CHV (9)
 
-```{r analyse chanvre}
+```{r analyse chanvre, eval = F}
 
 CHV_pra <- culture_pra(RPG_CULT_pra, c("CHV"))
 
@@ -281,9 +278,7 @@ df_chv_culture <- ajout_presence(resultats_chv_culture, 2015)
 
 ```
 
-Et la carte :
-
-```{r carte biv CHANVRE}
+```{r carte biv CHANVRE, eval = F}
 
 final_plot_chv <- carte_biv(df_chv_culture, "du chanvre")
 
@@ -291,9 +286,6 @@ print(final_plot_chv$final_plot)
 
 ```
 
-## La betterave
-
-On fait la même chose pour la betterave : BVF et BTN
 
 ```{r analyse betterave}
 
@@ -315,7 +307,31 @@ print(final_plot_bet$final_plot)
 
 ```
 
-## Le maïs
+La betterave est plus uniformément cultivée que le lin et fait ressortir des tendances régionales. Le bassin parisien et le nord de la France semblent avoir accordé une place importante à cette culture dans le passé mais semble aujourd'hui y accorder moins d'attention que le reste de la métropole. Nous y reviendrons juste après mais ce phénomène pourrait s'expliquer par l'niterdiction récente des néonicotinoïdes. Au contraire, l'Alsace semble développer cette filière plus que les autres territoires : la présence important de sucrière y joue-t-elle un rôle ?
+
+On peut aussi observer tout ça sur une échelle plus large qu'une culture précise : le groupe RPG des protéagineux :
+
+```{r analyse protéagineux}
+
+PROT_pra <- culture_pra(RPG_CULT_pra, c("FEV", "FVL", "FVT", "LDH", "LDP", "LDT", "MPC", "MPP", "MPT", "PAG", "PHI", "PPR", "PPT"))
+  
+resultats_prot_culture <- analyse_culture(PROT_pra)
+
+df_prot_culture <- ajout_presence(resultats_prot_culture, 2015)
+
+```
+
+```{r carte biv prot}
+
+final_plot_prot <- carte_biv(df_prot_culture, "des protéagineux")
+
+print(final_plot_prot$final_plot)
+
+```
+
+## D'autres cultures importantes
+
+Nous allons brièvement nous intéresser à trois autres cultures qui interviendront bien plus dans l'analyse économétrique pour leur importance historique, leur présence dans la littérature récente et leur implantation spatialement hétérogène : le maïs, le blé et les vignes.
 
 ```{r analyse maïs}
 
@@ -327,7 +343,6 @@ df_mais_culture <- ajout_presence(resultats_mais_culture, 2015)
 
 ```
 
-Et la carte : 
 
 ```{r carte biv maïs}
 
@@ -336,7 +351,6 @@ final_plot_mais <- carte_biv(df_mais_culture, "du maïs")
 print(final_plot_mais$final_plot)
 
 ```
-## Le blé
 
 ```{r analyse blé}
 
@@ -348,8 +362,6 @@ df_ble_culture <- ajout_presence(resultats_ble_culture, 2015)
 
 ```
 
-Et la carte : 
-
 ```{r carte biv blé}
 
 final_plot_ble <- carte_biv(df_ble_culture, "du blé")
@@ -357,8 +369,6 @@ final_plot_ble <- carte_biv(df_ble_culture, "du blé")
 print(final_plot_ble$final_plot)
 
 ```
-
-## La vigne
 
 ```{r analyse vigne}
 
@@ -379,9 +389,11 @@ final_plot_vigne <- carte_biv(df_vigne_culture, "des vignes")
 print(final_plot_vigne$final_plot)
 
 ```
-## Le verger
 
-```{r analyse verger}
+On pourrait s'étonner de ne pas y voir la Bretagne mais cela pourrait s'expliquer par une année de référence (2015, modifiable) trop précoce à l'installation des premières vignes.
+
+
+```{r analyse verger, eval = F}
 
 VERGER_pra <- culture_pra(RPG_CULT_pra, c("AGR", "ANA", "AVO", "BCA", "BCF", "BCI", "BCP", "BCR", "BEA", "BEF", "BEI", "BEP", "BER", "CAC", "CBT", "PFR", "PRU", "PVT", "PWT", "VGD", "VRG"))
   
@@ -391,9 +403,7 @@ df_verger_culture <- ajout_presence(resultats_verger_culture, 2015)
 
 ```
 
-Et la carte : 
-
-```{r carte biv verger}
+```{r carte biv verger, eval = F}
 
 final_plot_verger <- carte_biv(df_verger_culture, "des vergers")
 
@@ -401,31 +411,7 @@ print(final_plot_verger$final_plot)
 
 ```
 
-## Les protéagineux
-
-```{r analyse protéagineux}
-
-PROT_pra <- culture_pra(RPG_CULT_pra, c("FEV", "FVL", "FVT", "LDH", "LDP", "LDT", "MPC", "MPP", "MPT", "PAG", "PHI", "PPR", "PPT"))
-  
-resultats_prot_culture <- analyse_culture(PROT_pra)
-
-df_prot_culture <- ajout_presence(resultats_prot_culture, 2015)
-
-```
-
-Et la carte : 
-
-```{r carte biv prot}
-
-final_plot_prot <- carte_biv(df_prot_culture, "des protéagineux")
-
-print(final_plot_prot$final_plot)
-
-```
-
-## Les légumineuses à grain
-
-```{r analyse légumineuses}
+```{r analyse légumineuses, eval = F}
 
 LEGU_pra <- culture_pra(RPG_CULT_pra, c("LEC", "PCH"))
   
@@ -435,9 +421,8 @@ df_legu_culture <- ajout_presence(resultats_legu_culture, 2015)
 
 ```
 
-Et la carte : 
 
-```{r carte biv légumineuse}
+```{r carte biv légumineuse, eval = F}
 
 final_plot_legu <- carte_biv(df_prot_culture, "des légumineuses")
 
@@ -446,6 +431,11 @@ print(final_plot_legu$final_plot)
 ```
 
 # Des indices de biodiversité 
+
+Pour rappel, s'adapter correspond à adopter une démarche d’ajustement au climat actuel ou attendu, ainsi qu’à ses conséquences.
+L'adaptation en agriculture peut passer par différents mécanismes : planter plus d'une culture (spécialiser) pour pouvoir absorber les chocs de perte de rendements ou planter plus de tout pour devenir plus résilient (diversification).
+
+On cherche à identifier ces différentes trajectoires en étudiant deux indices de biodiversité : l'indice de Shannon et celui de Simpson.
 
 ## Indice de Shannon (1949)
 
@@ -541,12 +531,7 @@ stat_desc %>%
   pack_rows("Simpson", 4, 6)
 ```
 
-
-
-
-Ici, on veut une analyse plus "qualitative" : 
-- Axe X : a diminué, stagné, augmenté
-- Axe Y : la déviation par rapport à la moyenne de valeur de départ 
+Maintenant qu'on comprend un peu plus ce qui compose ces indices, on peut les visualiser via une nouvelle carte bivariée, c'est une analyse plus qualitative.
 
 ```{r fonction carte index}
 
@@ -665,7 +650,7 @@ print(final_plot_simpson$final_plot)
 
 ```
 
-On peut faire un tableau récapitulatif :
+On peut faire un tableau récapitulatif des différentes dynamiques observables :
 
 ```{r tableau récap indices}
 
@@ -700,32 +685,23 @@ kable(df_indices,
 
 ## Suggestions de mécanismes
 
-Bretagne : baisse de l'indice de shannon et simpson : perte en diversité et/ou installation d'une forte dominance. 
 
-(1) Reflète le processus ayant suivi la fin des quota de lait (2008 puis 2015) qui a contribué à renforcer l’inégale répartition des vaches laitières (VL) en France. La taille du cheptel de VL a augmenté de plus de 12000 têtes dans les Départements d’Ille-et-Vilaine et de la Manche et a baissé dans le Sud-Ouest de la France. 
-Avignon & Guige (2023) : polarisation de la production de lait en faveur des grandes exploitations en Bretagne (ie forte présence initiale) : économies d’échelles et progrès technique. 
-
-(2) Recensement agricole 2020 : 
-Réduction des exploitations : 416 054 exploitations contre 514 964 en 2010 mais 
-Augmentation des surfaces par exploitations : Surface Agricole Utile / Nombre d’exploitations agricoles est passé de 52,6 hectares en 2010 à 64,6 hectares en 2020
-
---> Ainsi, production laitière a pris de plus en plus de place en Bretagne (de même avec élevage porçin?)
+En Bretagne et sur une partie du Pays de la Loire, on observe une baisse des deux indices ce qui traduit une perte de diversité culturale et l'installation d'une forte dominance. 
+Cela reflète le processus qui a suivi la fin des quotas laitiers en 2008 puis 2015 qui a renforcé la polarisation de la production de lait en faveur des grandes exploitations bretonnes qui bénéficiaient d'économies d'échelle (Avignon & Guige (2023)) et donc leur spécialisation et la diminution de systèmes agricoles en polyculture et en élevage. Parallèlement, le recensement agricole de 2020 confirme une réduction du nombre d'exploitations, de 515 000 en 2010 à 416 000 en 2020, accompagnée d'une hausse de la surface moyenne par exploitation.
 
 
-Zones montagneuses (Pyrénées, Alpes, Massif Central, Corse, Jura, Vosges) : aucune évolution des indices, pratiques agricoles peu présentes dans ces zones par nature (géologique, terrain compliqué).
+Dans les zones de montagne en revanche (Alpes, Pyrénées, Massif central, Corse) les indices restent stables et bas. Ce n'est pas une surprise : ces zones sont historiquement dédiées au pastoralisme extensif, les terres arables y sont rares et les pratiques agricoles peu présentes par nature.
 
-Les zones de moyenne et haute montagne sont historiquement dédiées au pastoralisme et à l'élevage extensif. Les terres arables y sont rares en raison du relief et du climat. Par conséquent, l'indice reste bas et totalement stable.
+Enfin, le Bassin parisien se distingue par une hausse des deux indices, signalant un enrichissement de la biodiversité culturale. Plusieurs facteurs l'expliquent : la Stratégie nationale pour les protéines végétales de 2020 (pour l'indépendance protéinique face au soja importé) qui vise à doubler les surfaces de légumineuses (1 à 2 millions d’hectares d’ici 2030 (ie 8% de la surface utile) + préservation des surfaces oléagineuses à 2 millions d’hectares)  et l'interdiction des néonicotinoïdes en 2023 qui a mené à la chute de la production de betterave et à l’allongement des rotations courtes traditionnelles (pour casser le cycle des bioagresseurs). Cette situation aurait donc pu bénéficier aux olégaineux/protéagineux. 
+Ainsi, on peut expliquer cet accroissement de la diversité spécifiquement dans cette région par l’existence de grands champs, fertiles et ayant ainsi une bonne productivité pour y développer ces cultures.
 
-
-Enfin, on voit que Bassin parisien voit ses deux indices augmenter ce qui traduit une amélioration globale de la biodiversité. Le milieu s'enrichit en nouvelles espèces et/ou les effectifs deviennent plus homogènes.
-
-(1) : Décembre 2020, Stratégie nationale pour les protéines végétales : doubler surface agricole de protéagineux : 1 à 2 millions d’hectares d’ici 2030 (ie 8% de la surface utile) de légumineuses à graines et fourragères + préservation des surfaces oléagineuses à 2 millions d’hectares aussi.
---> Pour l'indépendance protéinique face au soja importé ! Cela incite donc encore plus à se tourner vers des récoltes de protéagineux et oléagineux.
-
-(2) : Interdiction des néonicotinoïdes en janvier 2023 : chute de la production de betterave. Cela force à l'allongement des rotations courtes traditionnelles pour casser le cycle des bioagresseurs. Cette situation aurait donc pu bénéficier aux olégaineux/protéagineux.
---> Introduction de cultures résilientes comme le tournesol (qui migre vers les zones Nord et Île-de-France) ou le sarrasin permet de répartir les risques face au manque d'eau et aux sécheresses printanières répétées.
+Maintenant qu'on a beaucoup observé et décrit ce qui a pu se passer, on peut passer à l'analyse économétrique.
 
 # Analyse économétrique
+
+Pour rappel, on cherche à capturer le rôle du changement climatique dans l'évolution des choix de cultures en France. 
+
+On s'appuie notamment sur les travaux de Cui (2020), Cui & Xie (2022) et Cui & Zhong (2024). C'est la façon dont les auteurs construisent leurs variables climatiques qui est intéressante dans ces papiers. Plutôt que d'utiliser des données météo annuelles, qui capturent surtout des chocs ponctuels, ils s'appuient sur des moyennes mobiles sur 30 ans et sur la longueur de la saison de croissance. Ce sont des indicateurs de tendance longue qui reflètent le dérèglement climatique structurel plutôt qu'un simple aléa météorologique d'une année sur l'autre. Ces travaux introduisent aussi la notion d'avantage comparatif régional : le fait que le réchauffement ne produit pas les mêmes effets partout. Une région initialement froide peut voir émerger de nouvelles cultures, quand une région déjà chaude subit des pertes. C'est cette hétérogénéité que l'on cherche à exploiter dans notre modèle.
 
 ```{r data prep}
 
@@ -864,6 +840,8 @@ df_pra_yearly <- RPG_GROUP_pra %>%
 
 ```
 
+On peut d'abord tester nos données sur un territoire particulier afin de contrôler la logique des choses. Pour cela, on a choisi de s'intéresser à la PRA "MONTAGNE BASQUE - 64", code 64140.
+
 ```{r Testing Data on Basque Country}
 
 # Let's plot a few graphs to test the logic of the data
@@ -878,8 +856,13 @@ ggplot(df_basque %>%
   labs(y = "Growing season degre-days > 25°C",
        x = "Year")
 
-# Exceptionnal temperatures in 2003, 2019 and 2022 
-# Which matches well the 2003, 2019 and 2022 heatwaves
+```
+
+On observe des températures exceptionnelles en 2003, 2019 et 2022 ce qui correspond bien aux vagues de chaleur de 2003, 2019 et 2022.
+
+De même avec les niveaux de précipitations, le pic de 2013 correspond bien aux inondations importantes qu'ont connues le territoire cette année-là.
+
+```{r test2}
 
 ggplot(df_basque, aes(x = year, y = R95p)) +
   geom_line() + theme_bw() +
@@ -955,6 +938,8 @@ mon_dico <- c(
 
 ```
 
+Voici quelques statistiques descriptives (pour la statistique de température moyenne journalière) pour comprendre avec quelles données on travaille :
+
 ```{r Descriptive statistics}
 
 stat_desc <- df_pra %>%
@@ -1013,6 +998,10 @@ stat_desc %>%
   kable_styling()
 
 ```
+
+Un premier modèle cherche à expliquer la surface d'une culture (en ha ou en %) par des "bins" de degrés-jours de 3°C durant la saison de croissance. Cette régression est complétée par des effets fixes année/PRA et par différentes variables de contrôle (précipitations, rendements potentiels).
+
+Par exemple, voici les résultats de régression pour les surfaces (en %) maïs et les vignes (daily maximum).
 
 ```{r Model 1 : Planted_surface ~ B*GSDD (3°C bins) }
 
@@ -1075,17 +1064,29 @@ latex <- etable(reg_surf_mean, fe_surf_mean1, fe_surf_mean2, fe_surf_mean3,
        dict = mon_dico,
        tex = F)
 
-return(list(latex = latex, model = fe_surf_mean4, bins = les_bins))
+ # Sometimes, fixed-effect singletons are removed : only one observation for a PRA
+  # Let's filter our df, si ourregression results match it perfectly
+  
+  codes_uniques <- df %>% 
+    # On identifie les PRA avec qu'une seule année d'observation
+    count(code_insee) %>%
+    filter(n == 1) %>% 
+    pull(code_insee)
+  
+  df_final <- df %>% 
+    filter(!code_insee %in% codes_uniques)
+
+return(list(df = df_final, latex = latex, model = fe_surf_mean4, 
+            bins = les_bins))
 }
 
-model1("8", "Protéagineux", "daily_mean")
-
-model1("1", "Blé", "daily_mean")
-
-model1("2", "Maïs", "daily_mean")
-
-model1("21", "Vignes", "daily_mean")
-
+# model1("8", "Protéagineux", "daily_mean")
+# 
+# model1("1", "Blé", "daily_mean")
+# 
+# model1("2", "Maïs", "daily_mean")
+# 
+# model1("21", "Vignes", "daily_mean")
 
 
 # 2. Surface in %
@@ -1136,17 +1137,25 @@ model1_bis <- function (code_group, nom, stat) {
                   dict = mon_dico,
                   tex = F)
   
-  return(list(latex = latex, model = fe_surf_mean4, bins = les_bins, type = "step"))
+   # Sometimes, fixed-effect singletons are removed : only one observation for a PRA
+  # Let's filter our df, si ourregression results match it perfectly
+  
+  codes_uniques <- df %>% 
+    # On identifie les PRA avec qu'une seule année d'observation
+    count(code_insee) %>%
+    filter(n == 1) %>% 
+    pull(code_insee)
+  
+  df_final <- df %>% 
+    filter(!code_insee %in% codes_uniques)
+  
+  return(list(df = df_final, latex = latex, model = fe_surf_mean4, 
+              bins = les_bins, type = "step"))
 }
 
-
-model1_bis("8", "Protéagineux", "daily_mean")
-
-model1_bis("1", "Blé", "daily_mean")
-
-model1_bis("2", "Maïs", "daily_mean")
-
-model1_bis("21", "Vignes", "daily_mean")
+model1_bis("2", "Maïs", "daily_maximum")
+ 
+model1_bis("21", "Vignes", "daily_maximum")
 
 ```
 
@@ -1200,15 +1209,6 @@ model2 <- function (code_group, nom, stat) {
   return(latex)
 }
 
-model2("8", "Protéagineux", "daily_mean")
-
-model2("1", "Blé", "daily_mean")
-
-model2("2", "Maïs", "daily_mean")
-
-model2("21", "Vignes", "daily_mean")
-
-
 
 # 2. Surface in %
 
@@ -1259,15 +1259,9 @@ model2_bis <- function (code_group, nom, stat) {
   return(latex)
 }
 
-model2_bis("8", "Protéagineux", "daily_mean")
-
-model2_bis("1", "Blé", "daily_mean")
-
-model2_bis("2", "Maïs", "daily_mean")
-
-model2_bis("21", "Vignes", "daily_mean")
-
 ```
+
+Un autre modèle fais la même chose qu'au premier mais  on utilise des seuils plus larges que celui de 3°C pour les degré-jours durant la saison de croissance. De même, voici les résultats pour les surfaces (en %) du maïs et des vignes (daily maximum) :
 
 ```{r Model n°3 : Planted_surface ~ B*GSDD(non linear function)}
 
@@ -1353,18 +1347,23 @@ model3 <- function (code_group, nom, stat, breaks) {
                   dict = mon_dico,
                   tex = F)
   
-  return(list(latex = latex, model = fe_surf_mean4, bins = les_bins))
+   # Sometimes, fixed-effect singletons are removed : only one observation for a PRA
+  # Let's filter our df, si ourregression results match it perfectly
+  
+  codes_uniques <- df %>% 
+    # On identifie les PRA avec qu'une seule année d'observation
+    count(code_insee) %>%
+    filter(n == 1) %>% 
+    pull(code_insee)
+  
+  df_final <- df %>% 
+    filter(!code_insee %in% codes_uniques)
+  
+  return(list(df = df_final, latex = latex, model = fe_surf_mean4, 
+              bins = les_bins, breaks = breaks))
 }
 
-model3("8", "Protéagineux", "daily_maximum", c(0, 10, 26))
-
-model3("1", "Blé", "daily_maximum", c(0, 10, 26))
-
-model3("2", "Maïs", "daily_maximum", c(0, 10, 26))
-
-model3("21", "Vignes", "daily_maximum", c(0, 10, 26))
-
-# 1. Surface in ha
+# 2. Surface in %
 
 model3_bis <- function (code_group, nom, stat, breaks) {
   
@@ -1446,137 +1445,241 @@ model3_bis <- function (code_group, nom, stat, breaks) {
                   dict = mon_dico,
                   tex = F)
   
-  return(list(latex = latex, model = fe_surf_mean4, bins = les_bins, type = "step"))
+   # Sometimes, fixed-effect singletons are removed : only one observation for a PRA
+  # Let's filter our df, si ourregression results match it perfectly
+  
+  codes_uniques <- df %>% 
+    # On identifie les PRA avec qu'une seule année d'observation
+    count(code_insee) %>%
+    filter(n == 1) %>% 
+    pull(code_insee)
+  
+  df_final <- df %>% 
+    filter(!code_insee %in% codes_uniques)
+  
+  return(list(df = df_final, latex = latex, model = fe_surf_mean4, 
+              bins = les_bins, breaks = breaks, type = "step"))
 }
 
-model3_bis("8", "Protéagineux", "daily_maximum", c(0, 10, 26))
-
-model3_bis("1", "Blé", "daily_maximum", c(0, 10, 26))
-
-model3_bis("2", "Maïs", "daily_maximum", c(0, 10, 26))
-
-model3_bis("21", "Vignes", "daily_maximum", c(0, 10, 26))
+model3_bis("2", "Maïs", "daily_mean", c(0, 10, 26))
+ 
+model3_bis("21", "Vignes", "daily_mean", c(0, 10, 26))
 
 ```
 
-```{r plotting results function example}
+On peut schématiquement visualiser ces résultats (pour le maïs par exemple) :
 
-plot_superpose <- function(res_model1, res_model3, nom, 
-                           temp_range = c(0, 40)) {
+```{r plotting results }
+
+plot_res <- function(res1, res3, measure){
   
-  # Extraire coefs + CI + midpoints
-  extract_plot_df <- function(res) {
-    model    <- res$model
-    les_bins <- res$bins
-    
-    coefs <- coef(model)[les_bins]
-    ci    <- confint(model, level = 0.95)[les_bins, ]
-    
-    # Midpoint de chaque bin à partir du nom de colonne
-    parse_midpoint <- function(bin_name) {
-      parts  <- gsub("gsdd_bin_", "", bin_name)
-      bounds <- strsplit(parts, "_")[[1]]
-      if (bounds[2] == "more") {
-        return(as.numeric(bounds[1]) + 2)
-      } else {
-        return((as.numeric(bounds[1]) + as.numeric(bounds[2])) / 2)
-      }
-    }
-    
-    midpoints <- sapply(les_bins, parse_midpoint)
-    
-    df_out <- data.frame(
-      midpoint = midpoints,
-      coef     = as.numeric(coefs),
-      ci_low   = as.numeric(ci[, 1]),
-      ci_high  = as.numeric(ci[, 2])
-    )
-    
-    # Centrage comme dans l'article (impact pondéré = 0)
-    center        <- mean(df_out$coef, na.rm = TRUE)
-    df_out$coef   <- df_out$coef   - center
-    df_out$ci_low <- df_out$ci_low - center
-    df_out$ci_high<- df_out$ci_high- center
-    
-    return(df_out)
-  }
+  # Extract the useful information
+  coef1 <- coef(res1$model)[grep("gsdd_bin_", names(coef(res1$model)))]
+  se <- se(res1$model)[grep("gsdd_bin_", names(coef(res1$model)))]
   
-  # Extraire les deux séries
-  df_step <- extract_plot_df(res_model1)  # bins larges → step function bleue
-  df_nl   <- extract_plot_df(res_model3)  # bins fins  → courbe rouge
+  coef3 <- coef(res3$model)[grep("gsdd_bin_", names(coef(res3$model)))]
+
+  df_result1 <- data.frame(
+    coef1 = coef1,
+    se = se,
+    bin = seq(0, 29, by = 3)) %>% 
+    mutate(
+      ci95_lo = coef1 - 1.96*se,
+      ci95_hi = coef1 + 1.96 * se,
+      ci99_lo = coef1 - 2.58 * se,
+      ci99_hi = coef1 + 2.58 * se)
   
-  # Pour model3 : interpolation en courbe lisse (comme dans l'article)
-  # On utilise spline sur les midpoints pour obtenir une ligne continue
-  spline_fit <- spline(df_nl$midpoint, df_nl$coef, 
-                       xout = seq(temp_range[1], temp_range[2], by = 0.5))
-  df_nl_smooth <- data.frame(
-    midpoint = spline_fit$x,
-    coef     = spline_fit$y
-  )
+  df_result3 <- data.frame(
+    bin = res3$breaks,
+    coef3 = coef3)
   
-  # Plot 
-  p <- ggplot() +
-    
-    # CI gris du modèle step (model1)
-    geom_ribbon(data = df_step,
-                aes(x = midpoint, ymin = ci_low, ymax = ci_high),
-                fill = "grey70", alpha = 0.35) +
-    
-    # Step function bleue (model1 — bins larges)
-    geom_step(data = df_step,
-              aes(x = midpoint, y = coef),
-              color = "steelblue", linewidth = 0.9, direction = "mid") +
-    
-    # Courbe non linéaire rouge lissée (model3 — bins fins)
-    geom_line(data = df_nl_smooth,
-              aes(x = midpoint, y = coef),
-              color = "red", linewidth = 0.9) +
-    
-    # Points model3 (optionnel, à retirer si trop chargé)
-    # geom_point(data = df_nl, aes(x = midpoint, y = coef),
-    #            color = "red", size = 1.2) +
-    
-    # Ligne zéro
-    geom_hline(yintercept = 0, linetype = "dashed", color = "grey40") +
-    
-    # Légende manuelle comme dans l'article
-    scale_color_manual(
+  # Join all the observations
+  results <- df_result1 %>% 
+    full_join(df_result3, by = "bin")
+  
+  # Plot the image
+  p <- ggplot(results, aes(x = bin)) +
+    # Main line
+    geom_step(aes(y = coef1), color = "navy", linewidth = 1) +
+    # CI (in step way also)
+    geom_step(aes(y = ci99_lo,  linetype = "99%"),   color = "deepskyblue") +
+    geom_step(aes(y = ci99_hi,  linetype = "99%"),   color = "deepskyblue") +
+    geom_step(aes(y = ci95_lo,  linetype = "95%"),   color = "royalblue") +
+    geom_step(aes(y = ci95_hi,  linetype = "95%"),   color = "royalblue") +
+    geom_hline(yintercept = 0, linetype = "dotted") +
+    # Non linear function
+    geom_point(aes(y = coef3), color = "red") +
+    geom_line(aes(y = coef3), color = "red", linewidth = 1, data = subset(results, !is.na(coef3))) +
+    scale_linetype_manual(
       name   = NULL,
-      values = c("Step Function" = "steelblue", "Piecewise Linear" = "red"),
-      guide  = guide_legend(override.aes = list(linewidth = 1.2))
-    ) +
-    
-    # Ajouter les deux séries dans la légende via un mapping artificiel
-    geom_line(data = df_step, aes(x = midpoint, y = coef, color = "Step Function"),
-              linewidth = 0) +
-    geom_line(data = df_nl_smooth, aes(x = midpoint, y = coef, color = "Piecewise Linear"),
-              linewidth = 0) +
-    
-    labs(
-      title = nom,
-      x     = "Temperature (Celsius)",
-      y     = "Log Yield (Log Ha)"
-    ) +
-    # coord_cartesian(ylim = c(-0.08, 0.03)) +
-    theme_classic(base_size = 13) +
-    theme(
-      plot.title       = element_text(hjust = 0.5, face = "bold"),
-      legend.position  = c(0.25, 0.25),
-      legend.background= element_rect(fill = "white", color = "grey80"),
-      panel.grid.major.y = element_line(color = "grey92")
-    )
-  
-  return(p)
+      values = c("95%" = "dashed", "99%" = "dashed"),
+      labels = c("95% CI", "99% CI")) +
+    labs(x = "Temperature (°C)", y = paste0("Log Surface (",measure,")")) +
+    theme_classic()
+
+  return(plot = p)
 }
 
 ```
 
-```{r view plot}
+```{r view plot example}
 
 res1 <- model1_bis("2", "Maïs", "daily_maximum")
 res3 <- model3_bis("2", "Maïs", "daily_maximum", c(0, 10, 26))
 
-p <- plot_superpose(res1, res3, nom = "Maïs")
-print(p)
+plot_res(res1, res3, "%")
+```
+
+Mais, au-delà de l'agriculteur lui-même, une question nous intéresse particulièrement : quels rôles jouent les firmes agroindustrielles dans ces décisions ? Dans quelle mesure décide-t-il seul ? Quand est-ce qu’il peut décider de manière isolée ? Quand-est-ce qu’un transformateur va jouer un rôle prépondérant ? De plus, on sait que les prix peuvent varier localement et donc intervenir dans le processus de décisionde l'agriculteur. Visualiser la répartition des résidus peut potentiellement dévoiler des motifs révélateur de ces mécanismes.
+
+
+Les exemples qui vont suivre sont ceux du maïs (pour 2024 et on prend 2007 comme année de référence).
+
+```{r residual map}
+
+res_map <- function(result, year){
+
+  # We extract the residuals
+  temp <- data.frame(residuals = result$model$residuals) 
+  
+  # We combine them so they match the PRA (+ geometry) and year
+  df_final <- result$df %>% 
+    select(year, code_insee) %>% 
+    bind_cols(temp) %>% 
+    left_join(pra %>% mutate(code_insee = str_remove(PRA_Code, "^0")), 
+            by = "code_insee") %>% 
+    select(-PRA_Code) %>% 
+    filter(year == year) %>% # On ajoute les PRA manquantes
+    right_join(pra %>% mutate(code_insee = str_remove(PRA_Code, "^0")), by = c("code_insee", "geometry"))
+  
+  
+  # We plot the map
+  map <- ggplot(df_final) +
+  geom_sf(aes(fill = residuals, geometry = geometry)) +
+  scale_fill_viridis(option = "H", name = "Residuals", na.value = "white") +
+  theme_void() +
+  labs(title = "Residuals map by PRA")
+  
+  return(map)
+}
+
+
+res_map(res3, 2024)
+
+```
+
+Nous aimerions également observer l'évolution spatiale des résidus au fil du temps, c'est pour cela qu'on fait encore appel à une carte bivariée.
+
+Les résidus d'un modèle oscillent naturellement autour de 0, le TCAM n'est donc pas du tout adapté à ce type de variable. C'est pour cela qu'on va utiliser la pente de régression qui semble bien plus appropriée.
+
+```{r residual biv map}
+
+res_biv_map <- function(result, norm_year){
+  
+  # result <- res3
+  # norm_year <- 2007
+  
+  # We extract the residuals
+  temp <- data.frame(residuals = result$model$residuals) 
+  
+  # We combine them so they match the PRA (+ geometry) and year
+  df_final <- result$df %>% 
+    select(year, code_insee) %>% 
+    bind_cols(temp) %>% 
+    left_join(pra %>% mutate(code_insee = str_remove(PRA_Code, "^0")), 
+            by = "code_insee") %>% 
+    select(-PRA_Code) %>% 
+    arrange(code_insee, year) %>% 
+    group_by(code_insee) %>% 
+    mutate(n_years = max(year) - min(year),
+      trend_res = coef(lm(residuals ~ as.numeric(year)))[2],
+      start_res = residuals[unlist(year) == norm_year][1]) %>% 
+    ungroup() %>% 
+    # On ajoute les PRA manquantes
+    right_join(pra %>% mutate(code_insee = str_remove(PRA_Code, "^0")), by = c("code_insee", "geometry"))
+  
+  df_unique <- df_final %>% 
+    select(code_insee, trend_res) %>% 
+    unique()
+  
+  # Prep data
+  moyenne_trend <- mean(df_unique$trend_res, na.rm = T)
+  
+  df_final$dev_trend_res <- df_final$trend_res - moyenne_trend
+  
+  tercile_start_res <- quantile(df_final$start_res, c(0.333,0.666), na.rm = T)
+  tercile_trend_res <- quantile(df_final$dev_trend_res, c(0.333, 0.666), na.rm = T)
+  
+  # On définit les catégories
+   df_final$x_cat <- cut(df_final$dev_trend_res, 
+             breaks = c(-Inf, tercile_trend_res, Inf), 
+             labels = c("1", "2", "3"))
+  
+  df_final$x_cat2 <- cut(df_final$dev_trend_res,
+             breaks = c(-Inf, tercile_trend_res, Inf),
+             labels = c(
+               paste0("Sous ", round(tercile_trend_res[1],3), "%"), 
+               "Entre", 
+               paste0("Au-dessus ", round(tercile_trend_res[2],3), "%")))
+
+  df_final$y_cat <- cut(df_final$start_res,
+             breaks = c(-Inf, tercile_start_res, Inf),
+             labels = c("1", "2", "3"))
+  
+  df_final$y_cat2 <- cut(df_final$start_res,
+             breaks = c(-Inf, tercile_start_res, Inf),
+             labels = c(
+               paste0("Sous ", 100*round(tercile_start_res[1],3), "%"), 
+               "Entre", 
+               paste0("Au-dessus ", 100*round(tercile_start_res[2],3), "%")))
+  
+  # We plot the map
+  biv_map <- df_final %>%
+    mutate(bi_class = paste0(df_final$x_cat, "-", df_final$y_cat)) %>% 
+     sf::st_as_sf()
+
+  biv_map$bi_class[is.na(df_final$x_cat) | is.na(df_final$y_cat)] <- NA
+
+  map <- ggplot() +
+  geom_sf(data = biv_map, aes(fill = bi_class), 
+          color = "black", size = 0.1, show.legend = FALSE) +
+  bi_scale_fill(pal = "DkViolet", dim = 3, na.value = "white") + # Utilisez votre palette préférée
+  labs(subtitle = "Evolution of residuals") +
+  bi_theme()
+
+  # --- Préparation des labels personnalisés pour la légende ---
+  
+  trend_b1 <- round(tercile_trend_res[1], 2)
+  trend_b2 <- round(tercile_trend_res[2], 2)
+  
+  pres_b1 <- round(100 * tercile_start_res[1], 1)
+  pres_b2 <- round(100 * tercile_start_res[2], 1)
+  
+  # Construction de chaînes de caractères explicites avec flèches
+  
+  lab_x <- paste0("Trend of the residuals (", trend_b1, "% / ", trend_b2, "%)")
+  lab_y <- paste0("Deviation from the regression at first (", pres_b1, "% / ", pres_b2, "%)")
+
+legend <- bi_legend(pal = "DkViolet",
+                    dim = 3,
+                    xlab = lab_x, # Pivot moyenne
+                    ylab = lab_y, # Pivot moyenne 
+                    size = 5)
+
+final_plot <- ggdraw() +
+  draw_plot(map, 0, 0, 1, 1) +
+  draw_plot(legend, 0.05, 0.05, 0.25, 0.25)
+
+  # On retourne la carte finale
+  return(list(final_plot = final_plot,
+              biv_map = biv_map,
+              df_final = df_final
+              ))
+}
+
+
+biv_res3 <- res_biv_map(res3, 2007)
+
+print(biv_res3$final_plot)
 ```
 

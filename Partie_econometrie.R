@@ -371,7 +371,8 @@ latex <- etable(reg_surf_mean, fe_surf_mean1, fe_surf_mean2, fe_surf_mean3,
        dict = mon_dico,
        tex = F)
 
-return(latex)
+return(list(latex = latex, model = fe_surf_mean4, bins = les_bins, type = "step"))
+
 }
 
 model1("8", "Protéagineux", "daily_mean")
@@ -432,7 +433,7 @@ model1_bis <- function (code_group, nom, stat) {
                   dict = mon_dico,
                   tex = F)
   
-  return(latex)
+  return(list(latex = latex, model = fe_surf_mean4, bins = les_bins, type = "step"))
 }
 
 
@@ -647,7 +648,7 @@ model3 <- function (code_group, nom, stat, breaks) {
                   dict = mon_dico,
                   tex = F)
   
-  return(latex)
+  return(list(latex = latex, model = fe_surf_mean4, bins = les_bins, type = "step"))
 }
 
 model3("8", "Protéagineux", "daily_maximum", c(0, 10, 26))
@@ -740,7 +741,20 @@ model3_bis <- function (code_group, nom, stat, breaks) {
                   dict = mon_dico,
                   tex = F)
   
-  return(latex)
+  # Sometimes, fixed-effect singletons are removed : only one observation for a PRA
+  # Let's filter our df, si ourregression results match it perfectly
+  
+  codes_uniques <- df %>% 
+    # On identifie les PRA avec qu'une seule année d'observation
+    count(code_insee) %>%
+    filter(n == 1) %>% 
+    pull(code_insee)
+  
+  df_final <- df %>% 
+    filter(!code_insee %in% codes_uniques)
+  
+  return(list(df = df_final, latex = latex, model = fe_surf_mean4, 
+              bins = les_bins, breaks = breaks, type = "step"))
 }
 
 model3_bis("8", "Protéagineux", "daily_maximum", c(0, 10, 26))
@@ -750,3 +764,94 @@ model3_bis("1", "Blé", "daily_maximum", c(0, 10, 26))
 model3_bis("2", "Maïs", "daily_maximum", c(0, 10, 26))
 
 model3_bis("21", "Vignes", "daily_maximum", c(0, 10, 26))
+
+
+# ==== Plotting the results ====
+
+res1 <- model1_bis("2", "Maïs", "daily_maximum")
+res3 <- model3_bis("2", "Maïs", "daily_maximum", c(0, 10, 26))
+
+
+# 1. Plot the main functions
+
+step_plot <- function(res1, res3){
+  
+  # Extract the useful information
+  coef1 <- coef(res1$model)[grep("gsdd_bin_", names(coef(res1$model)))]
+  se <- se(res1$model)[grep("gsdd_bin_", names(coef(res1$model)))]
+  
+  coef3 <- coef(res3$model)[grep("gsdd_bin_", names(coef(res3$model)))]
+
+  df_result1 <- data.frame(
+    coef1 = coef1,
+    se = se,
+    bin = seq(0, 30, by = 3)) %>% 
+    mutate(
+      ci95_lo = coef1 - 1.96*se,
+      ci95_hi = coef1 + 1.96 * se,
+      ci99_lo = coef1 - 2.58 * se,
+      ci99_hi = coef1 + 2.58 * se)
+  
+  df_result3 <- data.frame(
+    bin = res3$breaks,
+    coef3 = coef3)
+  
+  # Join all the observations
+  results <- df_result1 %>% 
+    full_join(df_result3, by = "bin")
+  
+  # Plot the image
+  p <- ggplot(results, aes(x = bin)) +
+    # Main line
+    geom_step(aes(y = coef1), color = "navy", linewidth = 1) +
+    # CI (in step way also)
+    geom_step(aes(y = ci99_lo,  linetype = "99%"),   color = "deepskyblue") +
+    geom_step(aes(y = ci99_hi,  linetype = "99%"),   color = "deepskyblue") +
+    geom_step(aes(y = ci95_lo,  linetype = "95%"),   color = "royalblue") +
+    geom_step(aes(y = ci95_hi,  linetype = "95%"),   color = "royalblue") +
+    geom_hline(yintercept = 0, linetype = "dotted") +
+    # Non linear function
+    geom_point(aes(y = coef3), color = "red") +
+    geom_line(aes(y = coef3), color = "red", linewidth = 1, data = subset(results, !is.na(coef3))) +
+    scale_linetype_manual(
+      name   = NULL,
+      values = c("95%" = "dashed", "99%" = "dashed"),
+      labels = c("95% CI", "99% CI")) +
+    labs(x = "Temperature (°C)", y = "Log Surface (%)") +
+    theme_classic()
+
+  
+  return(list(df_result = results, 
+              plot = p))
+}
+
+test_mais <- step_plot(res1, res3) # test_mais$plot to extract the plot
+
+
+# 2. Bonus 1 : représentation spatiale des résidus
+
+# Shapefile des PRA
+pra <- read_sf(here(dir$shapefiles, "pra_shp/CommunePra_SFWGS84_WithCell.shp")) %>%
+  select(code_insee = PRA_Code, geometry) %>%
+  filter(!is.na(code_insee)) %>%
+  unique() %>% 
+  mutate(code_insee = str_remove(PRA_Code, "^0"))
+
+# Prenons par exemple les résidus du model3_bis pour le mais :
+
+temp <- data.frame(residuals = res3$model$residuals) 
+
+df_final3 <- res3$df %>% 
+  select(year, code_insee) %>% 
+  bind_cols(temp) %>% 
+  left_join(pra %>% mutate(code_insee = str_remove(PRA_Code, "^0")), 
+            by = "code_insee")
+
+ggplot(df_final3) +
+  geom_sf(aes(fill = residuals, geometry = geometry)) +
+  scale_fill_gradient2(
+    low = "blue", mid = "white", high = "red",
+    midpoint = 0,
+    name = "Residuals") +
+  theme_void() +
+  labs(title = "Residuals map by PRA")
