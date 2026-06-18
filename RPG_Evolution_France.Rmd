@@ -2,13 +2,19 @@
 title: "Evolution des cultures agricoles en France"
 author: "Nathalie Gogni O'Kane"
 date: "`r Sys.Date()`"
-output: html_document
+output:
+  html_document:
+    toc: TRUE
+    toc_float: TRUE
+    theme: readable 
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = F)
 knitr::opts_chunk$set(warning = F)
+knitr::opts_chunk$set(message = F)
 ```
+
 
 ```{r environment preparation, include=FALSE}
 # Clean memory 
@@ -56,9 +62,9 @@ C'est dans ce cadre que s'inscrit ce projet de recherche, dont l'objectif est de
 
 Pour cela, on dispose de plusieurs sources de données :
 
-- Le Registre Parcellaire Graphique  (RPG). Ce sont les données déclarées par les agriculteurs dans le cadre de leurs demandes d'aides PAC : ils y renseignent ce qu'ils ont planté, parcelle par parcelle. Cela donne donc une image très fine de l'occupation du sol agricole en France.
+- Le Registre Parcellaire Graphique  (RPG). Ce sont les données déclarées par les agriculteurs dans le cadre de leurs demandes d'aides PAC : ils y renseignent ce qu'ils ont planté, parcelle par parcelle. Cela donne donc une image très fine de l'occupation du sol agricole en France. On dispose de deux types de classification des cultures : une classification large, on parle de 28 grands groupes de cultures (2007-2024) et une classification plus fine divisée en 350 cultures (2015-2024).
 
-- Les données météo de Copernicus. Elles offrent une résolution géographique fine sur les températures et les précipitations. On en a notamment profité pour créer une nouvelle variable : la saison de croissance. Elle est définie comme la période démarrant aux 6 premiers jours consécutifs où la température >5°C au printemps, et se terminant aux 6 premiers jours où <5°C après le 1er juillet. Cette variable capture mieux que la température moyenne la fenêtre réelle disponible pour la croissance des plantes et donc l'évolution des conditions agricoles sous l'effet du changement climatique.
+- Les données météo de Copernicus. Elles offrent une résolution géographique fine sur les températures (min, max, moyenne quotidiennes) et les précipitations (moyenne quotidienne). On en a notamment profité pour créer une nouvelle variable : la saison de croissance. Elle est définie comme la période démarrant aux 6 premiers jours consécutifs où la température >5°C au printemps et se terminant aux 6 premiers jours où <5°C après le 1er juillet. Cette variable capture mieux que la température moyenne la fenêtre réelle disponible pour la croissance des plantes et donc l'évolution des conditions agricoles sous l'effet du changement climatique.
 
 - Enfin, on dispose de données du GAEZ qui fournit des informations sur les risques et les opportunités actuels et futurs liés à la production agricole, sur la demande en eau d'irrigation, ainsi que sur les options en matière de développement des cultures et d'adaptation. Ce modèle prend en compte les contraintes de ressources et d'opportunités en fonction des caractéristiques écophysiologiques des plantes, des exigences climatiques et édaphiques des cultures et s'appuie sur ces éléments pour évaluer l'adéquation et le potentiel de production de chaque type de culture. 
 
@@ -86,14 +92,16 @@ print(final_plot_prot$final_plot)
 dev.off()
 ```
 
-On va s'intéresser à l'évolution des cultures résistantes au changement climatique et dont les bienfaits sont relayés par les médias. Ainsi, on va s'intéresser aux cultures de lin et de betteraves dans un premier temps. Dans un second temps, on s'intéressera à des cultures plus historiques et souvent couvertes par la littérature : le blé et le maïs. Enfin, on jettera un rapide coup d'oeil aux vignes, cultures pérennes en expansion dans certaines régions et en disparition dans d'autres.
+On va s'intéresser à l'évolution des cultures résistantes au changement climatique et dont les bienfaits sont relayés par les médias : c'est pourquoi on s'intéressera aux cultures de chanvre et de betteraves dans un premier temps. Dans un second temps, on se concentrera sur des cultures plus historiques et souvent couvertes par la littérature : le blé et le maïs. Enfin, on couvrira rapidement les vignes, cultures pérennes en expansion dans certaines régions et en disparition dans d'autres.
 
 On identifie les régions où ces cultures ont le plus évolué en s'intéressant au taux de croissance annuel moyen des surfaces totales et en pourcentages et au taux de présence initial (2015 pour l'instant).
 
 
 ## Préparation des données et fonctions 
 
-On a un shapefiles au niveau d'un maillage SAFRAN mais aussi un autre document qui associe à chaque commune le code PRA et RA : il ne nous reste plus qu'à fusionner selon le code PRA !
+Une des étapes fondamentales a consisté à aggréger les données au niveau des PRA. 
+
+Les données RPG étaient disponibles au niveau des communes. On disposait d'un shapefile (maillage SAFRAN) et d'un autre document qui associait à chaque commune le code PRA et RA. Il ne nous reste plus qu'à fusionner ces informations selon le code PRA et de réaggréger le tout. Une fois fini, on a pu s'amuser à observer l'évolution de différentes culture via des cartes bivariées. 
 
 
 ```{r création fonctions}
@@ -208,7 +216,7 @@ carte_biv <- function(df_culture, nom){
   geom_sf(data = biv_map, aes(fill = bi_class), 
           color = "black", size = 0.1, show.legend = FALSE) +
   bi_scale_fill(pal = "DkViolet", dim = 3, na.value = "white") + # Utilisez votre palette préférée
-  labs(subtitle = paste0("Evolution de la culture ", nom)) +
+  labs(subtitle = paste0("Evolution ", nom)) +
   bi_theme()
 
   # --- Préparation des labels personnalisés pour la légende ---
@@ -244,9 +252,16 @@ final_plot <- ggdraw() +
 
 ## Des cultures prometteuses
 
-[Citer avantages lin/betterave, cf veille]
+[Citer avantages chanvre/betterave, cf veille]
 
-```{r analyse lin}
+Les cultures de chanvre et de betteraves sont souvent citées pour leurs vertus environnementales : 
+- intervention dans le processus de rotation/salissement, nécessite peu d'intrants, économe en eau et réservoir de biodiversité pour l'une
+- rompt le cycle des ravageurs, fixatrice d'azote et de gaz carbonique, revalorisation possible de l'eau extraite, apport de matière organique et préserve la biodiversité pour l'autre.
+
+De plus, leur qualité nutritionnelles et diversité technique en font de véritables atouts pour l'adaptation au changement climatique (isolant, CBD, construction pour le chanvre et débouchés alimentaires et biocarburant pour la betterave).
+
+
+```{r analyse lin, eval = F}
 
 LIN_pra <- culture_pra(RPG_CULT_pra, c("LIH", "LIP", "LIF"))
 
@@ -257,7 +272,7 @@ df_lin_culture <- ajout_presence(resultats_lin_culture, 2015)
 ```
 
 
-```{r carte biv LIN}
+```{r carte biv LIN, eval = F}
 
 final_plot_lin <- carte_biv(df_lin_culture, "du lin")
 
@@ -265,10 +280,8 @@ print(final_plot_lin$final_plot)
 
 ```
 
-On remarque que le lin n'était pas cultivé dans toute l'hexagone en 2015 (zones blanches). C'est une culture historiquement développée dans le nord de la France mais dont la surface (en %) tend à y progresser moins vite que dans le reste du pays.
 
-
-```{r analyse chanvre, eval = F}
+```{r analyse chanvre}
 
 CHV_pra <- culture_pra(RPG_CULT_pra, c("CHV"))
 
@@ -278,14 +291,14 @@ df_chv_culture <- ajout_presence(resultats_chv_culture, 2015)
 
 ```
 
-```{r carte biv CHANVRE, eval = F}
+```{r carte biv CHANVRE}
 
 final_plot_chv <- carte_biv(df_chv_culture, "du chanvre")
 
 print(final_plot_chv$final_plot)
 
 ```
-
+On remarque que le chanvre n'était pas cultivé dans toute l'hexagone en 2015 (zones blanches). C'est une culture historiquement développée dans l'est du bassin parisien (bleu) mais dont la surface (en %) tend à y progresser moins vite que dans d'autres territoires (en rouge).
 
 ```{r analyse betterave}
 
@@ -307,11 +320,10 @@ print(final_plot_bet$final_plot)
 
 ```
 
-La betterave est plus uniformément cultivée que le lin et fait ressortir des tendances régionales. Le bassin parisien et le nord de la France semblent avoir accordé une place importante à cette culture dans le passé mais semble aujourd'hui y accorder moins d'attention que le reste de la métropole. Nous y reviendrons juste après mais ce phénomène pourrait s'expliquer par l'niterdiction récente des néonicotinoïdes. Au contraire, l'Alsace semble développer cette filière plus que les autres territoires : la présence important de sucrière y joue-t-elle un rôle ?
+La betterave est plus uniformément cultivée que le lin et fait ressortir des tendances régionales. Le bassin parisien et le nord de la France semblent avoir accordé une place importante à cette culture dans le passé mais semblent y accorder moins d'attention que le reste de la métropole aujourd'hui. Nous y reviendrons juste après mais ce phénomène pourrait s'expliquer par interdiction récente des néonicotinoïdes. Au contraire, l'Alsace semble développer cette filière plus que les autres territoires : la présence importante de sucrières y joue-t-elle un rôle ?
 
-On peut aussi observer tout ça sur une échelle plus large qu'une culture précise : le groupe RPG des protéagineux :
 
-```{r analyse protéagineux}
+```{r analyse protéagineux, eval = F}
 
 PROT_pra <- culture_pra(RPG_CULT_pra, c("FEV", "FVL", "FVT", "LDH", "LDP", "LDT", "MPC", "MPP", "MPT", "PAG", "PHI", "PPR", "PPT"))
   
@@ -321,7 +333,7 @@ df_prot_culture <- ajout_presence(resultats_prot_culture, 2015)
 
 ```
 
-```{r carte biv prot}
+```{r carte biv prot, eval = F}
 
 final_plot_prot <- carte_biv(df_prot_culture, "des protéagineux")
 
@@ -380,17 +392,27 @@ df_vigne_culture <- ajout_presence(resultats_vigne_culture, 2015)
 
 ```
 
-Et la carte : 
 
 ```{r carte biv vigne}
 
-final_plot_vigne <- carte_biv(df_vigne_culture, "des vignes")
+final_plot_vigne <- carte_biv(df_vigne_culture, "des vignes en 2015")
 
 print(final_plot_vigne$final_plot)
 
 ```
 
-On pourrait s'étonner de ne pas y voir la Bretagne mais cela pourrait s'expliquer par une année de référence (2015, modifiable) trop précoce à l'installation des premières vignes.
+
+```{r carte biv vigne 2021}
+
+df_vigne_culture <- ajout_presence(resultats_vigne_culture, 2021)
+
+final_plot_vigne <- carte_biv(df_vigne_culture, "des vignes en 2021")
+
+print(final_plot_vigne$final_plot)
+
+```
+
+On observe chacune des cartes pour une année de référence paramétrée à 2015, sauf pour les vignes où on a aussi choisi de la montrer avec 2021 pour année de référence : on voit bien les territoires émergeants où la vigne commence à s'implanter (notamment les régions passant du blanc au rouge) !
 
 
 ```{r analyse verger, eval = F}
@@ -437,7 +459,7 @@ L'adaptation en agriculture peut passer par différents mécanismes : planter pl
 
 On cherche à identifier ces différentes trajectoires en étudiant deux indices de biodiversité : l'indice de Shannon et celui de Simpson.
 
-## Indice de Shannon (1949)
+## Indice de Shannon 
 
 Parfois appelé indice de Shannon-Wiener, c'est un indice allant généralement de 0 à 5 : plus il est grand plus une communauté est riche et diversifiée. Cet indice reflète deux dimension de biodiversité : 
 - La richesse des espèces : fait référence au nombre d'espèces
@@ -840,6 +862,8 @@ df_pra_yearly <- RPG_GROUP_pra %>%
 
 ```
 
+## Test des données sur le Pays Basque
+
 On peut d'abord tester nos données sur un territoire particulier afin de contrôler la logique des choses. Pour cela, on a choisi de s'intéresser à la PRA "MONTAGNE BASQUE - 64", code 64140.
 
 ```{r Testing Data on Basque Country}
@@ -869,10 +893,10 @@ ggplot(df_basque, aes(x = year, y = R95p)) +
   labs(y = "Total rainfall above the 95th percentile",
        x = "Year")
 
-ggplot(df_basque, aes(x = year, y = R99p)) +
-  geom_line() + theme_bw() +
-  labs(y = "Total rainfall above the 99th percentile",
-       x = "Year")
+# ggplot(df_basque, aes(x = year, y = R99p)) +
+#   geom_line() + theme_bw() +
+#   labs(y = "Total rainfall above the 99th percentile",
+#        x = "Year")
 
 # Pic in 2013: region experienced large floods: consistent
 # The time series makes perfect sense!
@@ -933,10 +957,13 @@ mon_dico <- c(
   "gsl_days" = "GSL",
   "gsl_start_doy" = "1st GSL doy",
   "year" = "Année",
-  "code_insee" = "PRA"
+  "code_insee" = "PRA",
+  "change_group" = "Taux rendement potentiel"
 )
 
 ```
+
+## Statistiques descriptives
 
 Voici quelques statistiques descriptives (pour la statistique de température moyenne journalière) pour comprendre avec quelles données on travaille :
 
@@ -994,14 +1021,15 @@ stat_desc %>%
     "gsl_start_doy" = "1st GSL doy",
     "change_group" = "Taux de croissance des rendements potentiels"
   )) %>%
-  kable(booktabs = T,"latex") %>% # Add "latex" to get the Latex table
+  kable(booktabs = T) %>% # Add "latex" to get the Latex table
   kable_styling()
 
 ```
+## Modèles économétriques
 
 Un premier modèle cherche à expliquer la surface d'une culture (en ha ou en %) par des "bins" de degrés-jours de 3°C durant la saison de croissance. Cette régression est complétée par des effets fixes année/PRA et par différentes variables de contrôle (précipitations, rendements potentiels).
 
-Par exemple, voici les résultats de régression pour les surfaces (en %) maïs et les vignes (daily maximum).
+De plus, on va pondérer nos observations par la part de la région qui cultive la culture à laquelle on s'intéresse afin d'accorder plus de poids aux régions les plus cultivatrices.
 
 ```{r Model 1 : Planted_surface ~ B*GSDD (3°C bins) }
 
@@ -1011,9 +1039,17 @@ Par exemple, voici les résultats de régression pour les surfaces (en %) maïs 
 # 1. Surface in ha
 
 model1 <- function (code_group, nom, stat) {
-
+  
+  # code_group <- "8"
+  # stat <- "daily_maximum"
+  
 df <- df_pra %>%
-  filter(CODE_GROUP == code_group, statistic.x == stat)
+  filter(CODE_GROUP == code_group, statistic.x == stat) %>%
+  group_by(year) %>% 
+  mutate(weights = surf_code_group_m2/sum(surf_code_group_m2)) %>%
+  # mutate(check = sum(weights)) %>% 
+  ungroup()
+  
 
 # 1 ha = 10 000m2
 
@@ -1029,19 +1065,19 @@ controls <- c("total_precip_wet_days_mm", "total_precip_wet_days_mm2")
 
 reg_surf_mean <- feols(
   as.formula(paste("log(surf_code_group_m2/10000) ~", paste(les_bins, collapse = " + "))), 
-  df)
+  df, weights = df$weights)
 
 # We add year fixed effects
 
 fe_surf_mean1 <- feols(
   as.formula(paste("log(surf_code_group_m2/10000) ~", paste(les_bins, collapse = " + "), "| year")), 
-  df)
+  df, weights = df$weights)
 
 # And PRA fixed effects
 
 fe_surf_mean2 <- feols(
   as.formula(paste("log(surf_code_group_m2/10000) ~", paste(les_bins, collapse = " + "), "| year + code_insee")),
-  df)
+  df, weights = df$weights)
 
 
 # We add precipitation controls
@@ -1049,20 +1085,15 @@ fe_surf_mean2 <- feols(
 fe_surf_mean3 <- feols(
   as.formula(paste("log(surf_code_group_m2/10000) ~", paste(les_bins, collapse = " + "), 
                    "+", paste(controls, collapse = " + "), "| year + code_insee")),
-  df)
+  df, weights = df$weights)
 
 # We add potential yield controls
 
 fe_surf_mean4 <- feols(
   as.formula(paste("log(surf_code_group_m2/10000) ~", paste(les_bins, collapse = " + "), 
                    "+", paste(controls, collapse = " + "), "+ i(year, change_group)", "| year + code_insee")),
-  df)
+  df, weights = df$weights)
 
-
-latex <- etable(reg_surf_mean, fe_surf_mean1, fe_surf_mean2, fe_surf_mean3,
-                fe_surf_mean4,
-       dict = mon_dico,
-       tex = F)
 
  # Sometimes, fixed-effect singletons are removed : only one observation for a PRA
   # Let's filter our df, si ourregression results match it perfectly
@@ -1075,26 +1106,57 @@ latex <- etable(reg_surf_mean, fe_surf_mean1, fe_surf_mean2, fe_surf_mean3,
   
   df_final <- df %>% 
     filter(!code_insee %in% codes_uniques)
+  
+  if(all(df$change_group == 0)){
+    models <- list(
+    "I" = reg_surf_mean,
+    "II" = fe_surf_mean1,
+    "III" = fe_surf_mean2, 
+    "IV" = fe_surf_mean3)
+  } else {
+    models <- list(
+    "I" = reg_surf_mean,
+    "II" = fe_surf_mean1,
+    "III" = fe_surf_mean2, 
+    "IV" = fe_surf_mean3, 
+    "V" = fe_surf_mean4)
+  }
+  
+  models <- list(
+    "I" = reg_surf_mean,
+    "II" = fe_surf_mean1,
+    "III" = fe_surf_mean2, 
+    "IV" = fe_surf_mean3, 
+    "V" = fe_surf_mean4)
+  
+  gof_custom <- tribble(
+  ~raw,              ~clean,          ~fmt,
+  "nobs",            "Num.Obs.",       0,
+  "r.squared",       "R2",             3,
+  "adj.r.squared",   "R2 Adj.",        3,
+  "FE: year",        "FE: year",       0,
+  "FE: code_insee",  "FE: code_insee", 0
+)
+  
+  tab <- modelsummary(models, stars = T, output = "html",
+                      coef_rename = mon_dico,
+                      gof_map = gof_custom,
+                      title = paste0("Evolution de la surface de ", nom, " (en ha)"))
 
-return(list(df = df_final, latex = latex, model = fe_surf_mean4, 
+return(list(df = df_final, model = fe_surf_mean4, tab = tab, 
             bins = les_bins))
 }
-
-# model1("8", "Protéagineux", "daily_mean")
-# 
-# model1("1", "Blé", "daily_mean")
-# 
-# model1("2", "Maïs", "daily_mean")
-# 
-# model1("21", "Vignes", "daily_mean")
-
 
 # 2. Surface in %
 
 model1_bis <- function (code_group, nom, stat) {
   
   df <- df_pra %>%
-    filter(CODE_GROUP == code_group, statistic.x == stat)
+    filter(CODE_GROUP == code_group, statistic.x == stat) %>%
+  group_by(year) %>% 
+  mutate(weights = surf_code_group_m2/sum(surf_code_group_m2)) %>%
+  # mutate(check = sum(weights)) %>% 
+  ungroup()
   
   # We list all the columns that start with gsdd_bin_
   les_bins <- grep("^gsdd_bin_", names(df), value = TRUE)
@@ -1107,35 +1169,31 @@ model1_bis <- function (code_group, nom, stat) {
   # We create the formula: "surf_code_group_m2 ~ gsdd_bin_0_3 + gsdd_bin_03_06 + ..."
   reg_surf_mean <- feols(
     as.formula(paste("log(perc_group_m2) ~", paste(les_bins, collapse = " + "))), 
-    df)
+    df, weights = df$weights)
   
   # We add year fixed effects
   fe_surf_mean1 <- feols(
       as.formula(paste("log(perc_group_m2) ~", paste(les_bins, collapse = " + "), "| year")), 
-      df)
+      df, weights = df$weights)
   
   # And PRA fixed effects
   fe_surf_mean2 <- feols(
     as.formula(paste("log(perc_group_m2) ~", paste(les_bins, collapse = " + "), "| year + code_insee")),
-    df)
+    df, weights = df$weights)
   
   # We add precipitation controls
   fe_surf_mean3 <- feols(
     as.formula(paste("log(perc_group_m2) ~", paste(les_bins, collapse = " + "), 
                      "+", paste(controls, collapse = " + "), "| year + code_insee")),
-    df)
+    df, weights = df$weights)
   
   # We add potential yield controls
   
   fe_surf_mean4 <- feols(
     as.formula(paste("log(perc_group_m2) ~", paste(les_bins, collapse = " + "), 
                      "+", paste(controls, collapse = " + "), "+ i(year, change_group)", "| year + code_insee")),
-    df)
+    df, weights = df$weights)
   
-  latex <- etable(reg_surf_mean, fe_surf_mean1, fe_surf_mean2, fe_surf_mean3,
-                  fe_surf_mean4,
-                  dict = mon_dico,
-                  tex = F)
   
    # Sometimes, fixed-effect singletons are removed : only one observation for a PRA
   # Let's filter our df, si ourregression results match it perfectly
@@ -1149,13 +1207,45 @@ model1_bis <- function (code_group, nom, stat) {
   df_final <- df %>% 
     filter(!code_insee %in% codes_uniques)
   
-  return(list(df = df_final, latex = latex, model = fe_surf_mean4, 
+  if(all(df$change_group == 0)){
+    models <- list(
+    "I" = reg_surf_mean,
+    "II" = fe_surf_mean1,
+    "III" = fe_surf_mean2, 
+    "IV" = fe_surf_mean3)
+  }else{
+    models <- list(
+    "I" = reg_surf_mean,
+    "II" = fe_surf_mean1,
+    "III" = fe_surf_mean2, 
+    "IV" = fe_surf_mean3, 
+    "V" = fe_surf_mean4)
+  }
+  
+  models <- list(
+    "I" = reg_surf_mean,
+    "II" = fe_surf_mean1,
+    "III" = fe_surf_mean2, 
+    "IV" = fe_surf_mean3, 
+    "V" = fe_surf_mean4)
+  
+  gof_custom <- tribble(
+  ~raw,              ~clean,          ~fmt,
+  "nobs",            "Num.Obs.",       0,
+  "r.squared",       "R2",             3,
+  "adj.r.squared",   "R2 Adj.",        3,
+  "FE: year",        "FE: year",       0,
+  "FE: code_insee",  "FE: code_insee", 0
+)
+  
+  tab <- modelsummary(models, stars = T, output = "html",
+                      coef_rename = mon_dico,
+                      gof_map = gof_custom,
+                      title = paste0("Evolution de la surface de ", nom, " (en %)"))
+  
+  return(list(df = df_final, model = fe_surf_mean4, tab = tab,
               bins = les_bins, type = "step"))
 }
-
-model1_bis("2", "Maïs", "daily_maximum")
- 
-model1_bis("21", "Vignes", "daily_maximum")
 
 ```
 
@@ -1208,7 +1298,6 @@ model2 <- function (code_group, nom, stat) {
   
   return(latex)
 }
-
 
 # 2. Surface in %
 
@@ -1272,7 +1361,11 @@ Un autre modèle fais la même chose qu'au premier mais  on utilise des seuils p
 model3 <- function (code_group, nom, stat, breaks) {
   
   df <- df_pra_yearly %>%
-    filter(CODE_GROUP == code_group, statistic.x == stat)
+    filter(CODE_GROUP == code_group, statistic.x == stat) %>%
+  group_by(year) %>% 
+  mutate(weights = surf_code_group_m2/sum(surf_code_group_m2)) %>%
+  # mutate(check = sum(weights)) %>% 
+  ungroup()
   
   # We define the lower bounds: to go until gsdd_bin_26_more
   
@@ -1313,19 +1406,19 @@ model3 <- function (code_group, nom, stat, breaks) {
   
   reg_surf_mean <- feols(
     as.formula(paste("log(surf_code_group_m2/10000) ~", paste(les_bins, collapse = " + "))), 
-    df)
+    df, weights = df$weights)
   
   # We add year fixed effects
   
   fe_surf_mean1 <- feols(
     as.formula(paste("log(surf_code_group_m2/10000) ~", paste(les_bins, collapse = " + "), "| year")), 
-    df)
+    df, weights = df$weights)
   
   # And PRA fixed effects
   
   fe_surf_mean2 <- feols(
     as.formula(paste("log(surf_code_group_m2/10000) ~", paste(les_bins, collapse = " + "), "| year + code_insee")),
-    df)
+    df, weights = df$weights)
   
   
   # We add precipitation and potentiel yields controls
@@ -1333,20 +1426,16 @@ model3 <- function (code_group, nom, stat, breaks) {
   fe_surf_mean3 <- feols(
     as.formula(paste("log(surf_code_group_m2/10000) ~", paste(les_bins, collapse = " + "), 
                      "+", paste(controls, collapse = " + "), "| year + code_insee")),
-    df)
+    df, weights = df$weights)
   
   # We add potential yield controls
   
   fe_surf_mean4 <- feols(
     as.formula(paste("log(surf_code_group_m2/10000) ~", paste(les_bins, collapse = " + "), 
                      "+", paste(controls, collapse = " + "), "+ i(year, change_group)", "| year + code_insee")),
-    df)
+    df, weights = df$weights)
   
-  latex <- etable(reg_surf_mean, fe_surf_mean1, fe_surf_mean2, fe_surf_mean3,
-                  fe_surf_mean4,
-                  dict = mon_dico,
-                  tex = F)
-  
+
    # Sometimes, fixed-effect singletons are removed : only one observation for a PRA
   # Let's filter our df, si ourregression results match it perfectly
   
@@ -1359,7 +1448,43 @@ model3 <- function (code_group, nom, stat, breaks) {
   df_final <- df %>% 
     filter(!code_insee %in% codes_uniques)
   
-  return(list(df = df_final, latex = latex, model = fe_surf_mean4, 
+    if(all(df$change_group == 0)){
+    models <- list(
+    "I" = reg_surf_mean,
+    "II" = fe_surf_mean1,
+    "III" = fe_surf_mean2, 
+    "IV" = fe_surf_mean3)
+  } else {
+    models <- list(
+    "I" = reg_surf_mean,
+    "II" = fe_surf_mean1,
+    "III" = fe_surf_mean2, 
+    "IV" = fe_surf_mean3, 
+    "V" = fe_surf_mean4)
+  }
+  
+  models <- list(
+    "I" = reg_surf_mean,
+    "II" = fe_surf_mean1,
+    "III" = fe_surf_mean2, 
+    "IV" = fe_surf_mean3, 
+    "V" = fe_surf_mean4)
+  
+  gof_custom <- tribble(
+  ~raw,              ~clean,          ~fmt,
+  "nobs",            "Num.Obs.",       0,
+  "r.squared",       "R2",             3,
+  "adj.r.squared",   "R2 Adj.",        3,
+  "FE: year",        "FE: year",       0,
+  "FE: code_insee",  "FE: code_insee", 0
+)
+  
+  tab <- modelsummary(models, stars = T, output = "html",
+                      coef_rename = mon_dico,
+                      gof_map = gof_custom,
+                      title = paste0("Evolution de la surface de ", nom, " (en ha)"))
+  
+  return(list(df = df_final, model = fe_surf_mean4, tab = tab, 
               bins = les_bins, breaks = breaks))
 }
 
@@ -1367,8 +1492,17 @@ model3 <- function (code_group, nom, stat, breaks) {
 
 model3_bis <- function (code_group, nom, stat, breaks) {
   
+  # code_group <- "1"
+  # nom <- "Blé"
+  # stat <- "daily_maximum"
+  # breaks <- c(0, 10, 26)
+  
   df <- df_pra_yearly %>%
-    filter(CODE_GROUP == code_group, statistic.x == stat)
+    filter(CODE_GROUP == code_group, statistic.x == stat) %>%
+  group_by(year) %>% 
+  mutate(weights = surf_code_group_m2/sum(surf_code_group_m2)) %>%
+  # mutate(check = sum(weights)) %>% 
+  ungroup()
   
   # We define the lower bounds: to go until gsdd_bin_26_more
   
@@ -1409,19 +1543,19 @@ model3_bis <- function (code_group, nom, stat, breaks) {
   
   reg_surf_mean <- feols(
     as.formula(paste("log(perc_group_m2) ~", paste(les_bins, collapse = " + "))), 
-    df)
+    df, weights = df$weights)
   
   # We add year fixed effects
   
   fe_surf_mean1 <- feols(
     as.formula(paste("log(perc_group_m2) ~", paste(les_bins, collapse = " + "), "| year")), 
-    df)
+    df, weights = df$weights)
   
   # And PRA fixed effects
   
   fe_surf_mean2 <- feols(
     as.formula(paste("log(perc_group_m2) ~", paste(les_bins, collapse = " + "), "| year + code_insee")),
-    df)
+    df, weights = df$weights)
   
   
   # We add precipitation controls
@@ -1429,24 +1563,18 @@ model3_bis <- function (code_group, nom, stat, breaks) {
   fe_surf_mean3 <- feols(
     as.formula(paste("log(perc_group_m2) ~", paste(les_bins, collapse = " + "), 
                      "+", paste(controls, collapse = " + "), "| year + code_insee")),
-    df)
+    df, weights = df$weights)
   
   # We add potential yield controls
   
   fe_surf_mean4 <- feols(
     as.formula(paste("log(perc_group_m2) ~", paste(les_bins, collapse = " + "), 
                      "+", paste(controls, collapse = " + "), "+ i(year, change_group)", "| year + code_insee")),
-    df)
+    df, weights = df$weights)
 
   
-  
-  latex <- etable(reg_surf_mean, fe_surf_mean1, fe_surf_mean2, fe_surf_mean3,
-                  fe_surf_mean4,
-                  dict = mon_dico,
-                  tex = F)
-  
    # Sometimes, fixed-effect singletons are removed : only one observation for a PRA
-  # Let's filter our df, si ourregression results match it perfectly
+  # Let's filter our df, si our regression results match it perfectly
   
   codes_uniques <- df %>% 
     # On identifie les PRA avec qu'une seule année d'observation
@@ -1457,63 +1585,134 @@ model3_bis <- function (code_group, nom, stat, breaks) {
   df_final <- df %>% 
     filter(!code_insee %in% codes_uniques)
   
-  return(list(df = df_final, latex = latex, model = fe_surf_mean4, 
+  if (all(df$change_group == 0)){
+    models <- list(
+    "I" = reg_surf_mean,
+    "II" = fe_surf_mean1,
+    "III" = fe_surf_mean2, 
+    "IV" = fe_surf_mean3)
+  } else {
+    models <- list(
+    "I" = reg_surf_mean,
+    "II" = fe_surf_mean1,
+    "III" = fe_surf_mean2, 
+    "IV" = fe_surf_mean3, 
+    "V" = fe_surf_mean4)
+  }
+  
+  models <- list(
+    "I" = reg_surf_mean,
+    "II" = fe_surf_mean1,
+    "III" = fe_surf_mean2, 
+    "IV" = fe_surf_mean3, 
+    "V" = fe_surf_mean4)
+  
+  gof_custom <- tribble(
+  ~raw,              ~clean,          ~fmt,
+  "nobs",            "Num.Obs.",       0,
+  "r.squared",       "R2",             3,
+  "adj.r.squared",   "R2 Adj.",        3,
+  "FE: year",        "FE: year",       0,
+  "FE: code_insee",  "FE: code_insee", 0
+)
+  
+  tab <- modelsummary(models, stars = T, output = "html",
+                      coef_rename = mon_dico,
+                      gof_map = gof_custom,
+                      title = paste0("Evolution de la surface de ", nom, " (en %)"))
+  
+  return(list(df = df_final, model = fe_surf_mean4, tab = tab,
               bins = les_bins, breaks = breaks, type = "step"))
 }
 
-model3_bis("2", "Maïs", "daily_mean", c(0, 10, 26))
- 
-model3_bis("21", "Vignes", "daily_mean", c(0, 10, 26))
+```
+
+```{r resultats regressions, results = 'asis'}
+
+cat('<div style="overflow-x: auto;">')
+model1_bis("2", "Maïs", "daily_maximum")$tab
+cat('</div>')
+
+cat('<div style="overflow-x: auto;">')
+model3_bis("2", "Maïs", "daily_maximum", c(0, 10, 26))$tab
+cat('</div>')
+
+
+cat('<div style="overflow-x: auto;">')
+model1_bis("21", "Vignes", "daily_maximum")$tab
+cat('</div>')
+
+cat('<div style="overflow-x: auto;">')
+model3_bis("21", "Vignes", "daily_maximum", c(0, 10, 26))$tab
+cat('</div>')
+
+cat('<div style="overflow-x: auto;">')
+model1_bis("1", "Blé", "daily_maximum")$tab
+cat('</div>')
+
+cat('<div style="overflow-x: auto;">')
+model3_bis("1", "Blé", "daily_maximum",  c(0, 10, 26))$tab
+cat('</div>')
 
 ```
 
 On peut schématiquement visualiser ces résultats (pour le maïs par exemple) :
 
-```{r plotting results }
+```{r plotting results}
 
 plot_res <- function(res1, res3, measure){
-  
+
+  # res1 <- res1
+  # res3 <- res3
+  # measure <- "daily_maximum"
+
   # Extract the useful information
   coef1 <- coef(res1$model)[grep("gsdd_bin_", names(coef(res1$model)))]
-  se <- se(res1$model)[grep("gsdd_bin_", names(coef(res1$model)))]
+  se1 <- se(res1$model)[grep("gsdd_bin_", names(coef(res1$model)))]
   
   coef3 <- coef(res3$model)[grep("gsdd_bin_", names(coef(res3$model)))]
+  se3 <- se(res3$model)[grep("gsdd_bin_", names(coef(res3$model)))]
 
   df_result1 <- data.frame(
     coef1 = coef1,
-    se = se,
+    se1 = se1,
     bin = seq(0, 29, by = 3)) %>% 
     mutate(
-      ci95_lo = coef1 - 1.96*se,
-      ci95_hi = coef1 + 1.96 * se,
-      ci99_lo = coef1 - 2.58 * se,
-      ci99_hi = coef1 + 2.58 * se)
+      ci95_lo1 = coef1 - 1.96*se1,
+      ci95_hi1 = coef1 + 1.96 * se1)
   
   df_result3 <- data.frame(
-    bin = res3$breaks,
-    coef3 = coef3)
+    coef3 = coef3,
+    se3 = se3,
+    bin = res3$breaks) %>% 
+    mutate(
+      ci95_lo3 = coef3 - 1.96*se3,
+      ci95_hi3 = coef3 + 1.96 * se3)
   
   # Join all the observations
   results <- df_result1 %>% 
-    full_join(df_result3, by = "bin")
+    full_join(df_result3, by = "bin") %>% 
+    arrange(bin) %>%
+    fill(coef3, se3, ci95_lo3, ci95_hi3,
+         coef1, se1, ci95_lo1, ci95_hi1) 
   
   # Plot the image
   p <- ggplot(results, aes(x = bin)) +
     # Main line
     geom_step(aes(y = coef1), color = "navy", linewidth = 1) +
     # CI (in step way also)
-    geom_step(aes(y = ci99_lo,  linetype = "99%"),   color = "deepskyblue") +
-    geom_step(aes(y = ci99_hi,  linetype = "99%"),   color = "deepskyblue") +
-    geom_step(aes(y = ci95_lo,  linetype = "95%"),   color = "royalblue") +
-    geom_step(aes(y = ci95_hi,  linetype = "95%"),   color = "royalblue") +
+    geom_step(aes(y = ci95_lo1,  linetype = "95% (1)"),   color = "royalblue") +
+    geom_step(aes(y = ci95_hi1,  linetype = "95% (1)"),   color = "royalblue") +
     geom_hline(yintercept = 0, linetype = "dotted") +
-    # Non linear function
-    geom_point(aes(y = coef3), color = "red") +
-    geom_line(aes(y = coef3), color = "red", linewidth = 1, data = subset(results, !is.na(coef3))) +
+    # "Non linear function"
+    geom_step(aes(y = coef3), color = "red", linewidth = 1) +
+    # CI (in step way also)
+    geom_step(aes(y = ci95_lo3,  linetype = "95% (3)"),   color = "violetred1") +
+    geom_step(aes(y = ci95_hi3,  linetype = "95% (3)"),   color = "violetred1") +
     scale_linetype_manual(
       name   = NULL,
-      values = c("95%" = "dashed", "99%" = "dashed"),
-      labels = c("95% CI", "99% CI")) +
+      values = c("95% (1)" = "dashed", "95% (3)" = "dashed"),
+      labels = c("95% CI", "95% CI")) +
     labs(x = "Temperature (°C)", y = paste0("Log Surface (",measure,")")) +
     theme_classic()
 
@@ -1530,8 +1729,9 @@ res3 <- model3_bis("2", "Maïs", "daily_maximum", c(0, 10, 26))
 plot_res(res1, res3, "%")
 ```
 
-Mais, au-delà de l'agriculteur lui-même, une question nous intéresse particulièrement : quels rôles jouent les firmes agroindustrielles dans ces décisions ? Dans quelle mesure décide-t-il seul ? Quand est-ce qu’il peut décider de manière isolée ? Quand-est-ce qu’un transformateur va jouer un rôle prépondérant ? De plus, on sait que les prix peuvent varier localement et donc intervenir dans le processus de décisionde l'agriculteur. Visualiser la répartition des résidus peut potentiellement dévoiler des motifs révélateur de ces mécanismes.
+## Etude de la répartition des résidus
 
+Mais, au-delà de l'agriculteur lui-même, une question nous intéresse particulièrement : quels rôles jouent les firmes agroindustrielles dans ces décisions ? Dans quelle mesure décide-t-il seul ? Quand est-ce qu’il peut décider de manière isolée ? Quand-est-ce qu’un transformateur va jouer un rôle prépondérant ? De plus, on sait que les prix peuvent varier localement et donc intervenir dans le processus de décisionde l'agriculteur. Visualiser la répartition des résidus peut potentiellement dévoiler des motifs révélateur de ces mécanismes.
 
 Les exemples qui vont suivre sont ceux du maïs (pour 2024 et on prend 2007 comme année de référence).
 
@@ -1563,12 +1763,11 @@ res_map <- function(result, year){
   return(map)
 }
 
-
 res_map(res3, 2024)
 
 ```
 
-Nous aimerions également observer l'évolution spatiale des résidus au fil du temps, c'est pour cela qu'on fait encore appel à une carte bivariée.
+On aimerait également observer l'évolution spatiale des résidus au fil du temps, c'est pour cela qu'on fait encore appel à une carte bivariée.
 
 Les résidus d'un modèle oscillent naturellement autour de 0, le TCAM n'est donc pas du tout adapté à ce type de variable. C'est pour cela qu'on va utiliser la pente de régression qui semble bien plus appropriée.
 
@@ -1584,54 +1783,46 @@ res_biv_map <- function(result, norm_year){
   
   # We combine them so they match the PRA (+ geometry) and year
   df_final <- result$df %>% 
-    select(year, code_insee) %>% 
+    select(year, code_insee, weights) %>% 
     bind_cols(temp) %>% 
     left_join(pra %>% mutate(code_insee = str_remove(PRA_Code, "^0")), 
             by = "code_insee") %>% 
     select(-PRA_Code) %>% 
-    arrange(code_insee, year) %>% 
+    arrange(code_insee, year) %>%
     group_by(code_insee) %>% 
-    mutate(n_years = max(year) - min(year),
-      trend_res = coef(lm(residuals ~ as.numeric(year)))[2],
-      start_res = residuals[unlist(year) == norm_year][1]) %>% 
+    mutate(start_weight = weights[year == min(year)],
+           end_res = residuals[year == max(year)]) %>% 
     ungroup() %>% 
     # On ajoute les PRA manquantes
     right_join(pra %>% mutate(code_insee = str_remove(PRA_Code, "^0")), by = c("code_insee", "geometry"))
   
-  df_unique <- df_final %>% 
-    select(code_insee, trend_res) %>% 
-    unique()
-  
   # Prep data
-  moyenne_trend <- mean(df_unique$trend_res, na.rm = T)
-  
-  df_final$dev_trend_res <- df_final$trend_res - moyenne_trend
-  
-  tercile_start_res <- quantile(df_final$start_res, c(0.333,0.666), na.rm = T)
-  tercile_trend_res <- quantile(df_final$dev_trend_res, c(0.333, 0.666), na.rm = T)
+
+  tercile_start_weight <- quantile(df_final$start_weight, c(0.333,0.666), na.rm = T)
+  tercile_end_res <- quantile(df_final$end_res, c(0.333, 0.666), na.rm = T)
   
   # On définit les catégories
-   df_final$x_cat <- cut(df_final$dev_trend_res, 
-             breaks = c(-Inf, tercile_trend_res, Inf), 
+   df_final$x_cat <- cut(df_final$end_res, 
+             breaks = c(-Inf, tercile_end_res, Inf), 
              labels = c("1", "2", "3"))
   
-  df_final$x_cat2 <- cut(df_final$dev_trend_res,
-             breaks = c(-Inf, tercile_trend_res, Inf),
+  df_final$x_cat2 <- cut(df_final$end_res,
+             breaks = c(-Inf, tercile_end_res, Inf),
              labels = c(
-               paste0("Sous ", round(tercile_trend_res[1],3), "%"), 
+               paste0("Sous ", round(tercile_end_res[1],3)), 
                "Entre", 
-               paste0("Au-dessus ", round(tercile_trend_res[2],3), "%")))
+               paste0("Au-dessus ", round(tercile_end_res[2],3))))
 
-  df_final$y_cat <- cut(df_final$start_res,
-             breaks = c(-Inf, tercile_start_res, Inf),
+  df_final$y_cat <- cut(df_final$start_weight,
+             breaks = c(-Inf, tercile_start_weight, Inf),
              labels = c("1", "2", "3"))
   
-  df_final$y_cat2 <- cut(df_final$start_res,
-             breaks = c(-Inf, tercile_start_res, Inf),
+  df_final$y_cat2 <- cut(df_final$start_weight,
+             breaks = c(-Inf, tercile_start_weight, Inf),
              labels = c(
-               paste0("Sous ", 100*round(tercile_start_res[1],3), "%"), 
+               paste0("Sous ", 100*round(tercile_start_weight[1],3)), 
                "Entre", 
-               paste0("Au-dessus ", 100*round(tercile_start_res[2],3), "%")))
+               paste0("Au-dessus ", 100*round(tercile_start_weight[2],3))))
   
   # We plot the map
   biv_map <- df_final %>%
@@ -1643,24 +1834,24 @@ res_biv_map <- function(result, norm_year){
   map <- ggplot() +
   geom_sf(data = biv_map, aes(fill = bi_class), 
           color = "black", size = 0.1, show.legend = FALSE) +
-  bi_scale_fill(pal = "DkViolet", dim = 3, na.value = "white") + # Utilisez votre palette préférée
+  bi_scale_fill(pal = "PinkGrn", dim = 3, na.value = "white") + # Utilisez votre palette préférée
   labs(subtitle = "Evolution of residuals") +
   bi_theme()
 
   # --- Préparation des labels personnalisés pour la légende ---
   
-  trend_b1 <- round(tercile_trend_res[1], 2)
-  trend_b2 <- round(tercile_trend_res[2], 2)
+  trend_b1 <- round(tercile_end_res[1], 2)
+  trend_b2 <- round(tercile_end_res[2], 2)
   
-  pres_b1 <- round(100 * tercile_start_res[1], 1)
-  pres_b2 <- round(100 * tercile_start_res[2], 1)
+  pres_b1 <- round(100 * tercile_start_weight[1], 1)
+  pres_b2 <- round(100 * tercile_start_weight[2], 1)
   
   # Construction de chaînes de caractères explicites avec flèches
   
-  lab_x <- paste0("Trend of the residuals (", trend_b1, "% / ", trend_b2, "%)")
-  lab_y <- paste0("Deviation from the regression at first (", pres_b1, "% / ", pres_b2, "%)")
+  lab_x <- paste0("Value of residuals in last year (", trend_b1, " / ", trend_b2)
+  lab_y <- paste0("Contribution to crop cultivation (", pres_b1, "% / ", pres_b2, "%)")
 
-legend <- bi_legend(pal = "DkViolet",
+legend <- bi_legend(pal = "PinkGrn",
                     dim = 3,
                     xlab = lab_x, # Pivot moyenne
                     ylab = lab_y, # Pivot moyenne 
@@ -1677,9 +1868,7 @@ final_plot <- ggdraw() +
               ))
 }
 
+res_biv_map(res3, 2007)$final_plot
 
-biv_res3 <- res_biv_map(res3, 2007)
-
-print(biv_res3$final_plot)
 ```
 
