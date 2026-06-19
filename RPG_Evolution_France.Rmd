@@ -68,6 +68,7 @@ Pour cela, on dispose de plusieurs sources de données :
 
 - Enfin, on dispose de données du GAEZ qui fournit des informations sur les risques et les opportunités actuels et futurs liés à la production agricole, sur la demande en eau d'irrigation, ainsi que sur les options en matière de développement des cultures et d'adaptation. Ce modèle prend en compte les contraintes de ressources et d'opportunités en fonction des caractéristiques écophysiologiques des plantes, des exigences climatiques et édaphiques des cultures et s'appuie sur ces éléments pour évaluer l'adéquation et le potentiel de production de chaque type de culture. 
 
+\ 
 
 # Des petites régions agricoles ? 
 
@@ -96,12 +97,13 @@ On va s'intéresser à l'évolution des cultures résistantes au changement clim
 
 On identifie les régions où ces cultures ont le plus évolué en s'intéressant au taux de croissance annuel moyen des surfaces totales et en pourcentages et au taux de présence initial (2015 pour l'instant).
 
+\ 
 
 ## Préparation des données et fonctions 
 
 Une des étapes fondamentales a consisté à aggréger les données au niveau des PRA. 
 
-Les données RPG étaient disponibles au niveau des communes. On disposait d'un shapefile (maillage SAFRAN) et d'un autre document qui associait à chaque commune le code PRA et RA. Il ne nous reste plus qu'à fusionner ces informations selon le code PRA et de réaggréger le tout. Une fois fini, on a pu s'amuser à observer l'évolution de différentes culture via des cartes bivariées. 
+Les données RPG étaient disponibles au niveau des communes. On disposait d'un shapefile des PRA (maillage SAFRAN) et d'un autre document qui associait à chaque commune le code PRA et RA. Il ne nous restait plus qu'à fusionner ces informations selon le code PRA et de réaggréger le tout. Une fois fini, on a pu s'amuser à observer l'évolution de différentes culture via des cartes bivariées. 
 
 
 ```{r création fonctions}
@@ -250,15 +252,15 @@ final_plot <- ggdraw() +
 }
 ```
 
+\ 
+
 ## Des cultures prometteuses
 
-[Citer avantages chanvre/betterave, cf veille]
-
 Les cultures de chanvre et de betteraves sont souvent citées pour leurs vertus environnementales : 
-- intervention dans le processus de rotation/salissement, nécessite peu d'intrants, économe en eau et réservoir de biodiversité pour l'une
-- rompt le cycle des ravageurs, fixatrice d'azote et de gaz carbonique, revalorisation possible de l'eau extraite, apport de matière organique et préserve la biodiversité pour l'autre.
+\- intervention dans le processus de rotation/salissement, nécessite peu d'intrants, économe en eau et réservoir de biodiversité pour l'une
+\- rompt le cycle des ravageurs, fixatrice d'azote et de gaz carbonique, revalorisation possible de l'eau extraite, apport de matière organique et préserve la biodiversité pour l'autre.
 
-De plus, leur qualité nutritionnelles et diversité technique en font de véritables atouts pour l'adaptation au changement climatique (isolant, CBD, construction pour le chanvre et débouchés alimentaires et biocarburant pour la betterave).
+De plus, leurs qualités nutritionnelles et diversité technique en font de véritables atouts pour l'adaptation au changement climatique (isolant, CBD, construction pour le chanvre et débouchés alimentaires et biocarburant pour la betterave).
 
 
 ```{r analyse lin, eval = F}
@@ -298,6 +300,9 @@ final_plot_chv <- carte_biv(df_chv_culture, "du chanvre")
 print(final_plot_chv$final_plot)
 
 ```
+
+\ 
+
 On remarque que le chanvre n'était pas cultivé dans toute l'hexagone en 2015 (zones blanches). C'est une culture historiquement développée dans l'est du bassin parisien (bleu) mais dont la surface (en %) tend à y progresser moins vite que dans d'autres territoires (en rouge).
 
 ```{r analyse betterave}
@@ -310,7 +315,6 @@ df_bet_culture <- ajout_presence(resultats_bet_culture, 2015)
 
 ```
 
-Et la carte : 
 
 ```{r carte biv BETTERAVE}
 
@@ -320,7 +324,9 @@ print(final_plot_bet$final_plot)
 
 ```
 
-La betterave est plus uniformément cultivée que le lin et fait ressortir des tendances régionales. Le bassin parisien et le nord de la France semblent avoir accordé une place importante à cette culture dans le passé mais semblent y accorder moins d'attention que le reste de la métropole aujourd'hui. Nous y reviendrons juste après mais ce phénomène pourrait s'expliquer par interdiction récente des néonicotinoïdes. Au contraire, l'Alsace semble développer cette filière plus que les autres territoires : la présence importante de sucrières y joue-t-elle un rôle ?
+\ 
+
+La betterave est plus uniformément cultivée que le lin et fait ressortir des tendances régionales. Le bassin parisien et le nord de la France semblent avoir accordé une place importante à cette culture dans le passé mais semblent y accorder moins d'attention que le reste de la métropole aujourd'hui. Nous y reviendrons plus tard mais ce phénomène pourrait s'expliquer par l'interdiction récente des néonicotinoïdes. Au contraire, l'Alsace semble développer cette filière plus que les autres territoires : la présence importante de sucrières y joue-t-elle un rôle ?
 
 
 ```{r analyse protéagineux, eval = F}
@@ -341,9 +347,11 @@ print(final_plot_prot$final_plot)
 
 ```
 
+\ 
+
 ## D'autres cultures importantes
 
-Nous allons brièvement nous intéresser à trois autres cultures qui interviendront bien plus dans l'analyse économétrique pour leur importance historique, leur présence dans la littérature récente et leur implantation spatialement hétérogène : le maïs, le blé et les vignes.
+Nous allons brièvement nous intéresser à trois autres cultures. Elles interviendront bien plus dans l'analyse économétrique pour leur importance historique, leur présence dans la littérature récente et leur implantation spatialement hétérogène : le maïs, le blé et les vignes.
 
 ```{r analyse maïs}
 
@@ -412,6 +420,8 @@ print(final_plot_vigne$final_plot)
 
 ```
 
+\ 
+
 On observe chacune des cartes pour une année de référence paramétrée à 2015, sauf pour les vignes où on a aussi choisi de la montrer avec 2021 pour année de référence : on voit bien les territoires émergeants où la vigne commence à s'implanter (notamment les régions passant du blanc au rouge) !
 
 
@@ -452,27 +462,35 @@ print(final_plot_legu$final_plot)
 
 ```
 
+\ 
+
 # Des indices de biodiversité 
 
 Pour rappel, s'adapter correspond à adopter une démarche d’ajustement au climat actuel ou attendu, ainsi qu’à ses conséquences.
-L'adaptation en agriculture peut passer par différents mécanismes : planter plus d'une culture (spécialiser) pour pouvoir absorber les chocs de perte de rendements ou planter plus de tout pour devenir plus résilient (diversification).
+L'adaptation en agriculture peut passer par différents mécanismes : augmentation la surface de plantation d'une culture (spécialiser) pour pouvoir absorber les chocs de perte de rendements ou planter plus de tout pour devenir plus résilient (diversification).
 
 On cherche à identifier ces différentes trajectoires en étudiant deux indices de biodiversité : l'indice de Shannon et celui de Simpson.
 
+\ 
+
 ## Indice de Shannon 
 
-Parfois appelé indice de Shannon-Wiener, c'est un indice allant généralement de 0 à 5 : plus il est grand plus une communauté est riche et diversifiée. Cet indice reflète deux dimension de biodiversité : 
-- La richesse des espèces : fait référence au nombre d'espèces
-- La diversité des espèces : fait référence à une relation entre nombre d'espèces et nombre d'ndividus en son sein.
+Parfois appelé indice de Shannon-Wiener, c'est un indice allant généralement de 0 à 5 : plus il est grand plus une communauté est riche et diversifiée. Cet indice reflète deux dimensions de biodiversité : 
+\- La richesse des espèces : fait référence au nombre d'espèces
+\- La diversité des espèces : fait référence à une relation entre nombre d'espèces et nombre d'individus en son sein.
 
 On dit que < 2 : faible et > 3 : fort (ie le nombre d'espèces est aussi important que la variété et l'uniformité des concentrations de chaque espèce).
+
+\ 
+
 
 ## Indice de Simpson
 
 Si Shannon donne un aperçu de l'uniformité de la diversité sur une parcelle, Simpson met en évidence la présence d'espèces dominantes sur une parcelle.
 
-Plus concrètement, l'indice de Simpson D est la probabilité deux individus choisis au hasard soient de la même espèce : c'est pour cela qu'il prend des valeurs allant de 0 à 1. Ainsi, un $D$ grand signifie qu'une espèce est dominante. C'est pour cette raison que certains auteurs interprètent l'indice $1-D$ : plus il est grand, plus il y a de la diversité. Le package utilisé ici calcule justement $1-D$.
+Plus concrètement, l'indice de Simpson D est la probabilité que deux individus choisis au hasard soient de la même espèce : c'est pour cela qu'il prend des valeurs allant de 0 à 1. Ainsi, un $D$ grand signifie qu'une espèce est dominante. C'est pour cette raison que certains auteurs interprètent l'indice $1-D$ : plus il est grand, plus il y a de la diversité. Le package utilisé ici calcule justement $1-D$.
 
+\ 
 
 ## Calcul des indices 
 
@@ -516,7 +534,7 @@ RPG_wide_pra <- RPG_wide_pra %>%
   ungroup()
 ```
 
-Faisons un tour de ces deux indices en s'intéressant à leurs statistiques descriptives pour les cultures au niveau des PRA
+Faisons un tour de ces deux indices en s'intéressant à leurs statistiques descriptives pour les cultures au niveau des PRA :
 
 ```{r stat desc}
 
@@ -553,7 +571,7 @@ stat_desc %>%
   pack_rows("Simpson", 4, 6)
 ```
 
-Maintenant qu'on comprend un peu plus ce qui compose ces indices, on peut les visualiser via une nouvelle carte bivariée, c'est une analyse plus qualitative.
+Maintenant qu'on comprend un peu plus ce qui compose ces indices, on peut les visualiser via une nouvelle carte bivariée pour une analyse plus qualitative.
 
 ```{r fonction carte index}
 
@@ -672,6 +690,8 @@ print(final_plot_simpson$final_plot)
 
 ```
 
+\ 
+
 On peut faire un tableau récapitulatif des différentes dynamiques observables :
 
 ```{r tableau récap indices}
@@ -694,7 +714,7 @@ df_indices <- data.frame(
 # On génère le tableau stylisé
 
 kable(df_indices, 
-      col.names = c("Évolution de Shannon ($H'$)", "Évolution de Simpson ($1-D$)", "Interprétation écologique (Situation sur le terrain)"),
+      col.names = c("Évolution de Shannon", "Évolution de Simpson ($1-D$)", "Interprétation écologique (Situation sur le terrain)"),
       escape = FALSE, # Permet d'interpréter le LaTeX ($H'$) et le Markdown (**gras**)
       align = c("l", "l", "l"),
       caption = "Grille d'interprétation croisée des indices de Shannon et Simpson") %>%
@@ -705,25 +725,30 @@ kable(df_indices,
   column_spec(2, bold = TRUE, width = "4cm")
 ```
 
+\ 
+
 ## Suggestions de mécanismes
 
 
 En Bretagne et sur une partie du Pays de la Loire, on observe une baisse des deux indices ce qui traduit une perte de diversité culturale et l'installation d'une forte dominance. 
-Cela reflète le processus qui a suivi la fin des quotas laitiers en 2008 puis 2015 qui a renforcé la polarisation de la production de lait en faveur des grandes exploitations bretonnes qui bénéficiaient d'économies d'échelle (Avignon & Guige (2023)) et donc leur spécialisation et la diminution de systèmes agricoles en polyculture et en élevage. Parallèlement, le recensement agricole de 2020 confirme une réduction du nombre d'exploitations, de 515 000 en 2010 à 416 000 en 2020, accompagnée d'une hausse de la surface moyenne par exploitation.
+Cela reflète le processus qui a suivi la fin des quotas laitiers en 2008 puis 2015 qui a renforcé la polarisation de la production de lait en faveur des grandes exploitations bretonnes qui bénéficiaient d'économies d'échelle (Avignon & Guige (2023)). Cela a poussé à leur spécialisation et à la diminution de systèmes agricoles en polyculture et en élevage. Parallèlement, le recensement agricole de 2020 confirme une réduction du nombre d'exploitations, passant de 515 000 en 2010 à 416 000 en 2020 et mécaniquement accompagnée d'une hausse de la surface moyenne par exploitation.
 
 
 Dans les zones de montagne en revanche (Alpes, Pyrénées, Massif central, Corse) les indices restent stables et bas. Ce n'est pas une surprise : ces zones sont historiquement dédiées au pastoralisme extensif, les terres arables y sont rares et les pratiques agricoles peu présentes par nature.
 
-Enfin, le Bassin parisien se distingue par une hausse des deux indices, signalant un enrichissement de la biodiversité culturale. Plusieurs facteurs l'expliquent : la Stratégie nationale pour les protéines végétales de 2020 (pour l'indépendance protéinique face au soja importé) qui vise à doubler les surfaces de légumineuses (1 à 2 millions d’hectares d’ici 2030 (ie 8% de la surface utile) + préservation des surfaces oléagineuses à 2 millions d’hectares)  et l'interdiction des néonicotinoïdes en 2023 qui a mené à la chute de la production de betterave et à l’allongement des rotations courtes traditionnelles (pour casser le cycle des bioagresseurs). Cette situation aurait donc pu bénéficier aux olégaineux/protéagineux. 
-Ainsi, on peut expliquer cet accroissement de la diversité spécifiquement dans cette région par l’existence de grands champs, fertiles et ayant ainsi une bonne productivité pour y développer ces cultures.
+Enfin, le Bassin parisien se distingue par une hausse des deux indices, signalant un enrichissement de la biodiversité culturale. Plusieurs facteurs l'expliquent : la Stratégie nationale pour les protéines végétales de 2020 (pour l'indépendance protéinique face au soja importé) qui vise à doubler les surfaces de légumineuses (1 à 2 millions d’hectares d’ici 2030 (ie 8% de la surface utile) + préservation des surfaces oléagineuses à 2 millions d’hectares)  et l'interdiction des néonicotinoïdes en 2023 qui a mené à la chute de la production de betterave et à l’allongement des rotations courtes traditionnelles (pour casser le cycle des bioagresseurs). Cette situation aurait donc pu bénéficier aux olégaineux et protéagineux. 
+Ainsi, on peut expliquer cet accroissement de la diversité spécifiquement dans cette région par l’existence de grands champs fertiles et suffisamment productifs pour y développer ces cultures.
 
+\ 
 Maintenant qu'on a beaucoup observé et décrit ce qui a pu se passer, on peut passer à l'analyse économétrique.
+
+\ 
 
 # Analyse économétrique
 
 Pour rappel, on cherche à capturer le rôle du changement climatique dans l'évolution des choix de cultures en France. 
 
-On s'appuie notamment sur les travaux de Cui (2020), Cui & Xie (2022) et Cui & Zhong (2024). C'est la façon dont les auteurs construisent leurs variables climatiques qui est intéressante dans ces papiers. Plutôt que d'utiliser des données météo annuelles, qui capturent surtout des chocs ponctuels, ils s'appuient sur des moyennes mobiles sur 30 ans et sur la longueur de la saison de croissance. Ce sont des indicateurs de tendance longue qui reflètent le dérèglement climatique structurel plutôt qu'un simple aléa météorologique d'une année sur l'autre. Ces travaux introduisent aussi la notion d'avantage comparatif régional : le fait que le réchauffement ne produit pas les mêmes effets partout. Une région initialement froide peut voir émerger de nouvelles cultures, quand une région déjà chaude subit des pertes. C'est cette hétérogénéité que l'on cherche à exploiter dans notre modèle.
+On s'inspire notamment des travaux de Cui (2020), Cui & Xie (2022) et Cui & Zhong (2024). C'est la façon dont les auteurs construisent leurs variables climatiques qui est intéressante dans ces papiers. Plutôt que d'utiliser des données météo annuelles, qui capturent surtout des chocs ponctuels, ils s'appuient sur des moyennes mobiles sur 30 ans et sur la longueur de la saison de croissance. Ce sont des indicateurs de tendance longue qui reflètent le dérèglement climatique structurel plutôt qu'un simple aléa météorologique d'une année sur l'autre. Ces travaux introduisent aussi la notion d'avantage comparatif régional (le fait que le réchauffement ne produit pas les mêmes effets partout). Une région initialement froide peut voir émerger de nouvelles cultures quand une région déjà chaude subit des pertes. C'est cette hétérogénéité que l'on cherchera à exploiter dans nos modèles.
 
 ```{r data prep}
 
@@ -862,6 +887,8 @@ df_pra_yearly <- RPG_GROUP_pra %>%
 
 ```
 
+\ 
+
 ## Test des données sur le Pays Basque
 
 On peut d'abord tester nos données sur un territoire particulier afin de contrôler la logique des choses. Pour cela, on a choisi de s'intéresser à la PRA "MONTAGNE BASQUE - 64", code 64140.
@@ -876,9 +903,9 @@ df_basque <- df_pra_yearly %>%
 
 ggplot(df_basque %>%
          filter(statistic.x == "daily_mean"), aes(x = year, y = gsdd_above25)) +
-  geom_line() + theme_bw() +
-  labs(y = "Growing season degre-days > 25°C",
-       x = "Year")
+  geom_line() + theme_classic() +
+  labs(y = "Degrés-jours de la saison de croissance > 25°C",
+       x = "")
 
 ```
 
@@ -889,13 +916,13 @@ De même avec les niveaux de précipitations, le pic de 2013 correspond bien aux
 ```{r test2}
 
 ggplot(df_basque, aes(x = year, y = R95p)) +
-  geom_line() + theme_bw() +
-  labs(y = "Total rainfall above the 95th percentile",
-       x = "Year")
+  geom_line() + theme_classic() +
+  labs(y = "Précipitations totales > 95th percentile",
+       x = "")
 
 # ggplot(df_basque, aes(x = year, y = R99p)) +
 #   geom_line() + theme_bw() +
-#   labs(y = "Total rainfall above the 99th percentile",
+#   labs(y = "Précipitations totales > 99th percentile",
 #        x = "Year")
 
 # Pic in 2013: region experienced large floods: consistent
@@ -953,7 +980,7 @@ mon_dico <- c(
   "gsdd_bin_10_26" = "Tranche GSDD [10°C - 26°C]",
   "gsdd_bin_26_more" = "Tranche GSDD [+26°C]",
   "total_precip_wet_days_mm" = "PRCP totales annuelles",
-  "total_precip_wet_days_mm2" = "(PRCP totales annuelles)$^2$",
+  "total_precip_wet_days_mm2" = "(PRCP totales annuelles)^2",
   "gsl_days" = "GSL",
   "gsl_start_doy" = "1st GSL doy",
   "year" = "Année",
@@ -963,9 +990,11 @@ mon_dico <- c(
 
 ```
 
+\ 
+
 ## Statistiques descriptives
 
-Voici quelques statistiques descriptives (pour la statistique de température moyenne journalière) pour comprendre avec quelles données on travaille :
+Voici quelques statistiques descriptives (pour la température moyenne journalière) pour comprendre avec quelles données on travaille :
 
 ```{r Descriptive statistics}
 
@@ -1025,6 +1054,9 @@ stat_desc %>%
   kable_styling()
 
 ```
+
+\ 
+
 ## Modèles économétriques
 
 Un premier modèle cherche à expliquer la surface d'une culture (en ha ou en %) par des "bins" de degrés-jours de 3°C durant la saison de croissance. Cette régression est complétée par des effets fixes année/PRA et par différentes variables de contrôle (précipitations, rendements potentiels).
@@ -1122,13 +1154,6 @@ fe_surf_mean4 <- feols(
     "V" = fe_surf_mean4)
   }
   
-  models <- list(
-    "I" = reg_surf_mean,
-    "II" = fe_surf_mean1,
-    "III" = fe_surf_mean2, 
-    "IV" = fe_surf_mean3, 
-    "V" = fe_surf_mean4)
-  
   gof_custom <- tribble(
   ~raw,              ~clean,          ~fmt,
   "nobs",            "Num.Obs.",       0,
@@ -1141,7 +1166,7 @@ fe_surf_mean4 <- feols(
   tab <- modelsummary(models, stars = T, output = "html",
                       coef_rename = mon_dico,
                       gof_map = gof_custom,
-                      title = paste0("Evolution de la surface de ", nom, " (en ha)"))
+                      title = paste0("Evolution du log de la surface de ", nom, " (en ha)"))
 
 return(list(df = df_final, model = fe_surf_mean4, tab = tab, 
             bins = les_bins))
@@ -1222,13 +1247,6 @@ model1_bis <- function (code_group, nom, stat) {
     "V" = fe_surf_mean4)
   }
   
-  models <- list(
-    "I" = reg_surf_mean,
-    "II" = fe_surf_mean1,
-    "III" = fe_surf_mean2, 
-    "IV" = fe_surf_mean3, 
-    "V" = fe_surf_mean4)
-  
   gof_custom <- tribble(
   ~raw,              ~clean,          ~fmt,
   "nobs",            "Num.Obs.",       0,
@@ -1241,7 +1259,7 @@ model1_bis <- function (code_group, nom, stat) {
   tab <- modelsummary(models, stars = T, output = "html",
                       coef_rename = mon_dico,
                       gof_map = gof_custom,
-                      title = paste0("Evolution de la surface de ", nom, " (en %)"))
+                      title = paste0("Evolution du log de la surface de ", nom, " (en %)"))
   
   return(list(df = df_final, model = fe_surf_mean4, tab = tab,
               bins = les_bins, type = "step"))
@@ -1350,7 +1368,7 @@ model2_bis <- function (code_group, nom, stat) {
 
 ```
 
-Un autre modèle fais la même chose qu'au premier mais  on utilise des seuils plus larges que celui de 3°C pour les degré-jours durant la saison de croissance. De même, voici les résultats pour les surfaces (en %) du maïs et des vignes (daily maximum) :
+Un autre modèle fait la même chose qu'au premier mais utilise des seuils plus larges que ceux de 3°C pour les degrés-jours de la saison de croissance. De même, voici les résultats pour les surfaces (en %) du maïs, des vignes et du blé (maximum quotidien) :
 
 ```{r Model n°3 : Planted_surface ~ B*GSDD(non linear function)}
 
@@ -1463,12 +1481,6 @@ model3 <- function (code_group, nom, stat, breaks) {
     "V" = fe_surf_mean4)
   }
   
-  models <- list(
-    "I" = reg_surf_mean,
-    "II" = fe_surf_mean1,
-    "III" = fe_surf_mean2, 
-    "IV" = fe_surf_mean3, 
-    "V" = fe_surf_mean4)
   
   gof_custom <- tribble(
   ~raw,              ~clean,          ~fmt,
@@ -1482,7 +1494,7 @@ model3 <- function (code_group, nom, stat, breaks) {
   tab <- modelsummary(models, stars = T, output = "html",
                       coef_rename = mon_dico,
                       gof_map = gof_custom,
-                      title = paste0("Evolution de la surface de ", nom, " (en ha)"))
+                      title = paste0("Evolution du log de la surface de ", nom, " (en ha)"))
   
   return(list(df = df_final, model = fe_surf_mean4, tab = tab, 
               bins = les_bins, breaks = breaks))
@@ -1492,8 +1504,8 @@ model3 <- function (code_group, nom, stat, breaks) {
 
 model3_bis <- function (code_group, nom, stat, breaks) {
   
-  # code_group <- "1"
-  # nom <- "Blé"
+  # code_group <- "21"
+  # nom <- "vignes"
   # stat <- "daily_maximum"
   # breaks <- c(0, 10, 26)
   
@@ -1600,12 +1612,6 @@ model3_bis <- function (code_group, nom, stat, breaks) {
     "V" = fe_surf_mean4)
   }
   
-  models <- list(
-    "I" = reg_surf_mean,
-    "II" = fe_surf_mean1,
-    "III" = fe_surf_mean2, 
-    "IV" = fe_surf_mean3, 
-    "V" = fe_surf_mean4)
   
   gof_custom <- tribble(
   ~raw,              ~clean,          ~fmt,
@@ -1619,7 +1625,7 @@ model3_bis <- function (code_group, nom, stat, breaks) {
   tab <- modelsummary(models, stars = T, output = "html",
                       coef_rename = mon_dico,
                       gof_map = gof_custom,
-                      title = paste0("Evolution de la surface de ", nom, " (en %)"))
+                      title = paste0("Evolution du log de la surface de ", nom, " (en %)"))
   
   return(list(df = df_final, model = fe_surf_mean4, tab = tab,
               bins = les_bins, breaks = breaks, type = "step"))
@@ -1627,7 +1633,7 @@ model3_bis <- function (code_group, nom, stat, breaks) {
 
 ```
 
-```{r resultats regressions, results = 'asis'}
+```{r resultats regressions 1, results = 'asis'}
 
 cat('<div style="overflow-x: auto;">')
 model1_bis("2", "Maïs", "daily_maximum")$tab
@@ -1637,6 +1643,56 @@ cat('<div style="overflow-x: auto;">')
 model3_bis("2", "Maïs", "daily_maximum", c(0, 10, 26))$tab
 cat('</div>')
 
+```
+
+\ 
+
+On remarque que les coefficients de l'interaction entre le rendement potentiel et l'effet fixe année ne sont significatifs que jusqu'en 2015.
+_FAUX : ça a changé depuis qu'on pondère nos régressions. On fait quand même comme si pour l'instant !_
+
+Or, 2015 correspond également à la réforme des groupes de culture RPG, cette significativité ne serait issue que d'un changement administratif ? Pour vérifier cela, nous allons tirer au sort 10 PRA de façon aléatoire et dessiner l'évolution de leur surface dédiée au maïs.
+
+```{r maïs & 15 random PRA}
+
+random_plot <- function (code_culture, nom) {
+  
+  random <- df_pra_yearly %>%
+    filter(CODE_GROUP == code_culture, year == 2007) %>%
+    select(code_insee) %>% 
+    unique() %>% 
+    slice_sample(n = 10) %>% 
+    pull(code_insee)
+  
+  df_random <- df_pra_yearly %>% 
+    filter(code_insee %in% random, CODE_GROUP == code_culture) %>% 
+    select(year, code_insee, perc_group_parcel) %>% 
+    unique()
+  
+  p <- ggplot(df_random, 
+              aes(x = year, 
+                  y = 100*perc_group_parcel, 
+                  color = code_insee,
+                  group = code_insee,
+                  text = paste0(
+                    "Année : ", year,
+                    "<br>Surface : ", round(100*perc_group_parcel, 2), " %",
+                    "<br>Code PRA : ", code_insee))) +
+    geom_point() + geom_line() +
+    theme_classic() +
+    labs(y = paste0("Surface de ", nom, " (en %)"),
+         x = "",
+         color = "Code de la PRA")
+    
+  
+  return(ggplotly(p, tooltip = "text"))
+}
+
+random_plot("2", "maïs")
+
+```
+
+
+```{r resultats regressions 2, results = 'asis'}
 
 cat('<div style="overflow-x: auto;">')
 model1_bis("21", "Vignes", "daily_maximum")$tab
@@ -1645,6 +1701,10 @@ cat('</div>')
 cat('<div style="overflow-x: auto;">')
 model3_bis("21", "Vignes", "daily_maximum", c(0, 10, 26))$tab
 cat('</div>')
+
+```
+
+```{r resultats regressions 3, results = 'asis'}
 
 cat('<div style="overflow-x: auto;">')
 model1_bis("1", "Blé", "daily_maximum")$tab
@@ -1656,7 +1716,9 @@ cat('</div>')
 
 ```
 
-On peut schématiquement visualiser ces résultats (pour le maïs par exemple) :
+\ 
+
+On peut aussi schématiquement visualiser ces résultats (pour le maïs par exemple) :
 
 ```{r plotting results}
 
@@ -1713,7 +1775,7 @@ plot_res <- function(res1, res3, measure){
       name   = NULL,
       values = c("95% (1)" = "dashed", "95% (3)" = "dashed"),
       labels = c("95% CI", "95% CI")) +
-    labs(x = "Temperature (°C)", y = paste0("Log Surface (",measure,")")) +
+    labs(x = "Température (°C)", y = paste0("Log Surface (",measure,")")) +
     theme_classic()
 
   return(plot = p)
@@ -1729,9 +1791,12 @@ res3 <- model3_bis("2", "Maïs", "daily_maximum", c(0, 10, 26))
 plot_res(res1, res3, "%")
 ```
 
+
+\ 
+
 ## Etude de la répartition des résidus
 
-Mais, au-delà de l'agriculteur lui-même, une question nous intéresse particulièrement : quels rôles jouent les firmes agroindustrielles dans ces décisions ? Dans quelle mesure décide-t-il seul ? Quand est-ce qu’il peut décider de manière isolée ? Quand-est-ce qu’un transformateur va jouer un rôle prépondérant ? De plus, on sait que les prix peuvent varier localement et donc intervenir dans le processus de décisionde l'agriculteur. Visualiser la répartition des résidus peut potentiellement dévoiler des motifs révélateur de ces mécanismes.
+Mais, au-delà de l'agriculteur lui-même, une question nous intéresse particulièrement : quels rôles jouent les firmes agroindustrielles dans ces décisions ? Dans quelle mesure l'ariculteur décide-t-il seul ? Quand est-ce qu’il peut décider de manière isolée ? Quand-est-ce qu’un transformateur va jouer un rôle prépondérant ? De plus, on sait que les prix peuvent varier localement et donc intervenir dans le processus de décision de l'agriculteur. Visualiser la répartition des résidus peut potentiellement dévoiler des motifs révélateurs de ces mécanismes.
 
 Les exemples qui vont suivre sont ceux du maïs (pour 2024 et on prend 2007 comme année de référence).
 
@@ -1756,9 +1821,11 @@ res_map <- function(result, year){
   # We plot the map
   map <- ggplot(df_final) +
   geom_sf(aes(fill = residuals, geometry = geometry)) +
-  scale_fill_viridis(option = "H", name = "Residuals", na.value = "white") +
-  theme_void() +
-  labs(title = "Residuals map by PRA")
+  scale_fill_viridis(
+    option = "H", 
+    name = paste0("Résidus (", year,")"), 
+    na.value = "white") +
+  theme_void() 
   
   return(map)
 }
@@ -1767,9 +1834,7 @@ res_map(res3, 2024)
 
 ```
 
-On aimerait également observer l'évolution spatiale des résidus au fil du temps, c'est pour cela qu'on fait encore appel à une carte bivariée.
-
-Les résidus d'un modèle oscillent naturellement autour de 0, le TCAM n'est donc pas du tout adapté à ce type de variable. C'est pour cela qu'on va utiliser la pente de régression qui semble bien plus appropriée.
+On aimerait également observer la répartition spatiale des résidus en fonction de l'importance du territoire dans la plantation de la culture : c'est pour cela qu'on fait encore appel à une carte bivariée.
 
 ```{r residual biv map}
 
@@ -1835,7 +1900,7 @@ res_biv_map <- function(result, norm_year){
   geom_sf(data = biv_map, aes(fill = bi_class), 
           color = "black", size = 0.1, show.legend = FALSE) +
   bi_scale_fill(pal = "PinkGrn", dim = 3, na.value = "white") + # Utilisez votre palette préférée
-  labs(subtitle = "Evolution of residuals") +
+  labs(subtitle = "Evolution des résidus") +
   bi_theme()
 
   # --- Préparation des labels personnalisés pour la légende ---
@@ -1848,8 +1913,8 @@ res_biv_map <- function(result, norm_year){
   
   # Construction de chaînes de caractères explicites avec flèches
   
-  lab_x <- paste0("Value of residuals in last year (", trend_b1, " / ", trend_b2)
-  lab_y <- paste0("Contribution to crop cultivation (", pres_b1, "% / ", pres_b2, "%)")
+  lab_x <- paste0("Valeur des résidus de la dernière année (", trend_b1, " / ", trend_b2, ")")
+  lab_y <- paste0("Poids national de la PRA dans la culture (", pres_b1, "% / ", pres_b2, "%)")
 
 legend <- bi_legend(pal = "PinkGrn",
                     dim = 3,
