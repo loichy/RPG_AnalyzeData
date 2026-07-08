@@ -2,25 +2,39 @@
 title: "Crop Dynamics and Climate Change in France"
 format: pdf
 editor: visual
+bibliography: biblio.bib
 ---
 
-## Quarto
+## Introduction
 
-Quarto enables you to weave together content and executable code into a finished document. To learn more about Quarto see <https://quarto.org>.
+This document presents a preliminary analysis of crop acreage dynamics in France and their relationship with climate change and downstream agri-food firms. Our objective is to document how crop acreages have evolved over time, and ultimately to disentangle the combined roles of climate change and downstream intermediaries in driving these evolutions. At this stage, the analysis covers only the isolated role of climate change. Data on downstream actors were not yet available, access having only been granted on July 1st, and are therefore not yet incorporated into the results presented here. The last section in the document presents the next steps in this perspective.
 
-## Running Code
+Our approach follows in the spirit of [@cui] and [@sloat], who show how crop expansion and contraction can be explained by climate change in China and the United States respectively, as well as [@cuie]. We adapt this framework to the French context, working at the Petites Régions Agricoles (PRA) level over the 2007–2024 period. In the final section, we lay the groundwork for integrating downstream firm data into subsequent analysis: we spatially map where a climate-only model explains crop acreage well and where it does not, and we split the sample into regions where a given crop expands or contracts particularly rapidly. This lets us examine whether the dynamics left unexplained by climate and land-suitability variables alone might instead be driven by downstream actors accelerating crop relocation.
 
-When you click the **Render** button a document will be generated that includes both content and the output of embedded code. You can embed code like this:
+Crop acreages are measured using the *Registre Parcellaire Graphique* dataset, which is a detailed dataset of agricultural plots in France. We aggregate these data at the PRA level. Weather data come from *ERA5*, providing temperature and precipitation at approximately 25km x 25km resolution. This is the [ERA5 post-processed daily statistics on single levels from 1940 to present](https://cds.climate.copernicus.eu/datasets/derived-era5-single-levels-daily-statistics?tab=overview). Weather data are also aggregated at PRA level. Potential crop yields under climate change are drawn from the *Global Agro-Ecological Zones* (GAEZ) dataset, which combines agro-climatic potential yields with soil and terrain suitability for 53 crops [(see FAO documentation)](https://gaez.fao.org/pages/theme-details-theme-4). Data construction and processing for all three sources are detailed in the Data section.
 
-```{r}
-1 + 1
-```
+Together, these sources allow us to measure yearly crop acreage for around 20 crop groups over 2007–2024, and for more than 300 specific crops over the shorter 2015–2024 window. We characterize temperature exposure using growing-season degree days, and precipitation using total precipitation on wet days. Potential yields under climate change are available for various climate scenarios, though only for the subset of crop categories covered jointly by RPG and GAEZ.
 
-You can add options to executable code like this
+This allows us to estimate the following crop acreage model, for a given crop $k$ as follows, in PRA region $i$, on year $t$, as:
 
-```{r}
-#| echo: false
-2 * 2
-```
+$$ y_{k,i,t} = \alpha_i + \lambda_t + \sum_j \beta_j DD_{j,i,t} + \sum_{s=1}^{T} \gamma_s GAEZ_{k,i} \times 1(s=t)  + \varepsilon_{kit}$$
 
-The `echo: false` option disables the printing of code (only output is displayed).
+where $\alpha_i$ and $\lambda_t$ are PRA and year fixed effects, respectively. Temperature exposure is captured through a piecewise-linear degree-day specification: $DD_{j,i,t}$ denotes degree days accumulated in temperature bin $j$ over the growing season in PRA $i$, year $t$, following the standard approach in the climate-impacts literature (e.g., [@schlenkera]). Future crop yields under climate change is captured by $GAEZ_{k,i}$, the time-invariant yield projection for crop $k$ in PRA $i$, interacting it with year dummies $1(s=t)$ allows the effect of yield projections to evolve flexibly over time, while still separately controllinh for $\alpha_i$ and $\lambda_t$.
+
+## Data
+
+### Crop Acreage
+
+### Weather Data
+
+### Crop Yields Projections under Climate Change
+
+## Descriptive Statistics
+
+## Econometric Models
+
+## Results
+
+## Discussion
+
+## References
