@@ -20,40 +20,6 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
-/* CSS for syntax highlighting */
-pre > code.sourceCode { white-space: pre; position: relative; }
-pre > code.sourceCode > span { line-height: 1.25; }
-pre > code.sourceCode > span:empty { height: 1.2em; }
-.sourceCode { overflow: visible; }
-code.sourceCode > span { color: inherit; text-decoration: inherit; }
-div.sourceCode { margin: 1em 0; }
-pre.sourceCode { margin: 0; }
-@media screen {
-div.sourceCode { overflow: auto; }
-}
-@media print {
-pre > code.sourceCode { white-space: pre-wrap; }
-pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
-}
-pre.numberSource code
-  { counter-reset: source-line 0; }
-pre.numberSource code > span
-  { position: relative; left: -4em; counter-increment: source-line; }
-pre.numberSource code > span > a:first-child::before
-  { content: counter(source-line);
-    position: relative; left: -1em; text-align: right; vertical-align: baseline;
-    border: none; display: inline-block;
-    -webkit-touch-callout: none; -webkit-user-select: none;
-    -khtml-user-select: none; -moz-user-select: none;
-    -ms-user-select: none; user-select: none;
-    padding: 0 4px; width: 4em;
-  }
-pre.numberSource { margin-left: 3em;  padding-left: 4px; }
-div.sourceCode
-  {   }
-@media screen {
-pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
-}
 </style>
 
 
@@ -97,38 +63,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 
 <div class="cell">
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Prepare environment</span></span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Clean memory </span></span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">rm</span>(<span class="at">list=</span><span class="fu">ls</span>())</span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="fu">gc</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>          used (Mb) gc trigger (Mb) max used (Mb)
-Ncells  596951 31.9    1360544 72.7   768919 41.1
-Vcells 1093324  8.4    8388608 64.0  1876200 14.4</code></pre>
+Ncells  596335 31.9    1360592 72.7   686442 36.7
+Vcells 1092268  8.4    8388608 64.0  1876200 14.4</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Load package</span></span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="sc">!</span><span class="fu">require</span>(<span class="st">"pacman"</span>)) <span class="fu">install.packages</span>(<span class="st">"pacman"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Le chargement a nécessité le package : pacman</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning: le package 'pacman' a été compilé avec la version R 4.4.3</code></pre>
-</div>
-<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>pacman<span class="sc">::</span><span class="fu">p_load</span>(tidyverse, data.table, here, sf, tmap, units, dplyr, modelsummary, fixest)</span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="co"># List directories </span></span>
-<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>dir <span class="ot">&lt;-</span> <span class="fu">list</span>()</span>
-<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>dir<span class="sc">$</span>root <span class="ot">&lt;-</span> <span class="fu">here</span>()</span>
-<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>dir<span class="sc">$</span>data <span class="ot">&lt;-</span> <span class="fu">here</span>(dir<span class="sc">$</span>root, <span class="st">"data"</span>)</span>
-<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>dir<span class="sc">$</span>raw <span class="ot">&lt;-</span> <span class="fu">here</span>(dir<span class="sc">$</span>data, <span class="st">"raw"</span>)</span>
-<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>dir<span class="sc">$</span>derived <span class="ot">&lt;-</span> <span class="fu">here</span>(dir<span class="sc">$</span>data, <span class="st">"derived"</span>)</span>
-<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>dir<span class="sc">$</span>final <span class="ot">&lt;-</span> <span class="fu">here</span>(dir<span class="sc">$</span>data, <span class="st">"final"</span>)</span>
-<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>dir<span class="sc">$</span>script <span class="ot">&lt;-</span> <span class="fu">here</span>(dir<span class="sc">$</span>root, <span class="st">"script"</span>)</span>
-<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>dir<span class="sc">$</span>output <span class="ot">&lt;-</span> <span class="fu">here</span>(dir<span class="sc">$</span>root, <span class="st">"output"</span>)</span>
-<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Create non existing directories</span></span>
-<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a><span class="fu">lapply</span>(dir, <span class="cf">function</span>(i) <span class="fu">dir.create</span>(i, <span class="at">recursive =</span> T, <span class="at">showWarnings =</span> F))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>$root
 [1] FALSE
@@ -152,516 +91,1381 @@ $output
 [1] FALSE</code></pre>
 </div>
 </div>
+<section id="multinomial-logit" class="level2">
+<h2 class="anchored" data-anchor-id="multinomial-logit">Multinomial logit</h2>
+<p>In the literature, we can find land-share models using multinomial logit, where the producer chooses between different crops while maximising its expected profit. The outcome variable is the land allocated to the production of a given crop over the total cultivated area.</p>
+<p>In our analysis, the dependent variable is <code>etat</code>, a categorical variable going from 1 to 4, which measures if the acreage destined to a crop in a commune has increased, decreased, been maintained or has never existed during our period of interest. We will try to explain this variable first with data on historical potential yields from the <strong>GAEZ dataset</strong>, as well as potential yield change, computed as the difference between the future potential yield under the RCP 8.5 climate change scenario of the HadGEM2-ES model and the historical values of potentiel yield.</p>
+<section id="descriptive-statistics" class="level3">
+<h3 class="anchored" data-anchor-id="descriptive-statistics">Descriptive Statistics</h3>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Prepare datasets</span></span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>cultures_select <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"Blé tendre"</span>, <span class="st">"Maïs grain et ensilage"</span>, </span>
-<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>                     <span class="st">"Protéagineux"</span>, <span class="st">"Légumineuses à grains"</span>, <span class="st">"Plantes à fibres"</span>)</span>
-<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>trad_cultures <span class="ot">&lt;-</span> tibble<span class="sc">::</span><span class="fu">tibble</span>(</span>
-<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">crop =</span> <span class="fu">c</span>(<span class="st">"Dry pea"</span>, <span class="st">"Flax"</span>, <span class="st">"Maize"</span>, <span class="st">"Wheat"</span>),</span>
-<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">culture_fr =</span> <span class="fu">c</span>(<span class="st">"Légumineuses à grains"</span>, <span class="st">"Plantes à fibres"</span>, <span class="st">"Maïs grain et ensilage"</span>, <span class="st">"Blé tendre"</span>)</span>
-<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>RPG_Variations <span class="ot">&lt;-</span> <span class="fu">readRDS</span>(<span class="fu">here</span>(dir<span class="sc">$</span>raw, <span class="st">"LongPeriod_AcreageVariations.rds"</span>))</span>
-<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>GAEZ_yield <span class="ot">&lt;-</span> <span class="fu">readRDS</span>(<span class="fu">here</span>(dir<span class="sc">$</span>raw, <span class="st">"GAEZ_yieldchange_communes_filt.rds"</span>))</span>
-<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>RPG_Variations_filt <span class="ot">&lt;-</span> RPG_Variations <span class="sc">|&gt;</span></span>
-<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(LIBELLE_GROUPE_CULTURE <span class="sc">%in%</span> cultures_select) <span class="sc">|&gt;</span></span>
-<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rename</span>(<span class="at">crop =</span> LIBELLE_GROUPE_CULTURE)</span>
-<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>GAEZ_yield_filt <span class="ot">&lt;-</span> GAEZ_yield <span class="sc">|&gt;</span></span>
-<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(variable <span class="sc">==</span> <span class="st">"ylHr"</span>) <span class="sc">|&gt;</span></span>
-<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(crop <span class="sc">!=</span> <span class="st">"Gram"</span> <span class="sc">&amp;</span> crop <span class="sc">!=</span> <span class="st">"Chickpea"</span>) <span class="sc">|&gt;</span></span>
-<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">crop =</span> <span class="fu">recode</span>(crop, </span>
-<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a>                       <span class="st">"Dry pea"</span> <span class="ot">=</span> <span class="st">"Légumineuses à grains"</span>,</span>
-<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a>                       <span class="st">"Flax"</span> <span class="ot">=</span> <span class="st">"Plantes à fibres"</span>,</span>
-<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a>                       <span class="st">"Maize"</span> <span class="ot">=</span> <span class="st">"Maïs grain et ensilage"</span>, </span>
-<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a>                       <span class="st">"Wheat"</span> <span class="ot">=</span> <span class="st">"Blé tendre"</span>))</span>
-<span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-26"><a href="#cb8-26" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-27"><a href="#cb8-27" aria-hidden="true" tabindex="-1"></a>df_final <span class="ot">&lt;-</span> GAEZ_yield_filt <span class="sc">|&gt;</span></span>
-<span id="cb8-28"><a href="#cb8-28" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(RPG_Variations_filt, <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"insee"</span>, <span class="st">"crop"</span>)) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Add back to the dataset the region_code column</span></span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>df_final <span class="ot">&lt;-</span> df_final <span class="sc">|&gt;</span></span>
-<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">dept_code =</span> <span class="fu">str_sub</span>(<span class="fu">as.character</span>(insee), <span class="dv">1</span>, <span class="dv">2</span>),</span>
-<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>         <span class="at">dept_code =</span> <span class="fu">ifelse</span>(dept_code <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"2A"</span>, <span class="st">"2B"</span>), <span class="st">"20"</span>, dept_code))</span>
-<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>dept_to_region <span class="ot">&lt;-</span> <span class="fu">c</span>(</span>
-<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>  <span class="st">"01"</span><span class="ot">=</span><span class="st">"84"</span>, <span class="st">"02"</span><span class="ot">=</span><span class="st">"32"</span>, <span class="st">"03"</span><span class="ot">=</span><span class="st">"84"</span>, <span class="st">"04"</span><span class="ot">=</span><span class="st">"93"</span>, <span class="st">"05"</span><span class="ot">=</span><span class="st">"93"</span>, <span class="st">"06"</span><span class="ot">=</span><span class="st">"93"</span>, <span class="st">"07"</span><span class="ot">=</span><span class="st">"84"</span>,</span>
-<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>  <span class="st">"08"</span><span class="ot">=</span><span class="st">"44"</span>, <span class="st">"09"</span><span class="ot">=</span><span class="st">"76"</span>, <span class="st">"10"</span><span class="ot">=</span><span class="st">"44"</span>, <span class="st">"11"</span><span class="ot">=</span><span class="st">"76"</span>, <span class="st">"12"</span><span class="ot">=</span><span class="st">"76"</span>, <span class="st">"13"</span><span class="ot">=</span><span class="st">"93"</span>, <span class="st">"14"</span><span class="ot">=</span><span class="st">"28"</span>,</span>
-<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>  <span class="st">"15"</span><span class="ot">=</span><span class="st">"84"</span>, <span class="st">"16"</span><span class="ot">=</span><span class="st">"75"</span>, <span class="st">"17"</span><span class="ot">=</span><span class="st">"75"</span>, <span class="st">"18"</span><span class="ot">=</span><span class="st">"24"</span>, <span class="st">"19"</span><span class="ot">=</span><span class="st">"75"</span>, <span class="st">"20"</span><span class="ot">=</span><span class="st">"94"</span>, <span class="st">"21"</span><span class="ot">=</span><span class="st">"27"</span>,</span>
-<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>  <span class="st">"22"</span><span class="ot">=</span><span class="st">"53"</span>, <span class="st">"23"</span><span class="ot">=</span><span class="st">"75"</span>, <span class="st">"24"</span><span class="ot">=</span><span class="st">"75"</span>, <span class="st">"25"</span><span class="ot">=</span><span class="st">"27"</span>, <span class="st">"26"</span><span class="ot">=</span><span class="st">"84"</span>, <span class="st">"27"</span><span class="ot">=</span><span class="st">"28"</span>, <span class="st">"28"</span><span class="ot">=</span><span class="st">"24"</span>,</span>
-<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>  <span class="st">"29"</span><span class="ot">=</span><span class="st">"53"</span>, <span class="st">"30"</span><span class="ot">=</span><span class="st">"76"</span>, <span class="st">"31"</span><span class="ot">=</span><span class="st">"76"</span>, <span class="st">"32"</span><span class="ot">=</span><span class="st">"76"</span>, <span class="st">"33"</span><span class="ot">=</span><span class="st">"75"</span>, <span class="st">"34"</span><span class="ot">=</span><span class="st">"76"</span>, <span class="st">"35"</span><span class="ot">=</span><span class="st">"53"</span>,</span>
-<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>  <span class="st">"36"</span><span class="ot">=</span><span class="st">"24"</span>, <span class="st">"37"</span><span class="ot">=</span><span class="st">"24"</span>, <span class="st">"38"</span><span class="ot">=</span><span class="st">"84"</span>, <span class="st">"39"</span><span class="ot">=</span><span class="st">"27"</span>, <span class="st">"40"</span><span class="ot">=</span><span class="st">"75"</span>, <span class="st">"41"</span><span class="ot">=</span><span class="st">"24"</span>, <span class="st">"42"</span><span class="ot">=</span><span class="st">"84"</span>,</span>
-<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>  <span class="st">"43"</span><span class="ot">=</span><span class="st">"84"</span>, <span class="st">"44"</span><span class="ot">=</span><span class="st">"52"</span>, <span class="st">"45"</span><span class="ot">=</span><span class="st">"24"</span>, <span class="st">"46"</span><span class="ot">=</span><span class="st">"76"</span>, <span class="st">"47"</span><span class="ot">=</span><span class="st">"75"</span>, <span class="st">"48"</span><span class="ot">=</span><span class="st">"76"</span>, <span class="st">"49"</span><span class="ot">=</span><span class="st">"52"</span>,</span>
-<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a>  <span class="st">"50"</span><span class="ot">=</span><span class="st">"28"</span>, <span class="st">"51"</span><span class="ot">=</span><span class="st">"44"</span>, <span class="st">"52"</span><span class="ot">=</span><span class="st">"44"</span>, <span class="st">"53"</span><span class="ot">=</span><span class="st">"52"</span>, <span class="st">"54"</span><span class="ot">=</span><span class="st">"44"</span>, <span class="st">"55"</span><span class="ot">=</span><span class="st">"44"</span>, <span class="st">"56"</span><span class="ot">=</span><span class="st">"53"</span>,</span>
-<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a>  <span class="st">"57"</span><span class="ot">=</span><span class="st">"44"</span>, <span class="st">"58"</span><span class="ot">=</span><span class="st">"27"</span>, <span class="st">"59"</span><span class="ot">=</span><span class="st">"32"</span>, <span class="st">"60"</span><span class="ot">=</span><span class="st">"32"</span>, <span class="st">"61"</span><span class="ot">=</span><span class="st">"28"</span>, <span class="st">"62"</span><span class="ot">=</span><span class="st">"32"</span>, <span class="st">"63"</span><span class="ot">=</span><span class="st">"84"</span>,</span>
-<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a>  <span class="st">"64"</span><span class="ot">=</span><span class="st">"75"</span>, <span class="st">"65"</span><span class="ot">=</span><span class="st">"76"</span>, <span class="st">"66"</span><span class="ot">=</span><span class="st">"76"</span>, <span class="st">"67"</span><span class="ot">=</span><span class="st">"44"</span>, <span class="st">"68"</span><span class="ot">=</span><span class="st">"44"</span>, <span class="st">"69"</span><span class="ot">=</span><span class="st">"84"</span>, <span class="st">"70"</span><span class="ot">=</span><span class="st">"27"</span>,</span>
-<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a>  <span class="st">"71"</span><span class="ot">=</span><span class="st">"27"</span>, <span class="st">"72"</span><span class="ot">=</span><span class="st">"52"</span>, <span class="st">"73"</span><span class="ot">=</span><span class="st">"84"</span>, <span class="st">"74"</span><span class="ot">=</span><span class="st">"84"</span>, <span class="st">"75"</span><span class="ot">=</span><span class="st">"11"</span>, <span class="st">"76"</span><span class="ot">=</span><span class="st">"28"</span>, <span class="st">"77"</span><span class="ot">=</span><span class="st">"11"</span>,</span>
-<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a>  <span class="st">"78"</span><span class="ot">=</span><span class="st">"11"</span>, <span class="st">"79"</span><span class="ot">=</span><span class="st">"75"</span>, <span class="st">"80"</span><span class="ot">=</span><span class="st">"32"</span>, <span class="st">"81"</span><span class="ot">=</span><span class="st">"76"</span>, <span class="st">"82"</span><span class="ot">=</span><span class="st">"76"</span>, <span class="st">"83"</span><span class="ot">=</span><span class="st">"93"</span>, <span class="st">"84"</span><span class="ot">=</span><span class="st">"93"</span>,</span>
-<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a>  <span class="st">"85"</span><span class="ot">=</span><span class="st">"52"</span>, <span class="st">"86"</span><span class="ot">=</span><span class="st">"75"</span>, <span class="st">"87"</span><span class="ot">=</span><span class="st">"75"</span>, <span class="st">"88"</span><span class="ot">=</span><span class="st">"44"</span>, <span class="st">"89"</span><span class="ot">=</span><span class="st">"27"</span>, <span class="st">"90"</span><span class="ot">=</span><span class="st">"27"</span>, <span class="st">"91"</span><span class="ot">=</span><span class="st">"11"</span>,</span>
-<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a>  <span class="st">"92"</span><span class="ot">=</span><span class="st">"11"</span>, <span class="st">"93"</span><span class="ot">=</span><span class="st">"11"</span>, <span class="st">"94"</span><span class="ot">=</span><span class="st">"11"</span>, <span class="st">"95"</span><span class="ot">=</span><span class="st">"11"</span>, <span class="st">"971"</span><span class="ot">=</span><span class="st">"01"</span>, <span class="st">"972"</span><span class="ot">=</span><span class="st">"02"</span>, <span class="st">"973"</span><span class="ot">=</span><span class="st">"03"</span>,</span>
-<span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a>  <span class="st">"974"</span><span class="ot">=</span><span class="st">"04"</span>, <span class="st">"976"</span><span class="ot">=</span><span class="st">"06"</span></span>
-<span id="cb9-23"><a href="#cb9-23" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb9-24"><a href="#cb9-24" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-25"><a href="#cb9-25" aria-hidden="true" tabindex="-1"></a>df_final <span class="ot">&lt;-</span> df_final <span class="sc">|&gt;</span></span>
-<span id="cb9-26"><a href="#cb9-26" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">region_code =</span> dept_to_region[dept_code])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-<section id="elasticity-of-area-to-potential-yield" class="level2">
-<h2 class="anchored" data-anchor-id="elasticity-of-area-to-potential-yield">Elasticity of area to potential yield</h2>
-<p>In general, we use percentage change as our dependent variable, as it is more straightforward to interpret and also controls for scale differences at the communal level.</p>
-<section id="dependent-variable-acreage-variations-between-2023-and-2007" class="level3">
-<h3 class="anchored" data-anchor-id="dependent-variable-acreage-variations-between-2023-and-2007">Dependent variable : acreage variations between 2023 and 2007</h3>
-<section id="ordinary-least-squares-model" class="level4">
-<h4 class="anchored" data-anchor-id="ordinary-least-squares-model">Ordinary Least Squares Model</h4>
-<p>First, we use the percentage change in acreage per crop between 2023 and 2007 as our dependent variable. Our main independent variables are <code>value</code>, corresponding to potential yield level under the <strong>rcp8p5</strong> climate change scenario of the <strong>HadGEM2-ES</strong> model, as well as <code>value_hist</code>, the historical yield level. To avoid potential multicollinearity problems, we use the log-difference between the two variables which capture the same information with more stable coefficients.</p>
-<p>We are interested in comparing coefficients between our crops of interest, therefore we run regressions separately for the four of them.</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Creating separate datasets for each culture we want to analyze</span></span>
-<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Wheat</span></span>
-<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>df_final_w <span class="ot">&lt;-</span> df_final <span class="sc">|&gt;</span></span>
-<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(crop <span class="sc">==</span> <span class="st">"Blé tendre"</span>) </span>
-<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Maize</span></span>
-<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>df_final_m <span class="ot">&lt;-</span> df_final <span class="sc">|&gt;</span></span>
-<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(crop <span class="sc">==</span> <span class="st">"Maïs grain et ensilage"</span>)</span>
-<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Pea</span></span>
-<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>df_final_p <span class="ot">&lt;-</span> df_final <span class="sc">|&gt;</span></span>
-<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(crop <span class="sc">==</span> <span class="st">"Légumineuses à grains"</span>)</span>
-<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a><span class="co"># Flax</span></span>
-<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a>df_final_f <span class="ot">&lt;-</span> df_final <span class="sc">|&gt;</span></span>
-<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(crop <span class="sc">==</span> <span class="st">"Plantes à fibres"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-<p>We construct an OLS specification with regional fixed effects using the <code>feols()</code> command that we then compare with a benchmark specification without fixed effects. The following tables show for each specifications the regression results by crop.</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Standard OLS regression without fixed effects using feols command to deal with Inf/NaN observations</span></span>
-<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>reg0_wheat <span class="ot">&lt;-</span> <span class="fu">feols</span>(diff_2007_2023_perc <span class="sc">~</span> <span class="fu">log</span>(value) <span class="sc">-</span> <span class="fu">log</span>(value_hist), <span class="at">data =</span> df_final_w)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stderr">
-<pre><code>NOTE: 6,349 observations removed because of NA and infinite values (LHS: 6,329, RHS: 93).</code></pre>
-</div>
-<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>reg0_maize <span class="ot">&lt;-</span> <span class="fu">feols</span>(diff_2007_2023_perc <span class="sc">~</span> <span class="fu">log</span>(value) <span class="sc">-</span> <span class="fu">log</span>(value_hist), <span class="at">data =</span> df_final_m)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stderr">
-<pre><code>NOTE: 8,807 observations removed because of NA and infinite values (LHS: 8,796, RHS: 104).</code></pre>
-</div>
-<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>reg0_pea <span class="ot">&lt;-</span> <span class="fu">feols</span>(diff_2007_2023_perc <span class="sc">~</span> <span class="fu">log</span>(value) <span class="sc">-</span> <span class="fu">log</span>(value_hist), <span class="at">data =</span> df_final_p)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stderr">
-<pre><code>NOTE: 34,214 observations removed because of NA and infinite values (LHS: 34,214, RHS: 94).</code></pre>
-</div>
-<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>reg0_flax <span class="ot">&lt;-</span> <span class="fu">feols</span>(diff_2007_2023_perc <span class="sc">~</span> <span class="fu">log</span>(value) <span class="sc">-</span> <span class="fu">log</span>(value_hist), <span class="at">data =</span> df_final_f)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stderr">
-<pre><code>NOTE: 32,131 observations removed because of NA and infinite values (LHS: 32,130, RHS: 93).</code></pre>
-</div>
-<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>reg0_results <span class="ot">&lt;-</span> </span>
-<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">modelsummary</span>(</span>
-<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">list</span>(<span class="st">"Wheat"</span> <span class="ot">=</span> reg0_wheat, </span>
-<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>       <span class="st">"Maize"</span> <span class="ot">=</span> reg0_maize, </span>
-<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>       <span class="st">"Pea"</span> <span class="ot">=</span> reg0_pea, </span>
-<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>       <span class="st">"Flax"</span> <span class="ot">=</span> reg0_flax), </span>
-<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">stars =</span> <span class="cn">TRUE</span>,</span>
-<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">statistic =</span> <span class="st">"std.error"</span>,</span>
-<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">coef_map =</span> <span class="fu">c</span>(<span class="st">"log(value)"</span> <span class="ot">=</span>  <span class="st">"Potential Yield"</span>, </span>
-<span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a>               <span class="st">"log(value_hist)"</span> <span class="ot">=</span> <span class="st">"Historical Yield"</span>),</span>
-<span id="cb19-11"><a href="#cb19-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">output =</span> <span class="st">"markdown"</span></span>
-<span id="cb19-12"><a href="#cb19-12" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb19-13"><a href="#cb19-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb19-14"><a href="#cb19-14" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(reg0_results)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>
-+-----------------+------------+-----------+----------+----------+
-|                 | Wheat      | Maize     | Pea      | Flax     |
-+=================+============+===========+==========+==========+
-| Potential Yield | -66.256*** | -45.981** | 49.551   | -52.443  |
-+-----------------+------------+-----------+----------+----------+
-|                 | (12.219)   | (15.218)  | (50.702) | (50.887) |
-+-----------------+------------+-----------+----------+----------+
-| Num.Obs.        | 28477      | 26019     | 612      | 2695     |
-+-----------------+------------+-----------+----------+----------+
-| R2              | 0.001      | 0.000     | 0.002    | 0.000    |
-+-----------------+------------+-----------+----------+----------+
-| R2 Adj.         | 0.001      | 0.000     | 0.000    | 0.000    |
-+-----------------+------------+-----------+----------+----------+
-| AIC             | 453553.8   | 435743.6  | 9846.4   | 43346.7  |
-+-----------------+------------+-----------+----------+----------+
-| BIC             | 453570.3   | 435760.0  | 9855.2   | 43358.5  |
-+-----------------+------------+-----------+----------+----------+
-| RMSE            | 695.41     | 1047.91   | 751.63   | 751.74   |
-+-----------------+------------+-----------+----------+----------+
-| Std.Errors      | IID        | IID       | IID      | IID      |
-+=================+============+===========+==========+==========+
-| + p &lt; 0.1, * p &lt; 0.05, ** p &lt; 0.01, *** p &lt; 0.001              |
-+=================+============+===========+==========+==========+ </code></pre>
+<pre><code># A tibble: 19 × 5
+   LIBELLE_GROUPE_CULTURE_AGG   apparition disparition `jamais cultivé` maintenu
+   &lt;chr&gt;                             &lt;dbl&gt;       &lt;dbl&gt;            &lt;dbl&gt;    &lt;dbl&gt;
+ 1 Autres cultures industriell…       14.2         3.5             60.2     22.1
+ 2 Autres céréales                    12.4         4.7             14       68.8
+ 3 Autres oléagineux                  21.9         2.5             65.1     10.5
+ 4 Blé tendre                          3.1         2.3             11.5     83.1
+ 5 Canne à sucre                       0           0              100        0  
+ 6 Colza                               7.2         5.4             24.7     62.8
+ 7 Divers                              7.6         4.2             10.7     77.4
+ 8 Fourrage                           51.6         1.5             14.4     32.5
+ 9 Légumes ou fleurs                  16.8         3.5             54.7     25  
+10 Légumineuses à grains/Proté…       21.3         5.7             35.3     37.7
+11 Manquante                           0          65.5             34.5      0  
+12 Maïs grain et ensilage              4.4         3.2             14.9     77.4
+13 Oliviers                            1.1         0.5             95.5      2.9
+14 Orge                                4.8         3               12.4     79.8
+15 Plantes à fibres                    9.9         2.2             78.9      9  
+16 Pâturages                           3.1         0.6              7.5     88.8
+17 Riz                                 0           0               99.9      0  
+18 Tournesol                          19.4         3               45.2     32.4
+19 Vergers                             8.2         2.5             80        9.3</code></pre>
 </div>
 </div>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="co"># OLS results with regional fixed effects</span></span>
-<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>reg1_wheat <span class="ot">&lt;-</span> <span class="fu">feols</span>(diff_2007_2023_perc <span class="sc">~</span> <span class="fu">log</span>(value) <span class="sc">-</span> <span class="fu">log</span>(value_hist) <span class="sc">|</span> region_code, <span class="at">data =</span> df_final_w)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stderr">
-<pre><code>NOTE: 6,349 observations removed because of NA and infinite values (LHS: 6,329, RHS: 93).</code></pre>
-</div>
-<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>reg1_maize <span class="ot">&lt;-</span> <span class="fu">feols</span>(diff_2007_2023_perc <span class="sc">~</span> <span class="fu">log</span>(value) <span class="sc">-</span> <span class="fu">log</span>(value_hist) <span class="sc">|</span> region_code, <span class="at">data =</span> df_final_m)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stderr">
-<pre><code>NOTE: 8,807 observations removed because of NA and infinite values (LHS: 8,796, RHS: 104).</code></pre>
-</div>
-<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>reg1_pea <span class="ot">&lt;-</span> <span class="fu">feols</span>(diff_2007_2023_perc <span class="sc">~</span> <span class="fu">log</span>(value) <span class="sc">-</span> <span class="fu">log</span>(value_hist) <span class="sc">|</span> region_code, <span class="at">data =</span> df_final_p)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stderr">
-<pre><code>NOTE: 34,214 observations removed because of NA and infinite values (LHS: 34,214, RHS: 94).</code></pre>
-</div>
-<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>reg1_flax <span class="ot">&lt;-</span> <span class="fu">feols</span>(diff_2007_2023_perc <span class="sc">~</span> <span class="fu">log</span>(value) <span class="sc">-</span> <span class="fu">log</span>(value_hist) <span class="sc">|</span> region_code, <span class="at">data =</span> df_final_f)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stderr">
-<pre><code>NOTE: 32,131 observations removed because of NA and infinite values (LHS: 32,130, RHS: 93).</code></pre>
-</div>
-<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>reg1_results <span class="ot">&lt;-</span></span>
-<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">modelsummary</span>(</span>
-<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">list</span>(<span class="st">"Wheat"</span> <span class="ot">=</span> reg1_wheat, </span>
-<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a>       <span class="st">"Maize"</span> <span class="ot">=</span> reg1_maize, </span>
-<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a>       <span class="st">"Pea"</span> <span class="ot">=</span> reg1_pea, </span>
-<span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a>       <span class="st">"Flax"</span> <span class="ot">=</span> reg1_flax), </span>
-<span id="cb29-7"><a href="#cb29-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">stars =</span> <span class="cn">TRUE</span>,</span>
-<span id="cb29-8"><a href="#cb29-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">statistic =</span> <span class="st">"std.error"</span>,</span>
-<span id="cb29-9"><a href="#cb29-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">coef_map =</span> <span class="fu">c</span>(<span class="st">"log(value)"</span> <span class="ot">=</span>  <span class="st">"Potential Yield"</span>, </span>
-<span id="cb29-10"><a href="#cb29-10" aria-hidden="true" tabindex="-1"></a>               <span class="st">"log(value_hist)"</span> <span class="ot">=</span> <span class="st">"Historical Yield"</span>),</span>
-<span id="cb29-11"><a href="#cb29-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">output =</span> <span class="st">"markdown"</span></span>
-<span id="cb29-12"><a href="#cb29-12" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-<p>We find that in both specifications, there is a negative relationship between potential yield change and acreage change for <strong>wheat, maize and flax</strong>. On the contrary, an increase in potential yield compared to the historical value of <strong>pea</strong> induces an increase in its acreage.</p>
-<p>Furthermore, the model with fixed effects shows only significance for the coefficient on this latter crop, when in the benchmark model, the coefficients on <strong>wheat and maize</strong> are significant. We observe that adding regional fixed effects reduced considerably the magnitude and the significance of the coefficient on <strong>wheat</strong>. In general, the R2 improved by adding regional fixed effects.</p>
-<p>However these results are not satisfactory as they point to contradictory results with theory. Indeed, increased potential yield should urge producers to cultivate those crops on larger surfaces. We will now try to improve our results by using potential yield change in percentage as computed by the <strong>GAEZ database</strong>, still controlling for historical yield values, and including an interaction term as well.</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="co"># OLS results with potential yield change as main explanatory variable</span></span>
-<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>reg2_wheat <span class="ot">&lt;-</span> <span class="fu">feols</span>(diff_2007_2023_perc <span class="sc">~</span> change<span class="sc">*</span>value_hist, <span class="at">data =</span> df_final_w)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stderr">
-<pre><code>NOTE: 6,363 observations removed because of NA and infinite values (LHS: 6,329, RHS: 214).</code></pre>
-</div>
-<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>reg2_maize <span class="ot">&lt;-</span> <span class="fu">feols</span>(diff_2007_2023_perc <span class="sc">~</span> change<span class="sc">*</span>value_hist, <span class="at">data =</span> df_final_m)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stderr">
-<pre><code>NOTE: 9,599 observations removed because of NA and infinite values (LHS: 8,796, RHS: 2,434).</code></pre>
-</div>
-<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a>reg2_pea <span class="ot">&lt;-</span> <span class="fu">feols</span>(diff_2007_2023_perc <span class="sc">~</span> change<span class="sc">*</span>value_hist, <span class="at">data =</span> df_final_p)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stderr">
-<pre><code>NOTE: 34,215 observations removed because of NA and infinite values (LHS: 34,214, RHS: 284).</code></pre>
-</div>
-<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a>reg2_flax <span class="ot">&lt;-</span> <span class="fu">feols</span>(diff_2007_2023_perc <span class="sc">~</span> change<span class="sc">*</span>value_hist, <span class="at">data =</span> df_final_f)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stderr">
-<pre><code>NOTE: 32,131 observations removed because of NA and infinite values (LHS: 32,130, RHS: 235).</code></pre>
-</div>
-<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a>reg2_results <span class="ot">&lt;-</span></span>
-<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">modelsummary</span>(</span>
-<span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">list</span>(<span class="st">"Wheat"</span> <span class="ot">=</span> reg2_wheat, </span>
-<span id="cb38-4"><a href="#cb38-4" aria-hidden="true" tabindex="-1"></a>       <span class="st">"Maize"</span> <span class="ot">=</span> reg2_maize, </span>
-<span id="cb38-5"><a href="#cb38-5" aria-hidden="true" tabindex="-1"></a>       <span class="st">"Pea"</span> <span class="ot">=</span> reg2_pea, </span>
-<span id="cb38-6"><a href="#cb38-6" aria-hidden="true" tabindex="-1"></a>       <span class="st">"Flax"</span> <span class="ot">=</span> reg2_flax), </span>
-<span id="cb38-7"><a href="#cb38-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">stars =</span> <span class="cn">TRUE</span>,</span>
-<span id="cb38-8"><a href="#cb38-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">statistic =</span> <span class="st">"std.error"</span>,</span>
-<span id="cb38-9"><a href="#cb38-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">coef_map =</span> <span class="fu">c</span>(<span class="st">"change"</span> <span class="ot">=</span> <span class="st">"Potential Yield Change"</span>, </span>
-<span id="cb38-10"><a href="#cb38-10" aria-hidden="true" tabindex="-1"></a>               <span class="st">"value_hist"</span> <span class="ot">=</span> <span class="st">"Historical Yield"</span>,</span>
-<span id="cb38-11"><a href="#cb38-11" aria-hidden="true" tabindex="-1"></a>              <span class="st">"change:value_hist"</span> <span class="ot">=</span> <span class="st">"Interaction"</span>),</span>
-<span id="cb38-12"><a href="#cb38-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">output =</span> <span class="st">"markdown"</span></span>
-<span id="cb38-13"><a href="#cb38-13" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb38-14"><a href="#cb38-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb38-15"><a href="#cb38-15" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(reg2_results)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>
-+------------------------+-----------+----------+-----------+-----------+
-|                        | Wheat     | Maize    | Pea       | Flax      |
-+========================+===========+==========+===========+===========+
-| Potential Yield Change | 40.564    | 1.113    | -38.636   | -837.373* |
-+------------------------+-----------+----------+-----------+-----------+
-|                        | (45.936)  | (19.594) | (398.832) | (422.337) |
-+------------------------+-----------+----------+-----------+-----------+
-| Historical Yield       | -0.016*** | -0.015** | -0.024    | -0.435*** |
-+------------------------+-----------+----------+-----------+-----------+
-|                        | (0.003)   | (0.005)  | (0.066)   | (0.090)   |
-+------------------------+-----------+----------+-----------+-----------+
-| Interaction            | -0.021*   | -0.028** | 0.205     | 2.197***  |
-+------------------------+-----------+----------+-----------+-----------+
-|                        | (0.009)   | (0.011)  | (0.260)   | (0.490)   |
-+------------------------+-----------+----------+-----------+-----------+
-| Num.Obs.               | 28463     | 25227    | 611       | 2695      |
-+------------------------+-----------+----------+-----------+-----------+
-| R2                     | 0.001     | 0.000    | 0.004     | 0.013     |
-+------------------------+-----------+----------+-----------+-----------+
-| R2 Adj.                | 0.001     | 0.000    | -0.001    | 0.012     |
-+------------------------+-----------+----------+-----------+-----------+
-| AIC                    | 453337.4  | 421457.3 | 9833.5    | 43317.0   |
-+------------------------+-----------+----------+-----------+-----------+
-| BIC                    | 453370.4  | 421489.8 | 9851.2    | 43340.6   |
-+------------------------+-----------+----------+-----------+-----------+
-| RMSE                   | 695.44    | 1026.80  | 751.13    | 747.05    |
-+------------------------+-----------+----------+-----------+-----------+
-| Std.Errors             | IID       | IID      | IID       | IID       |
-+========================+===========+==========+===========+===========+
-| + p &lt; 0.1, * p &lt; 0.05, ** p &lt; 0.01, *** p &lt; 0.001                     |
-+========================+===========+==========+===========+===========+ </code></pre>
-</div>
-</div>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="co"># OLS results with potential yield change as main explanatory variable</span></span>
-<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a>reg3_wheat <span class="ot">&lt;-</span> <span class="fu">feols</span>(diff_2007_2023_perc <span class="sc">~</span> change<span class="sc">*</span>value_hist <span class="sc">|</span> region_code, <span class="at">data =</span> df_final_w)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stderr">
-<pre><code>NOTE: 6,363 observations removed because of NA and infinite values (LHS: 6,329, RHS: 214).</code></pre>
-</div>
-<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a>reg3_maize <span class="ot">&lt;-</span> <span class="fu">feols</span>(diff_2007_2023_perc <span class="sc">~</span> change<span class="sc">*</span>value_hist <span class="sc">|</span> region_code, <span class="at">data =</span> df_final_m)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stderr">
-<pre><code>NOTE: 9,599 observations removed because of NA and infinite values (LHS: 8,796, RHS: 2,434).</code></pre>
-</div>
-<div class="sourceCode cell-code" id="cb44"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a>reg3_pea <span class="ot">&lt;-</span> <span class="fu">feols</span>(diff_2007_2023_perc <span class="sc">~</span> change<span class="sc">*</span>value_hist <span class="sc">|</span> region_code, <span class="at">data =</span> df_final_p)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stderr">
-<pre><code>NOTE: 34,215 observations removed because of NA and infinite values (LHS: 34,214, RHS: 284).</code></pre>
-</div>
-<div class="sourceCode cell-code" id="cb46"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a>reg3_flax <span class="ot">&lt;-</span> <span class="fu">feols</span>(diff_2007_2023_perc <span class="sc">~</span> change<span class="sc">*</span>value_hist <span class="sc">|</span> region_code, <span class="at">data =</span> df_final_f)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stderr">
-<pre><code>NOTE: 32,131 observations removed because of NA and infinite values (LHS: 32,130, RHS: 235).</code></pre>
-</div>
-<div class="sourceCode cell-code" id="cb48"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a>reg3_results <span class="ot">&lt;-</span></span>
-<span id="cb48-2"><a href="#cb48-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">modelsummary</span>(</span>
-<span id="cb48-3"><a href="#cb48-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">list</span>(<span class="st">"Wheat"</span> <span class="ot">=</span> reg3_wheat, </span>
-<span id="cb48-4"><a href="#cb48-4" aria-hidden="true" tabindex="-1"></a>       <span class="st">"Maize"</span> <span class="ot">=</span> reg3_maize, </span>
-<span id="cb48-5"><a href="#cb48-5" aria-hidden="true" tabindex="-1"></a>       <span class="st">"Pea"</span> <span class="ot">=</span> reg3_pea, </span>
-<span id="cb48-6"><a href="#cb48-6" aria-hidden="true" tabindex="-1"></a>       <span class="st">"Flax"</span> <span class="ot">=</span> reg3_flax), </span>
-<span id="cb48-7"><a href="#cb48-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">stars =</span> <span class="cn">TRUE</span>,</span>
-<span id="cb48-8"><a href="#cb48-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">statistic =</span> <span class="st">"std.error"</span>,</span>
-<span id="cb48-9"><a href="#cb48-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">coef_map =</span> <span class="fu">c</span>(<span class="st">"change"</span> <span class="ot">=</span> <span class="st">"Potential Yield Change"</span>, </span>
-<span id="cb48-10"><a href="#cb48-10" aria-hidden="true" tabindex="-1"></a>               <span class="st">"value_hist"</span> <span class="ot">=</span> <span class="st">"Historical Yield"</span>,</span>
-<span id="cb48-11"><a href="#cb48-11" aria-hidden="true" tabindex="-1"></a>              <span class="st">"change:value_hist"</span> <span class="ot">=</span> <span class="st">"Interaction"</span>),</span>
-<span id="cb48-12"><a href="#cb48-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">output =</span> <span class="st">"markdown"</span></span>
-<span id="cb48-13"><a href="#cb48-13" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb48-14"><a href="#cb48-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb48-15"><a href="#cb48-15" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(reg3_results)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>
-+------------------------+-----------------+-----------------+-----------------+-----------------+
-|                        | Wheat           | Maize           | Pea             | Flax            |
-+========================+=================+=================+=================+=================+
-| Potential Yield Change | -27.779         | 2.140           | -21.314         | -398.919        |
-+------------------------+-----------------+-----------------+-----------------+-----------------+
-|                        | (16.567)        | (9.637)         | (342.550)       | (354.837)       |
-+------------------------+-----------------+-----------------+-----------------+-----------------+
-| Historical Yield       | -0.004          | -0.016*         | -0.037          | -0.300*         |
-+------------------------+-----------------+-----------------+-----------------+-----------------+
-|                        | (0.004)         | (0.006)         | (0.026)         | (0.131)         |
-+------------------------+-----------------+-----------------+-----------------+-----------------+
-| Interaction            | -0.033*         | -0.041*         | 0.396*          | 1.426*          |
-+------------------------+-----------------+-----------------+-----------------+-----------------+
-|                        | (0.013)         | (0.018)         | (0.145)         | (0.577)         |
-+------------------------+-----------------+-----------------+-----------------+-----------------+
-| Num.Obs.               | 28463           | 25227           | 611             | 2695            |
-+------------------------+-----------------+-----------------+-----------------+-----------------+
-| R2                     | 0.013           | 0.005           | 0.019           | 0.024           |
-+------------------------+-----------------+-----------------+-----------------+-----------------+
-| R2 Adj.                | 0.013           | 0.004           | -0.004          | 0.019           |
-+------------------------+-----------------+-----------------+-----------------+-----------------+
-| R2 Within              | 0.001           | 0.001           | 0.010           | 0.006           |
-+------------------------+-----------------+-----------------+-----------------+-----------------+
-| R2 Within Adj.         | 0.001           | 0.001           | 0.005           | 0.004           |
-+------------------------+-----------------+-----------------+-----------------+-----------------+
-| AIC                    | 453021.7        | 421367.3        | 9846.3          | 43306.9         |
-+------------------------+-----------------+-----------------+-----------------+-----------------+
-| BIC                    | 453153.8        | 421497.5        | 9912.5          | 43389.5         |
-+------------------------+-----------------+-----------------+-----------------+-----------------+
-| RMSE                   | 691.30          | 1024.48         | 745.47          | 742.88          |
-+------------------------+-----------------+-----------------+-----------------+-----------------+
-| Std.Errors             | by: region_code | by: region_code | by: region_code | by: region_code |
-+------------------------+-----------------+-----------------+-----------------+-----------------+
-| FE: region_code        | X               | X               | X               | X               |
-+========================+=================+=================+=================+=================+
-| + p &lt; 0.1, * p &lt; 0.05, ** p &lt; 0.01, *** p &lt; 0.001                                              |
-+========================+=================+=================+=================+=================+ </code></pre>
-</div>
-</div>
-<p>The results reveal that historical yield is consistently and significantly negatively associated with the percentage change in acreage for <strong>wheat, maize, and flax</strong>. This suggests that crops historically more productive may have seen relatively less acreage expansion. The interaction term between potential yield change and historical yield is also significant for <strong>wheat, maize, and flax</strong>, indicating that the effect of expected yield improvement depends on the initial productivity level. Particularly, the interaction is strongly positive for <strong>flax</strong>, suggesting that potential gains are only realized where historical yields were already high. In contrast, the effect of potential yield change itself is not statistically significant for most crops, except for <strong>flax</strong>, where it shows a large, negative effect (which is weakly significant at the 10% level).</p>
-<p>Controlling for regional fixed effects refines the estimation by absorbing unobserved heterogeneity across regions. The historical yield variable remains negatively associated with changes in acreage for maize and flax, both statistically significant. However, for <strong>wheat</strong> and <strong>pea</strong>, historical yield loses statistical significance. The interaction term between historical yield and potential yield change is now statistically significant across all four crops. This suggests that the effect of potential productivity changes on land allocation depends strongly on the initial yield level. The direct effect of potential yield change remains non-significant for all crops, even becoming negative for <strong>wheat and flax</strong>, once fixed effects are included.</p>
 </section>
-<section id="generalized-additive-model" class="level4">
-<h4 class="anchored" data-anchor-id="generalized-additive-model">Generalized Additive Model</h4>
-<p>GAM models can be more relevant when using the difference between potential yield under climate change and historical yield as our independent variable. Indeed, the response of land use to climate-induced yield gaps may be nonlinear or threshold-dependent. GAMs can be used to model a smooth function of the said gap.</p>
+<section id="potential-yield-change" class="level3">
+<h3 class="anchored" data-anchor-id="potential-yield-change">Potential yield change</h3>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb50"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Test du modèle GAM</span></span>
-<span id="cb50-2"><a href="#cb50-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(mgcv)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Le chargement a nécessité le package : nlme</code></pre>
+<div class="cell-output cell-output-stdout">
+<pre><code># weights:  16 (9 variable)
+initial  value 676298.158896 
+iter  10 value 523558.192951
+iter  20 value 513118.600353
+iter  30 value 513115.860379
+final  value 513115.732079 
+converged</code></pre>
 </div>
-<div class="cell-output cell-output-stderr">
-<pre><code>
-Attachement du package : 'nlme'</code></pre>
 </div>
-<div class="cell-output cell-output-stderr">
-<pre><code>L'objet suivant est masqué depuis 'package:dplyr':
-
-    collapse</code></pre>
+<p><strong>Notes : Coefficients issued from the <code>summary()</code> command cannot be interpreted directly, only significance level and sign of the coefficients are relevant. Relative risk ratio can be interpreted as the risk of switching to another category (if RRR &gt; 1, it is more likely that the crop in question in the given community will switch categories).</strong></p>
+</section>
+<section id="comparative-advantage-difference" class="level3">
+<h3 class="anchored" data-anchor-id="comparative-advantage-difference">Comparative advantage difference</h3>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code># weights:  16 (9 variable)
+initial  value 676298.158896 
+iter  10 value 529461.974209
+iter  20 value 525187.553310
+final  value 525143.667062 
+converged</code></pre>
 </div>
-<div class="cell-output cell-output-stderr">
-<pre><code>This is mgcv 1.9-1. For overview type 'help("mgcv-package")'.</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb55"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb55-1"><a href="#cb55-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Deleting NaN and Inf</span></span>
-<span id="cb55-2"><a href="#cb55-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb55-3"><a href="#cb55-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Wheat</span></span>
-<span id="cb55-4"><a href="#cb55-4" aria-hidden="true" tabindex="-1"></a>df_gam_w <span class="ot">&lt;-</span> df_final_w <span class="sc">|&gt;</span></span>
-<span id="cb55-5"><a href="#cb55-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.nan</span>(change) <span class="sc">&amp;</span> <span class="sc">!</span><span class="fu">is.infinite</span>(change)) <span class="sc">|&gt;</span></span>
-<span id="cb55-6"><a href="#cb55-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.nan</span>(diff_2007_2023_perc) <span class="sc">&amp;</span> <span class="sc">!</span><span class="fu">is.infinite</span>(diff_2007_2023_perc))</span>
-<span id="cb55-7"><a href="#cb55-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb55-8"><a href="#cb55-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Maize</span></span>
-<span id="cb55-9"><a href="#cb55-9" aria-hidden="true" tabindex="-1"></a>df_gam_m <span class="ot">&lt;-</span> df_final_m <span class="sc">|&gt;</span></span>
-<span id="cb55-10"><a href="#cb55-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.nan</span>(change) <span class="sc">&amp;</span> <span class="sc">!</span><span class="fu">is.infinite</span>(change)) <span class="sc">|&gt;</span></span>
-<span id="cb55-11"><a href="#cb55-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.nan</span>(diff_2007_2023_perc) <span class="sc">&amp;</span> <span class="sc">!</span><span class="fu">is.infinite</span>(diff_2007_2023_perc)) </span>
-<span id="cb55-12"><a href="#cb55-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb55-13"><a href="#cb55-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Pea</span></span>
-<span id="cb55-14"><a href="#cb55-14" aria-hidden="true" tabindex="-1"></a>df_gam_p <span class="ot">&lt;-</span> df_final_p <span class="sc">|&gt;</span></span>
-<span id="cb55-15"><a href="#cb55-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.nan</span>(change) <span class="sc">&amp;</span> <span class="sc">!</span><span class="fu">is.infinite</span>(change)) <span class="sc">|&gt;</span></span>
-<span id="cb55-16"><a href="#cb55-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.nan</span>(diff_2007_2023_perc) <span class="sc">&amp;</span> <span class="sc">!</span><span class="fu">is.infinite</span>(diff_2007_2023_perc)) </span>
-<span id="cb55-17"><a href="#cb55-17" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb55-18"><a href="#cb55-18" aria-hidden="true" tabindex="-1"></a><span class="co"># Flax</span></span>
-<span id="cb55-19"><a href="#cb55-19" aria-hidden="true" tabindex="-1"></a>df_gam_f <span class="ot">&lt;-</span> df_final_f <span class="sc">|&gt;</span></span>
-<span id="cb55-20"><a href="#cb55-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.nan</span>(change) <span class="sc">&amp;</span> <span class="sc">!</span><span class="fu">is.infinite</span>(change)) <span class="sc">|&gt;</span></span>
-<span id="cb55-21"><a href="#cb55-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.nan</span>(diff_2007_2023_perc) <span class="sc">&amp;</span> <span class="sc">!</span><span class="fu">is.infinite</span>(diff_2007_2023_perc))</span>
-<span id="cb55-22"><a href="#cb55-22" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb55-23"><a href="#cb55-23" aria-hidden="true" tabindex="-1"></a>reg1_gam_w <span class="ot">&lt;-</span> <span class="fu">gam</span>(diff_2007_2023_perc <span class="sc">~</span> <span class="fu">s</span>(change), <span class="at">data =</span> df_gam_w)</span>
-<span id="cb55-24"><a href="#cb55-24" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb55-25"><a href="#cb55-25" aria-hidden="true" tabindex="-1"></a>reg1_gam_m <span class="ot">&lt;-</span> <span class="fu">gam</span>(diff_2007_2023_perc <span class="sc">~</span> <span class="fu">s</span>(change), <span class="at">data =</span> df_gam_m)</span>
-<span id="cb55-26"><a href="#cb55-26" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb55-27"><a href="#cb55-27" aria-hidden="true" tabindex="-1"></a>reg1_gam_p <span class="ot">&lt;-</span> <span class="fu">gam</span>(diff_2007_2023_perc <span class="sc">~</span> <span class="fu">s</span>(change), <span class="at">data =</span> df_gam_p)</span>
-<span id="cb55-28"><a href="#cb55-28" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb55-29"><a href="#cb55-29" aria-hidden="true" tabindex="-1"></a>reg1_gam_f <span class="ot">&lt;-</span> <span class="fu">gam</span>(diff_2007_2023_perc <span class="sc">~</span> <span class="fu">s</span>(change), <span class="at">data =</span> df_gam_f)</span>
-<span id="cb55-30"><a href="#cb55-30" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb55-31"><a href="#cb55-31" aria-hidden="true" tabindex="-1"></a>sum_gam_w <span class="ot">&lt;-</span> <span class="fu">summary</span>(reg1_gam_w)<span class="sc">$</span>s.table[<span class="st">"s(change)"</span>, ]</span>
-<span id="cb55-32"><a href="#cb55-32" aria-hidden="true" tabindex="-1"></a>sum_gam_m <span class="ot">&lt;-</span> <span class="fu">summary</span>(reg1_gam_m)<span class="sc">$</span>s.table[<span class="st">"s(change)"</span>, ]</span>
-<span id="cb55-33"><a href="#cb55-33" aria-hidden="true" tabindex="-1"></a>sum_gam_p <span class="ot">&lt;-</span> <span class="fu">summary</span>(reg1_gam_p)<span class="sc">$</span>s.table[<span class="st">"s(change)"</span>, ]</span>
-<span id="cb55-34"><a href="#cb55-34" aria-hidden="true" tabindex="-1"></a>sum_gam_f <span class="ot">&lt;-</span> <span class="fu">summary</span>(reg1_gam_f)<span class="sc">$</span>s.table[<span class="st">"s(change)"</span>, ]</span>
-<span id="cb55-35"><a href="#cb55-35" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb55-36"><a href="#cb55-36" aria-hidden="true" tabindex="-1"></a>gam1_results <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
-<span id="cb55-37"><a href="#cb55-37" aria-hidden="true" tabindex="-1"></a>  <span class="at">Term =</span> <span class="st">"Potential Yield Change (s(change))"</span>,</span>
-<span id="cb55-38"><a href="#cb55-38" aria-hidden="true" tabindex="-1"></a>  <span class="at">Wheat =</span> <span class="fu">sprintf</span>(<span class="st">"%.3f (p=%.3f)"</span>, sum_gam_w[<span class="st">"edf"</span>], sum_gam_w[<span class="st">"p-value"</span>]),</span>
-<span id="cb55-39"><a href="#cb55-39" aria-hidden="true" tabindex="-1"></a>  <span class="at">Maize =</span> <span class="fu">sprintf</span>(<span class="st">"%.3f (p=%.3f)"</span>, sum_gam_m[<span class="st">"edf"</span>], sum_gam_m[<span class="st">"p-value"</span>]),</span>
-<span id="cb55-40"><a href="#cb55-40" aria-hidden="true" tabindex="-1"></a>  <span class="at">Pea =</span> <span class="fu">sprintf</span>(<span class="st">"%.3f (p=%.3f)"</span>, sum_gam_p[<span class="st">"edf"</span>], sum_gam_p[<span class="st">"p-value"</span>]),</span>
-<span id="cb55-41"><a href="#cb55-41" aria-hidden="true" tabindex="-1"></a>  <span class="at">Flax =</span> <span class="fu">sprintf</span>(<span class="st">"%.3f (p=%.3f)"</span>, sum_gam_f[<span class="st">"edf"</span>], sum_gam_f[<span class="st">"p-value"</span>])</span>
-<span id="cb55-42"><a href="#cb55-42" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb55-43"><a href="#cb55-43" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb55-44"><a href="#cb55-44" aria-hidden="true" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(gam1_results, <span class="at">format =</span> <span class="st">"markdown"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Crops with higher historical AC are less likely to appear or disappear compared to be maintained. In contrast, a higher future AC increases the likelihood of crop appearance and reduces the chance of disappearance, highlighting the anticipatory adaptation of communes to future agronomic potential. The change in crop share over time (change) also plays a role, with significant negative effects on both appearance and the “never cultivated” category, indicating that crops with strong shifts in area are more likely to be maintained. Although the coefficients on future potential yield (value_futur_rpg) are small, they are highly significant, and consistently associated with reduced odds of all categories compared to being maintained.</p>
+</section>
+<section id="combining-cai-and-potential-yield-change" class="level3">
+<h3 class="anchored" data-anchor-id="combining-cai-and-potential-yield-change">Combining CAI and Potential yield change</h3>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code># weights:  16 (9 variable)
+initial  value 676298.158896 
+iter  10 value 558930.596101
+iter  20 value 525222.209979
+iter  30 value 525189.563384
+final  value 525188.614731 
+converged</code></pre>
+</div>
+</div>
+<p>When combining historical comparative advantage index with potentiel yield change as explanatory variables in the same model, we find similar results to <strong>model 2</strong>, where we wanted to explain acreage dynamics with historical comparative advantage index and its potential change. Crops with higher historical CA are more likely to be maintained than to appear or disappear, but are more likely to be never cultivated compared to being maintained. When potential yield change is higher, crop acreage is also less likely to vary compared to be maintained as it is.</p>
+</section>
+<section id="adding-climate-controls" class="level3">
+<h3 class="anchored" data-anchor-id="adding-climate-controls">Adding climate controls</h3>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code># weights:  32 (21 variable)
+initial  value 676298.158896 
+iter  10 value 515900.673347
+iter  20 value 510937.085125
+iter  30 value 506429.289460
+final  value 506428.581874 
+converged</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code># weights:  32 (21 variable)
+initial  value 676298.158896 
+iter  10 value 561559.102852
+iter  20 value 550188.427341
+iter  30 value 517524.689899
+final  value 517520.172894 
+converged</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code># weights:  32 (21 variable)
+initial  value 676298.158896 
+iter  10 value 561851.959654
+iter  20 value 556748.280594
+iter  30 value 517612.806120
+final  value 517556.680780 
+converged</code></pre>
+</div>
 <div class="cell-output-display">
-<table class="caption-top table table-sm table-striped small">
-<colgroup>
-<col style="width: 35%">
-<col style="width: 17%">
-<col style="width: 16%">
-<col style="width: 16%">
-<col style="width: 16%">
-</colgroup>
-<thead>
-<tr class="header">
-<th style="text-align: left;">Term</th>
-<th style="text-align: left;">Wheat</th>
-<th style="text-align: left;">Maize</th>
-<th style="text-align: left;">Pea</th>
-<th style="text-align: left;">Flax</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td style="text-align: left;">Potential Yield Change (s(change))</td>
-<td style="text-align: left;">5.598 (p=-0.000)</td>
-<td style="text-align: left;">1.000 (p=0.267)</td>
-<td style="text-align: left;">1.724 (p=0.205)</td>
-<td style="text-align: left;">7.135 (p=0.000)</td>
-</tr>
-</tbody>
-</table>
+<!-- preamble start -->
+
+    <script>
+
+      function styleCell_57nynx9gtaalmrcuimpc(i, j, css_id) {
+          var table = document.getElementById("tinytable_57nynx9gtaalmrcuimpc");
+          var cell = table.rows[i]?.cells[j];  // Safe navigation to avoid errors
+          if (cell) {
+              console.log(`Styling cell at (${i}, ${j}) with class ${css_id}`);
+              cell.classList.add(css_id);
+          } else {
+              console.warn(`Cell at (${i}, ${j}) not found.`);
+          }
+      }
+      function insertSpanRow(i, colspan, content) {
+        var table = document.getElementById('tinytable_57nynx9gtaalmrcuimpc');
+        var newRow = table.insertRow(i);
+        var newCell = newRow.insertCell(0);
+        newCell.setAttribute("colspan", colspan);
+        // newCell.innerText = content;
+        // this may be unsafe, but innerText does not interpret <br>
+        newCell.innerHTML = content;
+      }
+      function spanCell_57nynx9gtaalmrcuimpc(i, j, rowspan, colspan) {
+        var table = document.getElementById("tinytable_57nynx9gtaalmrcuimpc");
+        const targetRow = table.rows[i];
+        const targetCell = targetRow.cells[j];
+        for (let r = 0; r < rowspan; r++) {
+          // Only start deleting cells to the right for the first row (r == 0)
+          if (r === 0) {
+            // Delete cells to the right of the target cell in the first row
+            for (let c = colspan - 1; c > 0; c--) {
+              if (table.rows[i + r].cells[j + c]) {
+                table.rows[i + r].deleteCell(j + c);
+              }
+            }
+          }
+          // For rows below the first, delete starting from the target column
+          if (r > 0) {
+            for (let c = colspan - 1; c >= 0; c--) {
+              if (table.rows[i + r] && table.rows[i + r].cells[j]) {
+                table.rows[i + r].deleteCell(j);
+              }
+            }
+          }
+        }
+        // Set rowspan and colspan of the target cell
+        targetCell.rowSpan = rowspan;
+        targetCell.colSpan = colspan;
+      }
+      // tinytable span after
+      window.addEventListener('load', function () {
+          var cellsToStyle = [
+            // tinytable style arrays after
+          { positions: [ { i: 0, j: 2 }, { i: 0, j: 3 }, { i: 0, j: 7 }, { i: 0, j: 6 }, { i: 0, j: 5 }, { i: 0, j: 4 },  ], css_id: 'tinytable_css_wr1ppkx64iebcltibo8x',}, 
+          { positions: [ { i: 0, j: 0 }, { i: 0, j: 1 },  ], css_id: 'tinytable_css_vdsoi5krvdtrscatrmea',}, 
+          { positions: [ { i: 48, j: 0 }, { i: 48, j: 1 },  ], css_id: 'tinytable_css_s8livn6r9prkwrkca0pv',}, 
+          { positions: [ { i: 48, j: 5 }, { i: 48, j: 4 }, { i: 48, j: 6 }, { i: 48, j: 7 }, { i: 48, j: 3 }, { i: 48, j: 2 },  ], css_id: 'tinytable_css_s7k73780bvjl1zbfk44z',}, 
+          { positions: [ { i: 52, j: 5 }, { i: 52, j: 4 }, { i: 52, j: 3 }, { i: 52, j: 2 }, { i: 52, j: 6 }, { i: 52, j: 7 },  ], css_id: 'tinytable_css_s18v8tnnqioc04qulcrp',}, 
+          { positions: [ { i: 1, j: 2 }, { i: 3, j: 2 }, { i: 4, j: 2 }, { i: 5, j: 2 }, { i: 2, j: 2 }, { i: 7, j: 2 }, { i: 8, j: 2 }, { i: 9, j: 2 }, { i: 6, j: 2 }, { i: 15, j: 2 }, { i: 16, j: 2 }, { i: 17, j: 2 }, { i: 14, j: 2 }, { i: 19, j: 2 }, { i: 20, j: 2 }, { i: 21, j: 2 }, { i: 18, j: 2 }, { i: 10, j: 2 }, { i: 24, j: 2 }, { i: 12, j: 2 }, { i: 22, j: 2 }, { i: 27, j: 2 }, { i: 28, j: 2 }, { i: 29, j: 2 }, { i: 30, j: 2 }, { i: 31, j: 2 }, { i: 32, j: 2 }, { i: 33, j: 2 }, { i: 34, j: 2 }, { i: 35, j: 2 }, { i: 36, j: 2 }, { i: 37, j: 2 }, { i: 25, j: 2 }, { i: 39, j: 2 }, { i: 40, j: 2 }, { i: 41, j: 2 }, { i: 42, j: 2 }, { i: 43, j: 2 }, { i: 44, j: 2 }, { i: 45, j: 2 }, { i: 46, j: 2 }, { i: 47, j: 2 }, { i: 10, j: 5 }, { i: 49, j: 2 }, { i: 50, j: 2 }, { i: 11, j: 2 }, { i: 14, j: 5 }, { i: 13, j: 2 }, { i: 1, j: 3 }, { i: 2, j: 3 }, { i: 3, j: 3 }, { i: 4, j: 3 }, { i: 5, j: 3 }, { i: 6, j: 3 }, { i: 7, j: 3 }, { i: 8, j: 3 }, { i: 9, j: 3 }, { i: 10, j: 3 }, { i: 11, j: 3 }, { i: 12, j: 3 }, { i: 26, j: 2 }, { i: 14, j: 3 }, { i: 15, j: 3 }, { i: 16, j: 3 }, { i: 17, j: 3 }, { i: 18, j: 3 }, { i: 19, j: 3 }, { i: 20, j: 3 }, { i: 21, j: 3 }, { i: 22, j: 3 }, { i: 23, j: 3 }, { i: 24, j: 3 }, { i: 25, j: 3 }, { i: 26, j: 3 }, { i: 27, j: 3 }, { i: 28, j: 3 }, { i: 29, j: 3 }, { i: 30, j: 3 }, { i: 31, j: 3 }, { i: 32, j: 3 }, { i: 33, j: 3 }, { i: 34, j: 3 }, { i: 35, j: 3 }, { i: 36, j: 3 }, { i: 37, j: 3 }, { i: 51, j: 2 }, { i: 39, j: 3 }, { i: 40, j: 3 }, { i: 41, j: 3 }, { i: 42, j: 3 }, { i: 43, j: 3 }, { i: 44, j: 3 }, { i: 45, j: 3 }, { i: 46, j: 3 }, { i: 47, j: 3 }, { i: 10, j: 6 }, { i: 49, j: 3 }, { i: 50, j: 3 }, { i: 51, j: 3 }, { i: 14, j: 6 }, { i: 13, j: 3 }, { i: 1, j: 4 }, { i: 2, j: 4 }, { i: 3, j: 4 }, { i: 4, j: 4 }, { i: 5, j: 4 }, { i: 6, j: 4 }, { i: 7, j: 4 }, { i: 8, j: 4 }, { i: 9, j: 4 }, { i: 10, j: 4 }, { i: 11, j: 4 }, { i: 12, j: 4 }, { i: 13, j: 4 }, { i: 14, j: 4 }, { i: 15, j: 4 }, { i: 16, j: 4 }, { i: 17, j: 4 }, { i: 18, j: 4 }, { i: 19, j: 4 }, { i: 20, j: 4 }, { i: 21, j: 4 }, { i: 22, j: 4 }, { i: 23, j: 4 }, { i: 24, j: 4 }, { i: 25, j: 4 }, { i: 26, j: 4 }, { i: 27, j: 4 }, { i: 28, j: 4 }, { i: 29, j: 4 }, { i: 30, j: 4 }, { i: 31, j: 4 }, { i: 32, j: 4 }, { i: 33, j: 4 }, { i: 34, j: 4 }, { i: 35, j: 4 }, { i: 36, j: 4 }, { i: 37, j: 4 }, { i: 23, j: 2 }, { i: 39, j: 4 }, { i: 40, j: 4 }, { i: 41, j: 4 }, { i: 42, j: 4 }, { i: 43, j: 4 }, { i: 44, j: 4 }, { i: 45, j: 4 }, { i: 46, j: 4 }, { i: 47, j: 4 }, { i: 10, j: 7 }, { i: 49, j: 4 }, { i: 50, j: 4 }, { i: 51, j: 4 }, { i: 14, j: 7 }, { i: 38, j: 2 }, { i: 1, j: 5 }, { i: 2, j: 5 }, { i: 3, j: 5 }, { i: 4, j: 5 }, { i: 5, j: 5 }, { i: 6, j: 5 }, { i: 7, j: 5 }, { i: 8, j: 5 }, { i: 9, j: 5 }, { i: 25, j: 7 }, { i: 11, j: 5 }, { i: 12, j: 5 }, { i: 13, j: 5 }, { i: 29, j: 7 }, { i: 15, j: 5 }, { i: 16, j: 5 }, { i: 17, j: 5 }, { i: 18, j: 5 }, { i: 19, j: 5 }, { i: 20, j: 5 }, { i: 21, j: 5 }, { i: 22, j: 5 }, { i: 23, j: 5 }, { i: 24, j: 5 }, { i: 25, j: 5 }, { i: 26, j: 5 }, { i: 27, j: 5 }, { i: 28, j: 5 }, { i: 29, j: 5 }, { i: 30, j: 5 }, { i: 31, j: 5 }, { i: 32, j: 5 }, { i: 33, j: 5 }, { i: 34, j: 5 }, { i: 35, j: 5 }, { i: 36, j: 5 }, { i: 37, j: 5 }, { i: 38, j: 5 }, { i: 39, j: 5 }, { i: 40, j: 5 }, { i: 41, j: 5 }, { i: 42, j: 5 }, { i: 43, j: 5 }, { i: 44, j: 5 }, { i: 45, j: 5 }, { i: 46, j: 5 }, { i: 47, j: 5 }, { i: 35, j: 6 }, { i: 49, j: 5 }, { i: 50, j: 5 }, { i: 51, j: 5 }, { i: 39, j: 6 }, { i: 38, j: 3 }, { i: 1, j: 6 }, { i: 2, j: 6 }, { i: 3, j: 6 }, { i: 4, j: 6 }, { i: 5, j: 6 }, { i: 6, j: 6 }, { i: 7, j: 6 }, { i: 8, j: 6 }, { i: 9, j: 6 }, { i: 50, j: 6 }, { i: 11, j: 6 }, { i: 12, j: 6 }, { i: 13, j: 6 }, { i: 1, j: 7 }, { i: 15, j: 6 }, { i: 16, j: 6 }, { i: 17, j: 6 }, { i: 18, j: 6 }, { i: 19, j: 6 }, { i: 20, j: 6 }, { i: 21, j: 6 }, { i: 22, j: 6 }, { i: 23, j: 6 }, { i: 24, j: 6 }, { i: 25, j: 6 }, { i: 26, j: 6 }, { i: 27, j: 6 }, { i: 28, j: 6 }, { i: 29, j: 6 }, { i: 30, j: 6 }, { i: 31, j: 6 }, { i: 32, j: 6 }, { i: 33, j: 6 }, { i: 34, j: 6 }, { i: 22, j: 7 }, { i: 36, j: 6 }, { i: 37, j: 6 }, { i: 38, j: 6 }, { i: 26, j: 7 }, { i: 40, j: 6 }, { i: 41, j: 6 }, { i: 42, j: 6 }, { i: 43, j: 6 }, { i: 44, j: 6 }, { i: 45, j: 6 }, { i: 46, j: 6 }, { i: 47, j: 6 }, { i: 35, j: 7 }, { i: 49, j: 6 }, { i: 37, j: 7 }, { i: 51, j: 6 }, { i: 39, j: 7 }, { i: 38, j: 4 }, { i: 41, j: 7 }, { i: 2, j: 7 }, { i: 3, j: 7 }, { i: 4, j: 7 }, { i: 5, j: 7 }, { i: 6, j: 7 }, { i: 7, j: 7 }, { i: 8, j: 7 }, { i: 9, j: 7 }, { i: 50, j: 7 }, { i: 11, j: 7 }, { i: 12, j: 7 }, { i: 13, j: 7 }, { i: 27, j: 7 }, { i: 15, j: 7 }, { i: 16, j: 7 }, { i: 17, j: 7 }, { i: 18, j: 7 }, { i: 19, j: 7 }, { i: 20, j: 7 }, { i: 21, j: 7 }, { i: 30, j: 7 }, { i: 23, j: 7 }, { i: 24, j: 7 }, { i: 38, j: 7 }, { i: 34, j: 7 }, { i: 40, j: 7 }, { i: 28, j: 7 }, { i: 42, j: 7 }, { i: 51, j: 7 }, { i: 31, j: 7 }, { i: 32, j: 7 }, { i: 33, j: 7 }, { i: 46, j: 7 }, { i: 43, j: 7 }, { i: 36, j: 7 }, { i: 45, j: 7 }, { i: 47, j: 7 }, { i: 44, j: 7 }, { i: 49, j: 7 },  ], css_id: 'tinytable_css_kjohz3fp7llnhjvx3rwt',}, 
+          { positions: [ { i: 52, j: 0 }, { i: 52, j: 1 },  ], css_id: 'tinytable_css_9gi73t6tk73nlp27b4hr',}, 
+          { positions: [ { i: 2, j: 0 }, { i: 3, j: 0 }, { i: 4, j: 0 }, { i: 1, j: 0 }, { i: 6, j: 0 }, { i: 7, j: 0 }, { i: 8, j: 0 }, { i: 5, j: 0 }, { i: 10, j: 0 }, { i: 11, j: 0 }, { i: 12, j: 0 }, { i: 9, j: 0 }, { i: 14, j: 0 }, { i: 15, j: 0 }, { i: 16, j: 0 }, { i: 17, j: 0 }, { i: 18, j: 0 }, { i: 19, j: 0 }, { i: 20, j: 0 }, { i: 21, j: 0 }, { i: 22, j: 0 }, { i: 23, j: 0 }, { i: 24, j: 0 }, { i: 25, j: 0 }, { i: 26, j: 0 }, { i: 27, j: 0 }, { i: 28, j: 0 }, { i: 29, j: 0 }, { i: 30, j: 0 }, { i: 31, j: 0 }, { i: 32, j: 0 }, { i: 33, j: 0 }, { i: 34, j: 0 }, { i: 35, j: 0 }, { i: 36, j: 0 }, { i: 37, j: 0 }, { i: 38, j: 0 }, { i: 39, j: 0 }, { i: 40, j: 0 }, { i: 41, j: 0 }, { i: 42, j: 0 }, { i: 43, j: 0 }, { i: 44, j: 0 }, { i: 45, j: 0 }, { i: 46, j: 0 }, { i: 47, j: 0 }, { i: 35, j: 1 }, { i: 49, j: 0 }, { i: 50, j: 0 }, { i: 51, j: 0 }, { i: 39, j: 1 }, { i: 13, j: 0 }, { i: 1, j: 1 }, { i: 2, j: 1 }, { i: 3, j: 1 }, { i: 4, j: 1 }, { i: 5, j: 1 }, { i: 6, j: 1 }, { i: 7, j: 1 }, { i: 8, j: 1 }, { i: 9, j: 1 }, { i: 10, j: 1 }, { i: 11, j: 1 }, { i: 12, j: 1 }, { i: 13, j: 1 }, { i: 14, j: 1 }, { i: 15, j: 1 }, { i: 16, j: 1 }, { i: 17, j: 1 }, { i: 18, j: 1 }, { i: 19, j: 1 }, { i: 20, j: 1 }, { i: 21, j: 1 }, { i: 22, j: 1 }, { i: 23, j: 1 }, { i: 24, j: 1 }, { i: 25, j: 1 }, { i: 26, j: 1 }, { i: 27, j: 1 }, { i: 28, j: 1 }, { i: 29, j: 1 }, { i: 30, j: 1 }, { i: 31, j: 1 }, { i: 32, j: 1 }, { i: 33, j: 1 }, { i: 34, j: 1 }, { i: 43, j: 1 }, { i: 36, j: 1 }, { i: 37, j: 1 }, { i: 38, j: 1 }, { i: 47, j: 1 }, { i: 40, j: 1 }, { i: 41, j: 1 }, { i: 42, j: 1 }, { i: 51, j: 1 }, { i: 44, j: 1 }, { i: 45, j: 1 }, { i: 46, j: 1 }, { i: 49, j: 1 }, { i: 50, j: 1 },  ], css_id: 'tinytable_css_0eu1juuv8e5n1f249bag',}, 
+          ];
+
+          // Loop over the arrays to style the cells
+          cellsToStyle.forEach(function (group) {
+              group.positions.forEach(function (cell) {
+                  styleCell_57nynx9gtaalmrcuimpc(cell.i, cell.j, group.css_id);
+              });
+          });
+      });
+    </script>
+
+    <style>
+      /* tinytable css entries after */
+      .table td.tinytable_css_wr1ppkx64iebcltibo8x, .table th.tinytable_css_wr1ppkx64iebcltibo8x { text-align: center; border-top: solid #d3d8dc 0.1em; border-bottom: solid #d3d8dc 0.05em; }
+      .table td.tinytable_css_vdsoi5krvdtrscatrmea, .table th.tinytable_css_vdsoi5krvdtrscatrmea { text-align: left; border-top: solid #d3d8dc 0.1em; border-bottom: solid #d3d8dc 0.05em; }
+      .table td.tinytable_css_s8livn6r9prkwrkca0pv, .table th.tinytable_css_s8livn6r9prkwrkca0pv { text-align: left; border-bottom: solid black 0.05em; }
+      .table td.tinytable_css_s7k73780bvjl1zbfk44z, .table th.tinytable_css_s7k73780bvjl1zbfk44z { text-align: center; border-bottom: solid black 0.05em; }
+      .table td.tinytable_css_s18v8tnnqioc04qulcrp, .table th.tinytable_css_s18v8tnnqioc04qulcrp { text-align: center; border-bottom: solid #d3d8dc 0.1em; }
+      .table td.tinytable_css_kjohz3fp7llnhjvx3rwt, .table th.tinytable_css_kjohz3fp7llnhjvx3rwt { text-align: center; }
+      .table td.tinytable_css_9gi73t6tk73nlp27b4hr, .table th.tinytable_css_9gi73t6tk73nlp27b4hr { text-align: left; border-bottom: solid #d3d8dc 0.1em; }
+      .table td.tinytable_css_0eu1juuv8e5n1f249bag, .table th.tinytable_css_0eu1juuv8e5n1f249bag { text-align: left; }
+    </style>
+    <div class="container">
+      <table class="table table-borderless" id="tinytable_57nynx9gtaalmrcuimpc" style="width: auto; margin-left: auto; margin-right: auto;" data-quarto-disable-processing="true">
+        <thead>
+        
+              <tr>
+                <th scope="col"> </th>
+                <th scope="col">response</th>
+                <th scope="col">1a</th>
+                <th scope="col">2a</th>
+                <th scope="col">3a</th>
+                <th scope="col">1b</th>
+                <th scope="col">2b</th>
+                <th scope="col">3b</th>
+              </tr>
+        </thead>
+        <tfoot><tr><td colspan="8">+ p &lt; 0.1, * p &lt; 0.05, ** p &lt; 0.01, *** p &lt; 0.001</td></tr></tfoot>
+        <tbody>
+                <tr>
+                  <td>Historical yield            </td>
+                  <td>disparition   </td>
+                  <td>0.000*** </td>
+                  <td>         </td>
+                  <td>         </td>
+                  <td>0.000*** </td>
+                  <td>         </td>
+                  <td>         </td>
+                </tr>
+                <tr>
+                  <td>                            </td>
+                  <td>              </td>
+                  <td>(0.000)  </td>
+                  <td>         </td>
+                  <td>         </td>
+                  <td>(0.000)  </td>
+                  <td>         </td>
+                  <td>         </td>
+                </tr>
+                <tr>
+                  <td>                            </td>
+                  <td>apparition    </td>
+                  <td>0.000*** </td>
+                  <td>         </td>
+                  <td>         </td>
+                  <td>0.000*** </td>
+                  <td>         </td>
+                  <td>         </td>
+                </tr>
+                <tr>
+                  <td>                            </td>
+                  <td>              </td>
+                  <td>(0.000)  </td>
+                  <td>         </td>
+                  <td>         </td>
+                  <td>(0.000)  </td>
+                  <td>         </td>
+                  <td>         </td>
+                </tr>
+                <tr>
+                  <td>                            </td>
+                  <td>jamais cultivé</td>
+                  <td>0.000*** </td>
+                  <td>         </td>
+                  <td>         </td>
+                  <td>0.000*** </td>
+                  <td>         </td>
+                  <td>         </td>
+                </tr>
+                <tr>
+                  <td>                            </td>
+                  <td>              </td>
+                  <td>(0.000)  </td>
+                  <td>         </td>
+                  <td>         </td>
+                  <td>(0.000)  </td>
+                  <td>         </td>
+                  <td>         </td>
+                </tr>
+                <tr>
+                  <td>Potential yield change      </td>
+                  <td>disparition   </td>
+                  <td>-0.035***</td>
+                  <td>         </td>
+                  <td>-0.003   </td>
+                  <td>-0.021***</td>
+                  <td>         </td>
+                  <td>-0.002   </td>
+                </tr>
+                <tr>
+                  <td>                            </td>
+                  <td>              </td>
+                  <td>(0.000)  </td>
+                  <td>         </td>
+                  <td>(0.005)  </td>
+                  <td>(0.000)  </td>
+                  <td>         </td>
+                  <td>(0.003)  </td>
+                </tr>
+                <tr>
+                  <td>                            </td>
+                  <td>apparition    </td>
+                  <td>-0.160***</td>
+                  <td>         </td>
+                  <td>-0.008*  </td>
+                  <td>-0.160***</td>
+                  <td>         </td>
+                  <td>-0.006+  </td>
+                </tr>
+                <tr>
+                  <td>                            </td>
+                  <td>              </td>
+                  <td>(0.001)  </td>
+                  <td>         </td>
+                  <td>(0.004)  </td>
+                  <td>(0.001)  </td>
+                  <td>         </td>
+                  <td>(0.003)  </td>
+                </tr>
+                <tr>
+                  <td>                            </td>
+                  <td>jamais cultivé</td>
+                  <td>-0.054***</td>
+                  <td>         </td>
+                  <td>-0.003+  </td>
+                  <td>-0.058***</td>
+                  <td>         </td>
+                  <td>-0.004*  </td>
+                </tr>
+                <tr>
+                  <td>                            </td>
+                  <td>              </td>
+                  <td>(0.005)  </td>
+                  <td>         </td>
+                  <td>(0.002)  </td>
+                  <td>(0.005)  </td>
+                  <td>         </td>
+                  <td>(0.002)  </td>
+                </tr>
+                <tr>
+                  <td>Historical CA               </td>
+                  <td>disparition   </td>
+                  <td>         </td>
+                  <td>-0.051***</td>
+                  <td>-0.051***</td>
+                  <td>         </td>
+                  <td>-0.111***</td>
+                  <td>-0.110***</td>
+                </tr>
+                <tr>
+                  <td>                            </td>
+                  <td>              </td>
+                  <td>         </td>
+                  <td>(0.015)  </td>
+                  <td>(0.015)  </td>
+                  <td>         </td>
+                  <td>(0.016)  </td>
+                  <td>(0.016)  </td>
+                </tr>
+                <tr>
+                  <td>                            </td>
+                  <td>apparition    </td>
+                  <td>         </td>
+                  <td>-0.005   </td>
+                  <td>-0.005   </td>
+                  <td>         </td>
+                  <td>-0.012+  </td>
+                  <td>-0.012+  </td>
+                </tr>
+                <tr>
+                  <td>                            </td>
+                  <td>              </td>
+                  <td>         </td>
+                  <td>(0.007)  </td>
+                  <td>(0.007)  </td>
+                  <td>         </td>
+                  <td>(0.007)  </td>
+                  <td>(0.007)  </td>
+                </tr>
+                <tr>
+                  <td>                            </td>
+                  <td>jamais cultivé</td>
+                  <td>         </td>
+                  <td>0.145*** </td>
+                  <td>0.143*** </td>
+                  <td>         </td>
+                  <td>0.125*** </td>
+                  <td>0.123*** </td>
+                </tr>
+                <tr>
+                  <td>                            </td>
+                  <td>              </td>
+                  <td>         </td>
+                  <td>(0.004)  </td>
+                  <td>(0.004)  </td>
+                  <td>         </td>
+                  <td>(0.004)  </td>
+                  <td>(0.004)  </td>
+                </tr>
+                <tr>
+                  <td>Potential CA change         </td>
+                  <td>disparition   </td>
+                  <td>         </td>
+                  <td>-0.005   </td>
+                  <td>         </td>
+                  <td>         </td>
+                  <td>-0.003   </td>
+                  <td>         </td>
+                </tr>
+                <tr>
+                  <td>                            </td>
+                  <td>              </td>
+                  <td>         </td>
+                  <td>(0.006)  </td>
+                  <td>         </td>
+                  <td>         </td>
+                  <td>(0.004)  </td>
+                  <td>         </td>
+                </tr>
+                <tr>
+                  <td>                            </td>
+                  <td>apparition    </td>
+                  <td>         </td>
+                  <td>-0.005+  </td>
+                  <td>         </td>
+                  <td>         </td>
+                  <td>-0.005+  </td>
+                  <td>         </td>
+                </tr>
+                <tr>
+                  <td>                            </td>
+                  <td>              </td>
+                  <td>         </td>
+                  <td>(0.003)  </td>
+                  <td>         </td>
+                  <td>         </td>
+                  <td>(0.003)  </td>
+                  <td>         </td>
+                </tr>
+                <tr>
+                  <td>                            </td>
+                  <td>jamais cultivé</td>
+                  <td>         </td>
+                  <td>-0.042***</td>
+                  <td>         </td>
+                  <td>         </td>
+                  <td>-0.033***</td>
+                  <td>         </td>
+                </tr>
+                <tr>
+                  <td>                            </td>
+                  <td>              </td>
+                  <td>         </td>
+                  <td>(0.006)  </td>
+                  <td>         </td>
+                  <td>         </td>
+                  <td>(0.005)  </td>
+                  <td>         </td>
+                </tr>
+                <tr>
+                  <td>Temperature mean            </td>
+                  <td>disparition   </td>
+                  <td>         </td>
+                  <td>         </td>
+                  <td>         </td>
+                  <td>0.402*** </td>
+                  <td>0.350*** </td>
+                  <td>0.350*** </td>
+                </tr>
+                <tr>
+                  <td>                            </td>
+                  <td>              </td>
+                  <td>         </td>
+                  <td>         </td>
+                  <td>         </td>
+                  <td>(0.001)  </td>
+                  <td>(0.069)  </td>
+                  <td>(0.069)  </td>
+                </tr>
+                <tr>
+                  <td>                            </td>
+                  <td>apparition    </td>
+                  <td>         </td>
+                  <td>         </td>
+                  <td>         </td>
+                  <td>0.195*** </td>
+                  <td>0.166*** </td>
+                  <td>0.164*** </td>
+                </tr>
+                <tr>
+                  <td>                            </td>
+                  <td>              </td>
+                  <td>         </td>
+                  <td>         </td>
+                  <td>         </td>
+                  <td>(0.000)  </td>
+                  <td>(0.036)  </td>
+                  <td>(0.036)  </td>
+                </tr>
+                <tr>
+                  <td>                            </td>
+                  <td>jamais cultivé</td>
+                  <td>         </td>
+                  <td>         </td>
+                  <td>         </td>
+                  <td>-0.694***</td>
+                  <td>-0.771***</td>
+                  <td>-0.771***</td>
+                </tr>
+                <tr>
+                  <td>                            </td>
+                  <td>              </td>
+                  <td>         </td>
+                  <td>         </td>
+                  <td>         </td>
+                  <td>(0.001)  </td>
+                  <td>(0.025)  </td>
+                  <td>(0.025)  </td>
+                </tr>
+                <tr>
+                  <td>Reference temperature mean  </td>
+                  <td>disparition   </td>
+                  <td>         </td>
+                  <td>         </td>
+                  <td>         </td>
+                  <td>-0.273***</td>
+                  <td>-0.215***</td>
+                  <td>-0.215***</td>
+                </tr>
+                <tr>
+                  <td>                            </td>
+                  <td>              </td>
+                  <td>         </td>
+                  <td>         </td>
+                  <td>         </td>
+                  <td>(0.001)  </td>
+                  <td>(0.065)  </td>
+                  <td>(0.065)  </td>
+                </tr>
+                <tr>
+                  <td>                            </td>
+                  <td>apparition    </td>
+                  <td>         </td>
+                  <td>         </td>
+                  <td>         </td>
+                  <td>-0.179***</td>
+                  <td>-0.155***</td>
+                  <td>-0.153***</td>
+                </tr>
+                <tr>
+                  <td>                            </td>
+                  <td>              </td>
+                  <td>         </td>
+                  <td>         </td>
+                  <td>         </td>
+                  <td>(0.001)  </td>
+                  <td>(0.034)  </td>
+                  <td>(0.034)  </td>
+                </tr>
+                <tr>
+                  <td>                            </td>
+                  <td>jamais cultivé</td>
+                  <td>         </td>
+                  <td>         </td>
+                  <td>         </td>
+                  <td>0.690*** </td>
+                  <td>0.744*** </td>
+                  <td>0.745*** </td>
+                </tr>
+                <tr>
+                  <td>                            </td>
+                  <td>              </td>
+                  <td>         </td>
+                  <td>         </td>
+                  <td>         </td>
+                  <td>(0.002)  </td>
+                  <td>(0.023)  </td>
+                  <td>(0.023)  </td>
+                </tr>
+                <tr>
+                  <td>Mean precipitation          </td>
+                  <td>disparition   </td>
+                  <td>         </td>
+                  <td>         </td>
+                  <td>         </td>
+                  <td>-2.631***</td>
+                  <td>-3.532***</td>
+                  <td>-3.535***</td>
+                </tr>
+                <tr>
+                  <td>                            </td>
+                  <td>              </td>
+                  <td>         </td>
+                  <td>         </td>
+                  <td>         </td>
+                  <td>(0.000)  </td>
+                  <td>(0.354)  </td>
+                  <td>(0.354)  </td>
+                </tr>
+                <tr>
+                  <td>                            </td>
+                  <td>apparition    </td>
+                  <td>         </td>
+                  <td>         </td>
+                  <td>         </td>
+                  <td>0.674*** </td>
+                  <td>-0.861***</td>
+                  <td>-0.857***</td>
+                </tr>
+                <tr>
+                  <td>                            </td>
+                  <td>              </td>
+                  <td>         </td>
+                  <td>         </td>
+                  <td>         </td>
+                  <td>(0.002)  </td>
+                  <td>(0.188)  </td>
+                  <td>(0.188)  </td>
+                </tr>
+                <tr>
+                  <td>                            </td>
+                  <td>jamais cultivé</td>
+                  <td>         </td>
+                  <td>         </td>
+                  <td>         </td>
+                  <td>-2.183***</td>
+                  <td>-3.479***</td>
+                  <td>-3.491***</td>
+                </tr>
+                <tr>
+                  <td>                            </td>
+                  <td>              </td>
+                  <td>         </td>
+                  <td>         </td>
+                  <td>         </td>
+                  <td>(0.004)  </td>
+                  <td>(0.127)  </td>
+                  <td>(0.127)  </td>
+                </tr>
+                <tr>
+                  <td>Reference mean precipitation</td>
+                  <td>disparition   </td>
+                  <td>         </td>
+                  <td>         </td>
+                  <td>         </td>
+                  <td>3.736*** </td>
+                  <td>4.627*** </td>
+                  <td>4.631*** </td>
+                </tr>
+                <tr>
+                  <td>                            </td>
+                  <td>              </td>
+                  <td>         </td>
+                  <td>         </td>
+                  <td>         </td>
+                  <td>(0.000)  </td>
+                  <td>(0.319)  </td>
+                  <td>(0.319)  </td>
+                </tr>
+                <tr>
+                  <td>                            </td>
+                  <td>apparition    </td>
+                  <td>         </td>
+                  <td>         </td>
+                  <td>         </td>
+                  <td>-0.040***</td>
+                  <td>1.464*** </td>
+                  <td>1.461*** </td>
+                </tr>
+                <tr>
+                  <td>                            </td>
+                  <td>              </td>
+                  <td>         </td>
+                  <td>         </td>
+                  <td>         </td>
+                  <td>(0.002)  </td>
+                  <td>(0.168)  </td>
+                  <td>(0.168)  </td>
+                </tr>
+                <tr>
+                  <td>                            </td>
+                  <td>jamais cultivé</td>
+                  <td>         </td>
+                  <td>         </td>
+                  <td>         </td>
+                  <td>3.601*** </td>
+                  <td>4.807*** </td>
+                  <td>4.819*** </td>
+                </tr>
+                <tr>
+                  <td>                            </td>
+                  <td>              </td>
+                  <td>         </td>
+                  <td>         </td>
+                  <td>         </td>
+                  <td>(0.004)  </td>
+                  <td>(0.114)  </td>
+                  <td>(0.114)  </td>
+                </tr>
+                <tr>
+                  <td>Num.Obs.                    </td>
+                  <td>              </td>
+                  <td>487846   </td>
+                  <td>487846   </td>
+                  <td>487846   </td>
+                  <td>487846   </td>
+                  <td>487846   </td>
+                  <td>487846   </td>
+                </tr>
+                <tr>
+                  <td>R2                          </td>
+                  <td>              </td>
+                  <td>0.313    </td>
+                  <td>0.297    </td>
+                  <td>0.297    </td>
+                  <td>0.322    </td>
+                  <td>0.307    </td>
+                  <td>0.307    </td>
+                </tr>
+                <tr>
+                  <td>R2 Adj.                     </td>
+                  <td>              </td>
+                  <td>0.313    </td>
+                  <td>0.297    </td>
+                  <td>0.297    </td>
+                  <td>0.322    </td>
+                  <td>0.307    </td>
+                  <td>0.307    </td>
+                </tr>
+                <tr>
+                  <td>RMSE                        </td>
+                  <td>              </td>
+                  <td>0.39     </td>
+                  <td>0.39     </td>
+                  <td>0.39     </td>
+                  <td>0.38     </td>
+                  <td>0.39     </td>
+                  <td>0.39     </td>
+                </tr>
+        </tbody>
+      </table>
+    </div>
+<!-- hack to avoid NA insertion in last line -->
 </div>
 </div>
 </section>
 </section>
-<section id="dependent-variable-mean-acreage-variations-between-2023-and-2007" class="level3">
-<h3 class="anchored" data-anchor-id="dependent-variable-mean-acreage-variations-between-2023-and-2007">Dependent variable : mean acreage variations between 2023 and 2007</h3>
-<p>We compute the mean variations over four years at the beginning and at the end of the period of interest (between 2007 and 2011, between 2019 and 2023). Then we take the percentage change in acreage between those two means, which will consist in our dependent variable.</p>
+<section id="reproducing-cui-et-al." class="level2">
+<h2 class="anchored" data-anchor-id="reproducing-cui-et-al.">Reproducing Cui et al.</h2>
+<p>Cui et al.&nbsp;uses a panel model where the author tries to explain acreage change of <strong>corn</strong> and <strong>soybean</strong> with variations in climate normals since the 1950s.</p>
+<section id="testing-model-fit" class="level3">
+<h3 class="anchored" data-anchor-id="testing-model-fit">Testing model fit</h3>
+<p>The first model looks at how climate variables affect crop acreage change. Specifically, we will be looking at <strong>Wheat</strong> and <strong>Maize</strong>, as they are the most cultivated crops in France, as well as showing a tendency of decreasing in agricultural surface occupied over our period of interest. Additionnal to Cui’s model, we introduce potential yield change as an explanatory variable to see if there is anticipation effect from crop producers.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb56"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb56-1"><a href="#cb56-1" aria-hidden="true" tabindex="-1"></a><span class="co"># OLS results with potential yield change as main explanatory variable</span></span>
-<span id="cb56-2"><a href="#cb56-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb56-3"><a href="#cb56-3" aria-hidden="true" tabindex="-1"></a>reg4_wheat <span class="ot">&lt;-</span> <span class="fu">feols</span>(diff_final_debut_perc <span class="sc">~</span> change<span class="sc">*</span>value_hist <span class="sc">|</span> region_code, <span class="at">data =</span> df_final_w)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stderr">
-<pre><code>NOTE: 4,793 observations removed because of NA and infinite values (LHS: 4,749, RHS: 214).</code></pre>
+<div class="cell-output-display">
+<!-- preamble start -->
+
+    <script>
+
+      function styleCell_whx54akax74prqnwful2(i, j, css_id) {
+          var table = document.getElementById("tinytable_whx54akax74prqnwful2");
+          var cell = table.rows[i]?.cells[j];  // Safe navigation to avoid errors
+          if (cell) {
+              console.log(`Styling cell at (${i}, ${j}) with class ${css_id}`);
+              cell.classList.add(css_id);
+          } else {
+              console.warn(`Cell at (${i}, ${j}) not found.`);
+          }
+      }
+      function insertSpanRow(i, colspan, content) {
+        var table = document.getElementById('tinytable_whx54akax74prqnwful2');
+        var newRow = table.insertRow(i);
+        var newCell = newRow.insertCell(0);
+        newCell.setAttribute("colspan", colspan);
+        // newCell.innerText = content;
+        // this may be unsafe, but innerText does not interpret <br>
+        newCell.innerHTML = content;
+      }
+      function spanCell_whx54akax74prqnwful2(i, j, rowspan, colspan) {
+        var table = document.getElementById("tinytable_whx54akax74prqnwful2");
+        const targetRow = table.rows[i];
+        const targetCell = targetRow.cells[j];
+        for (let r = 0; r < rowspan; r++) {
+          // Only start deleting cells to the right for the first row (r == 0)
+          if (r === 0) {
+            // Delete cells to the right of the target cell in the first row
+            for (let c = colspan - 1; c > 0; c--) {
+              if (table.rows[i + r].cells[j + c]) {
+                table.rows[i + r].deleteCell(j + c);
+              }
+            }
+          }
+          // For rows below the first, delete starting from the target column
+          if (r > 0) {
+            for (let c = colspan - 1; c >= 0; c--) {
+              if (table.rows[i + r] && table.rows[i + r].cells[j]) {
+                table.rows[i + r].deleteCell(j);
+              }
+            }
+          }
+        }
+        // Set rowspan and colspan of the target cell
+        targetCell.rowSpan = rowspan;
+        targetCell.colSpan = colspan;
+      }
+      // tinytable span after
+      window.addEventListener('load', function () {
+          var cellsToStyle = [
+            // tinytable style arrays after
+          { positions: [ { i: 0, j: 0 },  ], css_id: 'tinytable_css_oki1lzsh54qz5eq5v1li',}, 
+          { positions: [ { i: 0, j: 1 }, { i: 0, j: 2 }, { i: 0, j: 5 }, { i: 0, j: 3 }, { i: 0, j: 4 },  ], css_id: 'tinytable_css_mpcxf3wpnmdfwl2vy7fo',}, 
+          { positions: [ { i: 2, j: 1 }, { i: 3, j: 1 }, { i: 6, j: 1 }, { i: 7, j: 1 }, { i: 8, j: 1 }, { i: 10, j: 1 }, { i: 11, j: 1 }, { i: 12, j: 1 }, { i: 1, j: 1 }, { i: 14, j: 1 }, { i: 15, j: 1 }, { i: 16, j: 1 }, { i: 17, j: 1 }, { i: 5, j: 1 }, { i: 19, j: 1 }, { i: 20, j: 1 }, { i: 21, j: 1 }, { i: 9, j: 1 }, { i: 23, j: 1 }, { i: 24, j: 1 }, { i: 25, j: 1 }, { i: 26, j: 1 }, { i: 27, j: 1 }, { i: 28, j: 1 }, { i: 29, j: 1 }, { i: 8, j: 3 }, { i: 18, j: 1 }, { i: 1, j: 2 }, { i: 2, j: 2 }, { i: 3, j: 2 }, { i: 4, j: 2 }, { i: 5, j: 2 }, { i: 6, j: 2 }, { i: 7, j: 2 }, { i: 8, j: 2 }, { i: 9, j: 2 }, { i: 10, j: 2 }, { i: 11, j: 2 }, { i: 12, j: 2 }, { i: 4, j: 1 }, { i: 14, j: 2 }, { i: 15, j: 2 }, { i: 16, j: 2 }, { i: 17, j: 2 }, { i: 18, j: 2 }, { i: 19, j: 2 }, { i: 20, j: 2 }, { i: 21, j: 2 }, { i: 13, j: 1 }, { i: 23, j: 2 }, { i: 24, j: 2 }, { i: 25, j: 2 }, { i: 26, j: 2 }, { i: 27, j: 2 }, { i: 28, j: 2 }, { i: 29, j: 2 }, { i: 8, j: 4 }, { i: 9, j: 4 }, { i: 1, j: 3 }, { i: 2, j: 3 }, { i: 3, j: 3 }, { i: 4, j: 3 }, { i: 5, j: 3 }, { i: 6, j: 3 }, { i: 7, j: 3 }, { i: 17, j: 4 }, { i: 9, j: 3 }, { i: 10, j: 3 }, { i: 11, j: 3 }, { i: 12, j: 3 }, { i: 13, j: 3 }, { i: 14, j: 3 }, { i: 15, j: 3 }, { i: 16, j: 3 }, { i: 17, j: 3 }, { i: 18, j: 3 }, { i: 19, j: 3 }, { i: 20, j: 3 }, { i: 21, j: 3 }, { i: 13, j: 2 }, { i: 23, j: 3 }, { i: 24, j: 3 }, { i: 25, j: 3 }, { i: 26, j: 3 }, { i: 27, j: 3 }, { i: 28, j: 3 }, { i: 29, j: 3 }, { i: 8, j: 5 }, { i: 9, j: 5 }, { i: 1, j: 4 }, { i: 2, j: 4 }, { i: 3, j: 4 }, { i: 4, j: 4 }, { i: 5, j: 4 }, { i: 6, j: 4 }, { i: 7, j: 4 }, { i: 17, j: 5 }, { i: 18, j: 5 }, { i: 10, j: 4 }, { i: 11, j: 4 }, { i: 12, j: 4 }, { i: 13, j: 4 }, { i: 14, j: 4 }, { i: 15, j: 4 }, { i: 16, j: 4 }, { i: 26, j: 5 }, { i: 18, j: 4 }, { i: 19, j: 4 }, { i: 20, j: 4 }, { i: 21, j: 4 }, { i: 4, j: 5 }, { i: 23, j: 4 }, { i: 24, j: 4 }, { i: 25, j: 4 }, { i: 26, j: 4 }, { i: 27, j: 4 }, { i: 28, j: 4 }, { i: 29, j: 4 }, { i: 12, j: 5 }, { i: 13, j: 5 }, { i: 1, j: 5 }, { i: 2, j: 5 }, { i: 3, j: 5 }, { i: 21, j: 5 }, { i: 5, j: 5 }, { i: 6, j: 5 }, { i: 7, j: 5 }, { i: 25, j: 5 }, { i: 29, j: 5 }, { i: 10, j: 5 }, { i: 11, j: 5 }, { i: 16, j: 5 }, { i: 14, j: 5 }, { i: 15, j: 5 }, { i: 20, j: 5 }, { i: 19, j: 5 }, { i: 24, j: 5 }, { i: 23, j: 5 }, { i: 28, j: 5 }, { i: 27, j: 5 },  ], css_id: 'tinytable_css_bl17zb67qbim3xv9f87k',}, 
+          { positions: [ { i: 30, j: 2 }, { i: 30, j: 3 }, { i: 30, j: 1 }, { i: 30, j: 4 }, { i: 30, j: 5 },  ], css_id: 'tinytable_css_8hx4r773eorljrlr8bue',}, 
+          { positions: [ { i: 22, j: 0 },  ], css_id: 'tinytable_css_7i4lm1st4i81cl04tycf',}, 
+          { positions: [ { i: 22, j: 2 }, { i: 22, j: 3 }, { i: 22, j: 1 }, { i: 22, j: 5 }, { i: 22, j: 4 },  ], css_id: 'tinytable_css_6raodzdrwpegzis5di9e',}, 
+          { positions: [ { i: 30, j: 0 },  ], css_id: 'tinytable_css_6g55jsy9bdmmm95swz8q',}, 
+          { positions: [ { i: 1, j: 0 }, { i: 2, j: 0 }, { i: 3, j: 0 }, { i: 4, j: 0 }, { i: 5, j: 0 }, { i: 6, j: 0 }, { i: 7, j: 0 }, { i: 8, j: 0 }, { i: 9, j: 0 }, { i: 10, j: 0 }, { i: 11, j: 0 }, { i: 12, j: 0 }, { i: 13, j: 0 }, { i: 14, j: 0 }, { i: 15, j: 0 }, { i: 16, j: 0 }, { i: 17, j: 0 }, { i: 18, j: 0 }, { i: 19, j: 0 }, { i: 20, j: 0 }, { i: 21, j: 0 }, { i: 26, j: 0 }, { i: 23, j: 0 }, { i: 24, j: 0 }, { i: 25, j: 0 }, { i: 27, j: 0 }, { i: 28, j: 0 }, { i: 29, j: 0 },  ], css_id: 'tinytable_css_2a8du448f1f5px20aefx',}, 
+          ];
+
+          // Loop over the arrays to style the cells
+          cellsToStyle.forEach(function (group) {
+              group.positions.forEach(function (cell) {
+                  styleCell_whx54akax74prqnwful2(cell.i, cell.j, group.css_id);
+              });
+          });
+      });
+    </script>
+
+    <style>
+      /* tinytable css entries after */
+      .table td.tinytable_css_oki1lzsh54qz5eq5v1li, .table th.tinytable_css_oki1lzsh54qz5eq5v1li { text-align: left; border-top: solid #d3d8dc 0.1em; border-bottom: solid #d3d8dc 0.05em; }
+      .table td.tinytable_css_mpcxf3wpnmdfwl2vy7fo, .table th.tinytable_css_mpcxf3wpnmdfwl2vy7fo { text-align: center; border-top: solid #d3d8dc 0.1em; border-bottom: solid #d3d8dc 0.05em; }
+      .table td.tinytable_css_bl17zb67qbim3xv9f87k, .table th.tinytable_css_bl17zb67qbim3xv9f87k { text-align: center; }
+      .table td.tinytable_css_8hx4r773eorljrlr8bue, .table th.tinytable_css_8hx4r773eorljrlr8bue { text-align: center; border-bottom: solid #d3d8dc 0.1em; }
+      .table td.tinytable_css_7i4lm1st4i81cl04tycf, .table th.tinytable_css_7i4lm1st4i81cl04tycf { text-align: left; border-bottom: solid black 0.05em; }
+      .table td.tinytable_css_6raodzdrwpegzis5di9e, .table th.tinytable_css_6raodzdrwpegzis5di9e { text-align: center; border-bottom: solid black 0.05em; }
+      .table td.tinytable_css_6g55jsy9bdmmm95swz8q, .table th.tinytable_css_6g55jsy9bdmmm95swz8q { text-align: left; border-bottom: solid #d3d8dc 0.1em; }
+      .table td.tinytable_css_2a8du448f1f5px20aefx, .table th.tinytable_css_2a8du448f1f5px20aefx { text-align: left; }
+    </style>
+    <div class="container">
+      <table class="table table-borderless" id="tinytable_whx54akax74prqnwful2" style="width: auto; margin-left: auto; margin-right: auto;" data-quarto-disable-processing="true">
+        <thead>
+        
+              <tr>
+                <th scope="col"> </th>
+                <th scope="col">Wheat (Baseline)</th>
+                <th scope="col">Wheat (Interaction)</th>
+                <th scope="col">Wheat (Interactions + Squared)</th>
+                <th scope="col">Wheat (Lagged)</th>
+                <th scope="col">Wheat (all var)</th>
+              </tr>
+        </thead>
+        <tfoot><tr><td colspan="6">+ p &lt; 0.1, * p &lt; 0.05, ** p &lt; 0.01, *** p &lt; 0.001</td></tr></tfoot>
+        <tbody>
+                <tr>
+                  <td>Historical yield (in t/ha)              </td>
+                  <td>0.170*** </td>
+                  <td>0.125*** </td>
+                  <td>0.122*** </td>
+                  <td>0.162*** </td>
+                  <td>0.122*** </td>
+                </tr>
+                <tr>
+                  <td>                                        </td>
+                  <td>(0.005)  </td>
+                  <td>(0.003)  </td>
+                  <td>(0.003)  </td>
+                  <td>(0.008)  </td>
+                  <td>(0.008)  </td>
+                </tr>
+                <tr>
+                  <td>Temperature mean                        </td>
+                  <td>-0.095   </td>
+                  <td>0.966*** </td>
+                  <td>0.218    </td>
+                  <td>-0.092** </td>
+                  <td>0.045    </td>
+                </tr>
+                <tr>
+                  <td>                                        </td>
+                  <td>(0.151)  </td>
+                  <td>(0.118)  </td>
+                  <td>(0.206)  </td>
+                  <td>(0.035)  </td>
+                  <td>(0.129)  </td>
+                </tr>
+                <tr>
+                  <td>Reference temperature mean              </td>
+                  <td>0.072    </td>
+                  <td>0.848*** </td>
+                  <td>1.597*** </td>
+                  <td>0.105+   </td>
+                  <td>1.711*** </td>
+                </tr>
+                <tr>
+                  <td>                                        </td>
+                  <td>(0.144)  </td>
+                  <td>(0.113)  </td>
+                  <td>(0.197)  </td>
+                  <td>(0.060)  </td>
+                  <td>(0.160)  </td>
+                </tr>
+                <tr>
+                  <td>Total precipitation                     </td>
+                  <td>0.908    </td>
+                  <td>0.810+   </td>
+                  <td>0.765    </td>
+                  <td>0.685*** </td>
+                  <td>0.622*** </td>
+                </tr>
+                <tr>
+                  <td>                                        </td>
+                  <td>(0.616)  </td>
+                  <td>(0.451)  </td>
+                  <td>(0.458)  </td>
+                  <td>(0.068)  </td>
+                  <td>(0.069)  </td>
+                </tr>
+                <tr>
+                  <td>Reference total precipitation           </td>
+                  <td>-5.997***</td>
+                  <td>-5.665***</td>
+                  <td>-5.601***</td>
+                  <td>-6.180***</td>
+                  <td>-5.729***</td>
+                </tr>
+                <tr>
+                  <td>                                        </td>
+                  <td>(0.510)  </td>
+                  <td>(0.362)  </td>
+                  <td>(0.373)  </td>
+                  <td>(0.114)  </td>
+                  <td>(0.110)  </td>
+                </tr>
+                <tr>
+                  <td>Potential yield change                  </td>
+                  <td>         </td>
+                  <td>-0.339+  </td>
+                  <td>-0.305   </td>
+                  <td>-0.058   </td>
+                  <td>-0.300   </td>
+                </tr>
+                <tr>
+                  <td>                                        </td>
+                  <td>         </td>
+                  <td>(0.158)  </td>
+                  <td>(0.179)  </td>
+                  <td>(0.119)  </td>
+                  <td>(0.345)  </td>
+                </tr>
+                <tr>
+                  <td>Interaction yield change x temperature  </td>
+                  <td>         </td>
+                  <td>0.062**  </td>
+                  <td>0.061**  </td>
+                  <td>         </td>
+                  <td>0.062+   </td>
+                </tr>
+                <tr>
+                  <td>                                        </td>
+                  <td>         </td>
+                  <td>(0.017)  </td>
+                  <td>(0.019)  </td>
+                  <td>         </td>
+                  <td>(0.036)  </td>
+                </tr>
+                <tr>
+                  <td>Interaction temperature x reference temp</td>
+                  <td>         </td>
+                  <td>-0.082***</td>
+                  <td>-0.145***</td>
+                  <td>         </td>
+                  <td>-0.157***</td>
+                </tr>
+                <tr>
+                  <td>                                        </td>
+                  <td>         </td>
+                  <td>(0.003)  </td>
+                  <td>(0.015)  </td>
+                  <td>         </td>
+                  <td>(0.014)  </td>
+                </tr>
+                <tr>
+                  <td>Squared mean temperature                </td>
+                  <td>         </td>
+                  <td>         </td>
+                  <td>0.060*** </td>
+                  <td>         </td>
+                  <td>0.071*** </td>
+                </tr>
+                <tr>
+                  <td>                                        </td>
+                  <td>         </td>
+                  <td>         </td>
+                  <td>(0.014)  </td>
+                  <td>         </td>
+                  <td>(0.008)  </td>
+                </tr>
+                <tr>
+                  <td>Lagged temperature mean                 </td>
+                  <td>         </td>
+                  <td>         </td>
+                  <td>         </td>
+                  <td>-0.059+  </td>
+                  <td>0.072*   </td>
+                </tr>
+                <tr>
+                  <td>                                        </td>
+                  <td>         </td>
+                  <td>         </td>
+                  <td>         </td>
+                  <td>(0.032)  </td>
+                  <td>(0.029)  </td>
+                </tr>
+                <tr>
+                  <td>Lagged total precipitation              </td>
+                  <td>         </td>
+                  <td>         </td>
+                  <td>         </td>
+                  <td>0.436*** </td>
+                  <td>0.324*** </td>
+                </tr>
+                <tr>
+                  <td>                                        </td>
+                  <td>         </td>
+                  <td>         </td>
+                  <td>         </td>
+                  <td>(0.060)  </td>
+                  <td>(0.060)  </td>
+                </tr>
+                <tr>
+                  <td>Num.Obs.                                </td>
+                  <td>430557   </td>
+                  <td>430095   </td>
+                  <td>430095   </td>
+                  <td>372433   </td>
+                  <td>372433   </td>
+                </tr>
+                <tr>
+                  <td>R2                                      </td>
+                  <td>0.370    </td>
+                  <td>0.390    </td>
+                  <td>0.391    </td>
+                  <td>0.364    </td>
+                  <td>0.390    </td>
+                </tr>
+                <tr>
+                  <td>R2 Adj.                                 </td>
+                  <td>0.370    </td>
+                  <td>0.390    </td>
+                  <td>0.391    </td>
+                  <td>0.364    </td>
+                  <td>0.390    </td>
+                </tr>
+                <tr>
+                  <td>R2 Within                               </td>
+                  <td>0.369    </td>
+                  <td>0.389    </td>
+                  <td>0.390    </td>
+                  <td>0.364    </td>
+                  <td>0.389    </td>
+                </tr>
+                <tr>
+                  <td>R2 Within Adj.                          </td>
+                  <td>0.369    </td>
+                  <td>0.389    </td>
+                  <td>0.390    </td>
+                  <td>0.364    </td>
+                  <td>0.389    </td>
+                </tr>
+                <tr>
+                  <td>RMSE                                    </td>
+                  <td>1.43     </td>
+                  <td>1.42     </td>
+                  <td>1.41     </td>
+                  <td>1.42     </td>
+                  <td>1.41     </td>
+                </tr>
+                <tr>
+                  <td>Std.Errors                              </td>
+                  <td>by: year </td>
+                  <td>by: year </td>
+                  <td>by: year </td>
+                  <td>by: insee</td>
+                  <td>by: insee</td>
+                </tr>
+                <tr>
+                  <td>FE: year                                </td>
+                  <td>X        </td>
+                  <td>X        </td>
+                  <td>X        </td>
+                  <td>X        </td>
+                  <td>X        </td>
+                </tr>
+        </tbody>
+      </table>
+    </div>
+<!-- hack to avoid NA insertion in last line -->
 </div>
-<div class="sourceCode cell-code" id="cb58"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb58-1"><a href="#cb58-1" aria-hidden="true" tabindex="-1"></a>reg4_maize <span class="ot">&lt;-</span> <span class="fu">feols</span>(diff_final_debut_perc <span class="sc">~</span> change<span class="sc">*</span>value_hist <span class="sc">|</span> region_code, <span class="at">data =</span> df_final_m)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stderr">
-<pre><code>NOTE: 7,372 observations removed because of NA and infinite values (LHS: 6,470, RHS: 2,434).</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb60"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb60-1"><a href="#cb60-1" aria-hidden="true" tabindex="-1"></a>reg4_pea <span class="ot">&lt;-</span> <span class="fu">feols</span>(diff_final_debut_perc <span class="sc">~</span> change<span class="sc">*</span>value_hist <span class="sc">|</span> region_code, <span class="at">data =</span> df_final_p)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stderr">
-<pre><code>NOTE: 32,890 observations removed because of NA and infinite values (LHS: 32,886, RHS: 284).</code></pre>
-</div>
-<div class="sourceCode cell-code" id="cb62"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb62-1"><a href="#cb62-1" aria-hidden="true" tabindex="-1"></a>reg4_flax <span class="ot">&lt;-</span> <span class="fu">feols</span>(diff_final_debut_perc <span class="sc">~</span> change<span class="sc">*</span>value_hist <span class="sc">|</span> region_code, <span class="at">data =</span> df_final_f)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stderr">
-<pre><code>NOTE: 30,544 observations removed because of NA and infinite values (LHS: 30,540, RHS: 235).</code></pre>
-</div>
-<div class="sourceCode cell-code" id="cb64"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb64-1"><a href="#cb64-1" aria-hidden="true" tabindex="-1"></a>reg4_results <span class="ot">&lt;-</span></span>
-<span id="cb64-2"><a href="#cb64-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">modelsummary</span>(</span>
-<span id="cb64-3"><a href="#cb64-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">list</span>(<span class="st">"Wheat"</span> <span class="ot">=</span> reg4_wheat, </span>
-<span id="cb64-4"><a href="#cb64-4" aria-hidden="true" tabindex="-1"></a>       <span class="st">"Maize"</span> <span class="ot">=</span> reg4_maize, </span>
-<span id="cb64-5"><a href="#cb64-5" aria-hidden="true" tabindex="-1"></a>       <span class="st">"Pea"</span> <span class="ot">=</span> reg4_pea, </span>
-<span id="cb64-6"><a href="#cb64-6" aria-hidden="true" tabindex="-1"></a>       <span class="st">"Flax"</span> <span class="ot">=</span> reg4_flax), </span>
-<span id="cb64-7"><a href="#cb64-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">stars =</span> <span class="cn">TRUE</span>,</span>
-<span id="cb64-8"><a href="#cb64-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">statistic =</span> <span class="st">"std.error"</span>,</span>
-<span id="cb64-9"><a href="#cb64-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">coef_map =</span> <span class="fu">c</span>(<span class="st">"change"</span> <span class="ot">=</span> <span class="st">"Potential Yield Change"</span>, </span>
-<span id="cb64-10"><a href="#cb64-10" aria-hidden="true" tabindex="-1"></a>               <span class="st">"value_hist"</span> <span class="ot">=</span> <span class="st">"Historical Yield"</span>,</span>
-<span id="cb64-11"><a href="#cb64-11" aria-hidden="true" tabindex="-1"></a>              <span class="st">"change:value_hist"</span> <span class="ot">=</span> <span class="st">"Interaction"</span>),</span>
-<span id="cb64-12"><a href="#cb64-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">output =</span> <span class="st">"markdown"</span></span>
-<span id="cb64-13"><a href="#cb64-13" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb64-14"><a href="#cb64-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb64-15"><a href="#cb64-15" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(reg4_results)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>
-+------------------------+-----------------+-----------------+-----------------+-----------------+
-|                        | Wheat           | Maize           | Pea             | Flax            |
-+========================+=================+=================+=================+=================+
-| Potential Yield Change | -3.520          | -4.734          | -387.587+       | -414.998        |
-+------------------------+-----------------+-----------------+-----------------+-----------------+
-|                        | (10.072)        | (4.472)         | (179.799)       | (255.479)       |
-+------------------------+-----------------+-----------------+-----------------+-----------------+
-| Historical Yield       | -0.002          | -0.010*         | 0.044           | -0.170+         |
-+------------------------+-----------------+-----------------+-----------------+-----------------+
-|                        | (0.002)         | (0.004)         | (0.051)         | (0.085)         |
-+------------------------+-----------------+-----------------+-----------------+-----------------+
-| Interaction            | -0.015+         | -0.009+         | 0.309+          | 0.680           |
-+------------------------+-----------------+-----------------+-----------------+-----------------+
-|                        | (0.008)         | (0.005)         | (0.152)         | (0.473)         |
-+------------------------+-----------------+-----------------+-----------------+-----------------+
-| Num.Obs.               | 30033           | 27454           | 1936            | 4282            |
-+------------------------+-----------------+-----------------+-----------------+-----------------+
-| R2                     | 0.032           | 0.003           | 0.027           | 0.030           |
-+------------------------+-----------------+-----------------+-----------------+-----------------+
-| R2 Adj.                | 0.032           | 0.002           | 0.020           | 0.027           |
-+------------------------+-----------------+-----------------+-----------------+-----------------+
-| R2 Within              | 0.002           | 0.001           | 0.005           | 0.002           |
-+------------------------+-----------------+-----------------+-----------------+-----------------+
-| R2 Within Adj.         | 0.002           | 0.000           | 0.003           | 0.001           |
-+------------------------+-----------------+-----------------+-----------------+-----------------+
-| AIC                    | 412780.0        | 428180.5        | 32077.9         | 66637.5         |
-+------------------------+-----------------+-----------------+-----------------+-----------------+
-| BIC                    | 412912.9        | 428312.0        | 32161.5         | 66732.9         |
-+------------------------+-----------------+-----------------+-----------------+-----------------+
-| RMSE                   | 233.37          | 589.12          | 951.37          | 577.48          |
-+------------------------+-----------------+-----------------+-----------------+-----------------+
-| Std.Errors             | by: region_code | by: region_code | by: region_code | by: region_code |
-+------------------------+-----------------+-----------------+-----------------+-----------------+
-| FE: region_code        | X               | X               | X               | X               |
-+========================+=================+=================+=================+=================+
-| + p &lt; 0.1, * p &lt; 0.05, ** p &lt; 0.01, *** p &lt; 0.001                                              |
-+========================+=================+=================+=================+=================+ </code></pre>
-</div>
-</div>
-<p>Compared to the previous specification, the current results yield similar but more stable estimates in terms of sign and significance. Most importantly, the interaction term between potential yield change and historical yield remains statistically significant for <strong>wheat, maize, and pea</strong>. However, the magnitude of the coefficients, especially for the potential yield change, tends to be smaller in this specification. For <strong>wheat</strong> and <strong>maize</strong>, where the effects are now insignificant and negative. For <strong>pea</strong> and <strong>flax</strong>, large coefficients on the potential yield change persist, but they remain imprecisely estimated. The historical yield variable maintains its negative and sometimes significant association (see <strong>maize and flax</strong>).</p>
+<p>Historical yield consistently shows a positive and statistically significant effect on wheat acreage expansion across all models, indicating that communes with historically high yields tend to allocate more surface area to wheat. In contrast, the effect of potential yield change is consistently negative but not statistically significant on its own. However, its interaction with current mean annual temperature is both positive and significant, suggesting that in warmer communes, increases in potential yield have a stronger positive effect on wheat surface expansion.</p>
+<p>Temperature variables display more nuanced effects. While current mean temperature has an inconsistent impact, historical temperature levels are systematically positive and highly significant, implying that warmer historical climates are associated with greater wheat cultivation. The interaction between current temperature and potential yield change reinforces this positive relationship. When a squared temperature term is introduced, the linear effect becomes non-significant, pointing to a potential non-linear relationship. Moreover, the interaction with reference (historical) temperature yields a significant negative coefficient, suggesting that in already warm communes, further temperature increases may reduce wheat acreage. A lagged effect of current temperature also appears: higher temperatures in the previous year correlate with reduced wheat acreage, significant at the 10% level.</p>
+<p>Precipitation levels show a generally positive but mixed influence. Contemporary precipitation tends to be positively associated with wheat surface expansion, especially when lagged values are considered, which are both positive and strongly significant. In contrast, historical precipitation levels exhibit a significant negative relationship with wheat acreage, suggesting that areas with historically high rainfall may be less suited or less used for wheat cultivation.</p>
 </section>
+<section id="crop-specific-analysis" class="level3">
+<h3 class="anchored" data-anchor-id="crop-specific-analysis">Crop-specific analysis</h3>
+<div class="cell">
+<div class="cell-output-display">
+<!-- preamble start -->
+
+    <script>
+
+      function styleCell_y3ni0i9h0ntem5x7wteg(i, j, css_id) {
+          var table = document.getElementById("tinytable_y3ni0i9h0ntem5x7wteg");
+          var cell = table.rows[i]?.cells[j];  // Safe navigation to avoid errors
+          if (cell) {
+              console.log(`Styling cell at (${i}, ${j}) with class ${css_id}`);
+              cell.classList.add(css_id);
+          } else {
+              console.warn(`Cell at (${i}, ${j}) not found.`);
+          }
+      }
+      function insertSpanRow(i, colspan, content) {
+        var table = document.getElementById('tinytable_y3ni0i9h0ntem5x7wteg');
+        var newRow = table.insertRow(i);
+        var newCell = newRow.insertCell(0);
+        newCell.setAttribute("colspan", colspan);
+        // newCell.innerText = content;
+        // this may be unsafe, but innerText does not interpret <br>
+        newCell.innerHTML = content;
+      }
+      function spanCell_y3ni0i9h0ntem5x7wteg(i, j, rowspan, colspan) {
+        var table = document.getElementById("tinytable_y3ni0i9h0ntem5x7wteg");
+        const targetRow = table.rows[i];
+        const targetCell = targetRow.cells[j];
+        for (let r = 0; r < rowspan; r++) {
+          // Only start deleting cells to the right for the first row (r == 0)
+          if (r === 0) {
+            // Delete cells to the right of the target cell in the first row
+            for (let c = colspan - 1; c > 0; c--) {
+              if (table.rows[i + r].cells[j + c]) {
+                table.rows[i + r].deleteCell(j + c);
+              }
+            }
+          }
+          // For rows below the first, delete starting from the target column
+          if (r > 0) {
+            for (let c = colspan - 1; c >= 0; c--) {
+              if (table.rows[i + r] && table.rows[i + r].cells[j]) {
+                table.rows[i + r].deleteCell(j);
+              }
+            }
+          }
+        }
+        // Set rowspan and colspan of the target cell
+        targetCell.rowSpan = rowspan;
+        targetCell.colSpan = colspan;
+      }
+      // tinytable span after
+      window.addEventListener('load', function () {
+          var cellsToStyle = [
+            // tinytable style arrays after
+          { positions: [ { i: 26, j: 1 }, { i: 26, j: 2 }, { i: 26, j: 3 },  ], css_id: 'tinytable_css_y0x244q6ive79831ne45',}, 
+          { positions: [ { i: 0, j: 1 }, { i: 0, j: 2 }, { i: 0, j: 3 },  ], css_id: 'tinytable_css_jvi91x98w54ls5efwl2e',}, 
+          { positions: [ { i: 26, j: 0 },  ], css_id: 'tinytable_css_joud7rkh8rpus3fbmjjg',}, 
+          { positions: [ { i: 0, j: 0 },  ], css_id: 'tinytable_css_eyzkms0ktusny83e4d1f',}, 
+          { positions: [ { i: 3, j: 1 }, { i: 4, j: 1 }, { i: 5, j: 1 }, { i: 6, j: 1 }, { i: 7, j: 1 }, { i: 8, j: 1 }, { i: 9, j: 1 }, { i: 10, j: 1 }, { i: 11, j: 1 }, { i: 12, j: 1 }, { i: 13, j: 1 }, { i: 1, j: 1 }, { i: 2, j: 1 }, { i: 16, j: 1 }, { i: 17, j: 1 }, { i: 4, j: 2 }, { i: 19, j: 1 }, { i: 20, j: 1 }, { i: 21, j: 1 }, { i: 22, j: 1 }, { i: 23, j: 1 }, { i: 24, j: 1 }, { i: 25, j: 1 }, { i: 12, j: 2 }, { i: 14, j: 1 }, { i: 15, j: 1 }, { i: 2, j: 2 }, { i: 3, j: 2 }, { i: 17, j: 2 }, { i: 5, j: 2 }, { i: 6, j: 2 }, { i: 7, j: 2 }, { i: 8, j: 2 }, { i: 9, j: 2 }, { i: 10, j: 2 }, { i: 11, j: 2 }, { i: 25, j: 2 }, { i: 13, j: 2 }, { i: 1, j: 2 }, { i: 15, j: 2 }, { i: 16, j: 2 }, { i: 3, j: 3 }, { i: 4, j: 3 }, { i: 19, j: 2 }, { i: 20, j: 2 }, { i: 21, j: 2 }, { i: 22, j: 2 }, { i: 23, j: 2 }, { i: 24, j: 2 }, { i: 11, j: 3 }, { i: 12, j: 3 }, { i: 14, j: 2 }, { i: 1, j: 3 }, { i: 2, j: 3 }, { i: 16, j: 3 }, { i: 17, j: 3 }, { i: 5, j: 3 }, { i: 6, j: 3 }, { i: 7, j: 3 }, { i: 8, j: 3 }, { i: 9, j: 3 }, { i: 10, j: 3 }, { i: 24, j: 3 }, { i: 25, j: 3 }, { i: 13, j: 3 }, { i: 14, j: 3 }, { i: 15, j: 3 }, { i: 20, j: 3 }, { i: 21, j: 3 }, { i: 22, j: 3 }, { i: 19, j: 3 }, { i: 23, j: 3 },  ], css_id: 'tinytable_css_8qflclvmd522mxwkh8p2',}, 
+          { positions: [ { i: 1, j: 0 }, { i: 2, j: 0 }, { i: 3, j: 0 }, { i: 4, j: 0 }, { i: 5, j: 0 }, { i: 6, j: 0 }, { i: 7, j: 0 }, { i: 8, j: 0 }, { i: 9, j: 0 }, { i: 10, j: 0 }, { i: 11, j: 0 }, { i: 12, j: 0 }, { i: 13, j: 0 }, { i: 14, j: 0 }, { i: 15, j: 0 }, { i: 16, j: 0 }, { i: 17, j: 0 }, { i: 22, j: 0 }, { i: 19, j: 0 }, { i: 20, j: 0 }, { i: 21, j: 0 }, { i: 23, j: 0 }, { i: 24, j: 0 }, { i: 25, j: 0 },  ], css_id: 'tinytable_css_746rm0s120q3kac1ea9s',}, 
+          { positions: [ { i: 18, j: 1 }, { i: 18, j: 2 }, { i: 18, j: 3 },  ], css_id: 'tinytable_css_67zdkek1l6h4ylk79888',}, 
+          { positions: [ { i: 18, j: 0 },  ], css_id: 'tinytable_css_2vpvu8uq93089olky94t',}, 
+          ];
+
+          // Loop over the arrays to style the cells
+          cellsToStyle.forEach(function (group) {
+              group.positions.forEach(function (cell) {
+                  styleCell_y3ni0i9h0ntem5x7wteg(cell.i, cell.j, group.css_id);
+              });
+          });
+      });
+    </script>
+
+    <style>
+      /* tinytable css entries after */
+      .table td.tinytable_css_y0x244q6ive79831ne45, .table th.tinytable_css_y0x244q6ive79831ne45 { text-align: center; border-bottom: solid #d3d8dc 0.1em; }
+      .table td.tinytable_css_jvi91x98w54ls5efwl2e, .table th.tinytable_css_jvi91x98w54ls5efwl2e { text-align: center; border-top: solid #d3d8dc 0.1em; border-bottom: solid #d3d8dc 0.05em; }
+      .table td.tinytable_css_joud7rkh8rpus3fbmjjg, .table th.tinytable_css_joud7rkh8rpus3fbmjjg { text-align: left; border-bottom: solid #d3d8dc 0.1em; }
+      .table td.tinytable_css_eyzkms0ktusny83e4d1f, .table th.tinytable_css_eyzkms0ktusny83e4d1f { text-align: left; border-top: solid #d3d8dc 0.1em; border-bottom: solid #d3d8dc 0.05em; }
+      .table td.tinytable_css_8qflclvmd522mxwkh8p2, .table th.tinytable_css_8qflclvmd522mxwkh8p2 { text-align: center; }
+      .table td.tinytable_css_746rm0s120q3kac1ea9s, .table th.tinytable_css_746rm0s120q3kac1ea9s { text-align: left; }
+      .table td.tinytable_css_67zdkek1l6h4ylk79888, .table th.tinytable_css_67zdkek1l6h4ylk79888 { text-align: center; border-bottom: solid black 0.05em; }
+      .table td.tinytable_css_2vpvu8uq93089olky94t, .table th.tinytable_css_2vpvu8uq93089olky94t { text-align: left; border-bottom: solid black 0.05em; }
+    </style>
+    <div class="container">
+      <table class="table table-borderless" id="tinytable_y3ni0i9h0ntem5x7wteg" style="width: auto; margin-left: auto; margin-right: auto;" data-quarto-disable-processing="true">
+        <thead>
+        
+              <tr>
+                <th scope="col"> </th>
+                <th scope="col">Wheat</th>
+                <th scope="col">Maize</th>
+                <th scope="col">Oilseeds</th>
+              </tr>
+        </thead>
+        <tfoot><tr><td colspan="4">+ p &lt; 0.1, * p &lt; 0.05, ** p &lt; 0.01, *** p &lt; 0.001</td></tr></tfoot>
+        <tbody>
+                <tr>
+                  <td>Historical yield (in t/ha)              </td>
+                  <td>0.122*** </td>
+                  <td>0.167*** </td>
+                  <td>0.134*** </td>
+                </tr>
+                <tr>
+                  <td>                                        </td>
+                  <td>(0.003)  </td>
+                  <td>(0.004)  </td>
+                  <td>(0.020)  </td>
+                </tr>
+                <tr>
+                  <td>Temperature mean                        </td>
+                  <td>0.218    </td>
+                  <td>-0.148   </td>
+                  <td>-0.447   </td>
+                </tr>
+                <tr>
+                  <td>                                        </td>
+                  <td>(0.206)  </td>
+                  <td>(0.686)  </td>
+                  <td>(0.679)  </td>
+                </tr>
+                <tr>
+                  <td>Reference temperature mean              </td>
+                  <td>1.597*** </td>
+                  <td>1.389*   </td>
+                  <td>0.424    </td>
+                </tr>
+                <tr>
+                  <td>                                        </td>
+                  <td>(0.197)  </td>
+                  <td>(0.583)  </td>
+                  <td>(0.520)  </td>
+                </tr>
+                <tr>
+                  <td>Total precipitation                     </td>
+                  <td>0.765    </td>
+                  <td>-0.392   </td>
+                  <td>0.747+   </td>
+                </tr>
+                <tr>
+                  <td>                                        </td>
+                  <td>(0.458)  </td>
+                  <td>(0.842)  </td>
+                  <td>(0.401)  </td>
+                </tr>
+                <tr>
+                  <td>Reference total precipitation           </td>
+                  <td>-5.601***</td>
+                  <td>-0.870   </td>
+                  <td>-0.690   </td>
+                </tr>
+                <tr>
+                  <td>                                        </td>
+                  <td>(0.373)  </td>
+                  <td>(0.804)  </td>
+                  <td>(0.452)  </td>
+                </tr>
+                <tr>
+                  <td>Potential yield change                  </td>
+                  <td>-0.305   </td>
+                  <td>1.737*** </td>
+                  <td>-2.549***</td>
+                </tr>
+                <tr>
+                  <td>                                        </td>
+                  <td>(0.179)  </td>
+                  <td>(0.139)  </td>
+                  <td>(0.427)  </td>
+                </tr>
+                <tr>
+                  <td>Interaction yield change x temperature  </td>
+                  <td>0.061**  </td>
+                  <td>-0.124***</td>
+                  <td>0.222*** </td>
+                </tr>
+                <tr>
+                  <td>                                        </td>
+                  <td>(0.019)  </td>
+                  <td>(0.012)  </td>
+                  <td>(0.036)  </td>
+                </tr>
+                <tr>
+                  <td>Interaction temperature x reference temp</td>
+                  <td>-0.145***</td>
+                  <td>0.018    </td>
+                  <td>-0.080+  </td>
+                </tr>
+                <tr>
+                  <td>                                        </td>
+                  <td>(0.015)  </td>
+                  <td>(0.040)  </td>
+                  <td>(0.038)  </td>
+                </tr>
+                <tr>
+                  <td>Squared mean temperature                </td>
+                  <td>0.060*** </td>
+                  <td>-0.060   </td>
+                  <td>0.091+   </td>
+                </tr>
+                <tr>
+                  <td>                                        </td>
+                  <td>(0.014)  </td>
+                  <td>(0.042)  </td>
+                  <td>(0.043)  </td>
+                </tr>
+                <tr>
+                  <td>Num.Obs.                                </td>
+                  <td>430095   </td>
+                  <td>390780   </td>
+                  <td>86445    </td>
+                </tr>
+                <tr>
+                  <td>R2                                      </td>
+                  <td>0.391    </td>
+                  <td>0.175    </td>
+                  <td>0.129    </td>
+                </tr>
+                <tr>
+                  <td>R2 Adj.                                 </td>
+                  <td>0.391    </td>
+                  <td>0.175    </td>
+                  <td>0.129    </td>
+                </tr>
+                <tr>
+                  <td>R2 Within                               </td>
+                  <td>0.390    </td>
+                  <td>0.174    </td>
+                  <td>0.126    </td>
+                </tr>
+                <tr>
+                  <td>R2 Within Adj.                          </td>
+                  <td>0.390    </td>
+                  <td>0.174    </td>
+                  <td>0.126    </td>
+                </tr>
+                <tr>
+                  <td>RMSE                                    </td>
+                  <td>1.41     </td>
+                  <td>1.52     </td>
+                  <td>1.25     </td>
+                </tr>
+                <tr>
+                  <td>Std.Errors                              </td>
+                  <td>by: year </td>
+                  <td>by: year </td>
+                  <td>by: year </td>
+                </tr>
+                <tr>
+                  <td>FE: year                                </td>
+                  <td>X        </td>
+                  <td>X        </td>
+                  <td>X        </td>
+                </tr>
+        </tbody>
+      </table>
+    </div>
+<!-- hack to avoid NA insertion in last line -->
+</div>
+</div>
+<p>Across all three models, historical yield (measured in tons per hectare) shows a consistently positive and statistically significant association with crop acreage, suggesting that communes with higher past yields tend to allocate more land to these crops. The coefficient on potential yield change differs substantially across crops: it is strongly positive for maize, negative for wheat and oilseed, though only significant for maize and oilseed. This implies that an increase in expected future yield would incentivize maize expansion but discourage oilseed and wheat in some contexts.</p>
+<p>The interaction between potential yield change and current mean temperature is significant across all models, but with varying signs: positive for wheat and oilseed, negative for maize. This means that the influence of potential yield change on land allocation is modified by temperature, and the effect differs by crop.</p>
+<p>Temperature mean itself does not have a significant or consistent effect, and its sign varies by crop. In contrast, the historical temperature mean is strongly positive and significant for wheat and maize, implying that areas with historically warmer climates tend to devote more land to these crops—particularly wheat. The interaction between mean temperature and reference temperature is also significant for wheat and oilseed. For wheat, the strongly negative coefficient suggests that current warmth may reduce acreage especially in areas that were already warm in the past. The squared mean temperature term is significant and positive for wheat, and marginally so for oilseed, suggesting potential non-linear effects of temperature on land allocation decisions for these crops.</p>
+<p>Total precipitation and its reference value show more variable patterns. While total precipitation has a marginally significant positive effect on oilseed acreage, the reference precipitation has a strong negative effect for wheat, possibly indicating that areas with historically wetter conditions allocate less land to wheat.</p>
 </section>
-<section id="land-share-models" class="level2">
-<h2 class="anchored" data-anchor-id="land-share-models">Land-share models</h2>
-<p>In the literature, we can find land-share models using fractional logit. The outcome variable is the land allocated to the production of a given crop over the total cultivated area.</p>
+<section id="non-linearity-analysis" class="level3">
+<h3 class="anchored" data-anchor-id="non-linearity-analysis">Non-linearity analysis</h3>
+<p>To further analyse the non-linear effect of temperature on crop acreage of <strong>Wheat</strong>, <strong>Maize</strong> and <strong>Oilseeds</strong>, we implement a binned scatterplot regression to visualize the relationship between the variables, by grouping a variable that measures the number of days in a given temperature level into bins and plotting the average outcome in each bin.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="RPG_Modelling_France_files/figure-html/unnamed-chunk-11-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
 </section>
 
 </main>

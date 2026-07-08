@@ -24,23 +24,21 @@ dir$derived <- here(dir$data, "derived")
 dir$final <- here(dir$data, "final")
 dir$script <- here(dir$root, "script")
 dir$output <- here(dir$root, "output")
+dir$shapefiles <- here(dir$data, "shapefiles")
 
 # Create non existing directories
 lapply(dir, function(i) dir.create(i, recursive = T, showWarnings = F))
 
 #===============================================================================
-# 2) Complete table of RPG France data - cleaned data
+# 2). Load cleaned data
 #===============================================================================
 
-#Step 1: aggregation of data for regions ‘R11’ ‘R24’ ‘R27’ ‘R28’ ‘R32’ ‘R44’ ‘R52’ ‘R53’ ‘R75’ ‘R76’ ‘R84’ ‘R93’ ‘R94’ into a single table 
-#Step 2: data cleansing - elimination of null data
-
-RPG_aggregated_all <- readRDS(
+RPG_All <- readRDS(
   here(dir$final, paste0("RPG_Aggregated_ALL.rds"))
 )
 
 #===============================================================================
-# 3) Generate contrasted colours palette
+# 3). Generate contrasted colour palette
 #===============================================================================
 c25 <- c(
   "dodgerblue2", "#E31A1C", # red
@@ -63,18 +61,21 @@ c25 <- c(
 #===============================================================================
 
 # First overview of the data (mean, median, quartiles ...)
-summary(RPG_aggregated_all)
+summary(RPG_All)
 
 # Distribution of crop types by number of plots cultivated in France
 year_simplified <- c(2007, 2012, 2017, 2023)
-RPG_aggregated_simplified <- RPG_aggregated_all %>%
+
+# 1). Keep every 5 years from the time period
+RPG_simplified <- RPG_All |>
   filter(year %in% year_simplified)
 
-# Aggregate per year and crop 
-df_parcelles <- RPG_aggregated_simplified %>%
-  group_by(year, LIBELLE_GROUPE_CULTURE) %>%
+# 2). Aggregate per year and crop 
+df_parcelles <- RPG_simplified |>
+  group_by(year, LIBELLE_GROUPE_CULTURE) |>
   summarise(N = sum(N_Parcels, na.rm = TRUE), .groups = "drop")
 
+# 3). Plot parcel distribution by crop
 ggplot(df_parcelles, aes(x = LIBELLE_GROUPE_CULTURE, y = N)) +
   geom_col(fill = "darkgrey") +
   facet_wrap(~ year, ncol = 2) +
@@ -92,8 +93,9 @@ ggsave(
   height = 6
 )
 
-# Change in agricultural area over time - violin plot
-RPG_aggregated_all %>%
+# Plot change in agricultural area over time
+
+RPG_All |>
   ggplot(aes(x = factor(year), y = surf_agri_geo_unit_m2)) +
   geom_violin(fill = "skyblue", color = "black", alpha = 0.7) +
   geom_boxplot(width = 0.1, fill = "white", outlier.shape = NA, color = "black") + # Ajout d'une boîte 
@@ -107,26 +109,26 @@ ggsave(
 )
 
 #===============================================================================
-# 5) Inferential statistics - analysis of changes in crop groups between 2007 
+# 5). Inferential statistics - analysis of changes in crop groups between 2007 
 # and 2023 -----
 #===============================================================================
 
 # Changes in the various crop groups between 2007 and 2023 (top crops per year)
-cultures_groupes <- RPG_aggregated_all %>%
-  group_by(CODE_GROUP, LIBELLE_GROUPE_CULTURE, year) %>%
+cultures_groupes <- RPG_All |>
+  group_by(CODE_GROUP, LIBELLE_GROUPE_CULTURE, year) |>
   summarise(surface_groupe = sum(surf_code_group_m2),
             parcels_groupe = sum(parcel_cult_code_group_n),
             .groups = "drop")
 
 print(cultures_groupes)
 
-top_cultures_par_an <- cultures_groupes %>% 
-  group_by(year) %>% 
+top_cultures_par_an <- cultures_groupes |>
+  group_by(year) |>
   slice_max(surface_groupe, n = 3)
 
 print(top_cultures_par_an)
 
-## Scatter plot with size proportional to agricultural area
+# Scatter plot with size proportional to agricultural area
 png(here(dir$output, "graphique_dispersion_cultures.png"), width = 800, height = 600)
 plot(
   cultures_groupes$year, 
@@ -137,11 +139,11 @@ plot(
   ylab = "Groupe de culture",
   main = "Nuage de points avec taille proportionnelle à la surface agricole",
 )
-
 dev.off()
 
 # Share of different crop groups in total agricultural area 
-# Relative growth in areas and plots from one year to the next
+
+## Relative growth in areas and plots from one year to the next
 cultures_groupes_growth_rates <- cultures_groupes %>%
   group_by(year, CODE_GROUP, LIBELLE_GROUPE_CULTURE) %>%
   arrange(CODE_GROUP, year) %>% 
@@ -153,8 +155,6 @@ cultures_groupes_growth_rates <- cultures_groupes %>%
   mutate(
     mean_taux_croissance = mean(taux_croissance, na.rm = TRUE), 
     mean_taux_croissance_parcels = mean(taux_croissance_parcels, na.rm = TRUE))
-
-print(cultures_groupes_growth_rates)
 
 ## Related graphs based on growth rates (area cultivated and number of plots cultivated)
 ### Area growth rates
@@ -285,8 +285,9 @@ cultures_groupes_growth_rates %>%
 ggsave(
   filename = here(dir$output, paste0("combined_plot_parcels_France.png"))
 )
+
 ## Graph according to the location of crops in the communes
-RPG_aggregated_all %>%
+RPG_All %>%
   group_by(year, LIBELLE_GROUPE_CULTURE) %>%
   summarise(nb_communes = n_distinct(name)) %>%
   ggplot(aes(x = year, y = nb_communes, color = LIBELLE_GROUPE_CULTURE)) +
@@ -301,7 +302,7 @@ ggsave(
 # Emergence / disappearance of culture groups over time
 ## Detailed growth rates of crop groups over the years of the study period
 # Measurement of growth in relation to a fixed reference year (year of implementation) = overall view of the trend over the period studied
-year_by_culture <- RPG_aggregated_all %>%
+year_by_culture <- RPG_All %>%
   group_by(CODE_GROUP, LIBELLE_GROUPE_CULTURE, year) %>%
   summarise(
     annee_min = min(year),
@@ -329,7 +330,7 @@ print(year_by_culture)
 
 #The aim is to study the 2007-2015 period on the one hand and the 2015-2023 period on the other, in order to avoid the bias in the graphical results created by the data calculation method.
 
-year_by_culture_binary <- RPG_aggregated_all %>%
+year_by_culture_binary <- RPG_All %>%
   group_by(CODE_GROUP, LIBELLE_GROUPE_CULTURE, year) %>%
   summarise(
     surface_group = sum(surf_code_group_m2, na.rm = TRUE),
@@ -633,7 +634,7 @@ ggsave(
 # ==============================================================================
 
 # Average change in crop diversity (average number of crops per municipality)
-RPG_aggregated_all %>%
+RPG_All %>%
   group_by(year, name) %>%
   summarise(N_Parcels = n_distinct(LIBELLE_GROUPE_CULTURE), .groups = "drop") %>%
   group_by(year) %>%
@@ -647,7 +648,7 @@ ggsave(
 )
 
 # Evolution of crop groups over time 
-RPG_aggregated_all %>%
+RPG_All %>%
   group_by(year, LIBELLE_GROUPE_CULTURE) %>%
   summarise(nb_communes = n_distinct(name)) %>%
   ggplot(aes(x = year, y = nb_communes, color = LIBELLE_GROUPE_CULTURE)) +
@@ -661,7 +662,7 @@ ggsave(
 
 # Crop diversity indicator: Shannon index
 ## Shannon index calculation
-shannon_index <- RPG_aggregated_all %>%
+shannon_index <- RPG_All %>%
   group_by(year, name, LIBELLE_GROUPE_CULTURE) %>%
   summarise(surface_culture = sum(surf_code_group_m2), .groups = "drop") %>%
   group_by(year, name) %>%

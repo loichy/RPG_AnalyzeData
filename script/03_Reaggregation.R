@@ -32,7 +32,7 @@ lapply(dir, function(i) dir.create(i, recursive = T, showWarnings = F))
 # 2). Load and prepare GAEZ dataset ------
 #===============================================================================
 
-GAEZ_France <- readRDS(here(dir$raw, "GAEZ_yieldchange_communes_filt.rds"))
+GAEZ_France <- readRDS(here(dir$raw, "GAEZ_yieldchange_communes_filt(2).rds"))
 
 # Extracting Grass culture which is only present in theme 3
 GAEZ_France_Grass <- GAEZ_France |>
@@ -130,6 +130,7 @@ rpg_level <- GAEZ_France_weight |>
 
 RPG_cultures <- readRDS(here(dir$raw, "RPG_Aggregated_ALL.rds"))
 
+# Group selected crops together to match GAEZ typology
 RPG_cultures_transf <- RPG_cultures |>
   mutate(LIBELLE_GROUPE_CULTURE_AGG = case_when(
     LIBELLE_GROUPE_CULTURE %in% c("Prairies temporaires", "Prairies permanentes", "Estives et landes") ~ "Pâturages",
@@ -138,7 +139,7 @@ RPG_cultures_transf <- RPG_cultures |>
     TRUE ~ LIBELLE_GROUPE_CULTURE
   )) 
 
-# Méthode plus rapide que summarize : convert to data.table
+# Convert to data.table
 dt <- as.data.table(RPG_cultures_transf)
 
 # Replace NA in LIBELLE_GROUPE_CULTURE_AGG with "Manquante"
